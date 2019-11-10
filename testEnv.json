@@ -1,0 +1,25 @@
+{
+   "PccIp": "172.17.2.58",
+   "Invaders": [
+     {
+       "HostIp": "172.17.2.58",
+       "NetInterfaces": [
+         {
+           "Name": "eth0",
+           "Cidrs": [
+             "172.17.2.58/23"
+           ],
+           "MacAddr": "",
+           "IsManagement": false,
+           "ManagedByPcc": false,
+           "Speed": "",
+           "Autoneg": "",
+           "Fec": "",
+           "Media": "",
+           "Mtu": 0
+         }
+       ]
+     }
+   ],
+   "Servers": null
+}
