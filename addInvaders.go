@@ -3,16 +3,13 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"testing"
-	"time"
-
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
+	"testing"
+	"time"
 )
 
-var Nodes = make(map[uint64]*models.NodeWithKubernetes)
-
-func addNodes(t *testing.T) {
+func addClusterHeads(t *testing.T) {
 	t.Run("addInvaders", addInvaders)
 }
 
@@ -20,10 +17,13 @@ func addInvaders(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		body []byte
-		resp HttpResp
-		err  error
+		body       []byte
+		resp       HttpResp
+		err        error
+		check      bool
+		numInvader uint64 = 0
 	)
+	nodesToCheck := make([]uint64, len(Env.Invaders))
 	for _, i := range Env.Invaders {
 		var (
 			node models.NodeWithKubernetes
@@ -33,7 +33,7 @@ func addInvaders(t *testing.T) {
 			Host:    i.HostIp,
 			Managed: true,
 		}
-		endpoint := fmt.Sprintf("node/add")
+		endpoint := fmt.Sprintf("pccserver/node/add")
 		if data, err = json.Marshal(addReq); err != nil {
 			assert.Fatalf("invalid struct for node add request")
 		}
@@ -51,12 +51,42 @@ func addInvaders(t *testing.T) {
 			return
 		}
 		if node.Id != 0 {
+			nodesToCheck[numInvader] = node.Id
+			numInvader++
 			Nodes[node.Id] = &node
 			fmt.Printf("Add id %v to Nodes\n", node.Id)
+			NodebyHostIP[node.Host] = node.Id
+			fmt.Printf("Mapping hostIP %v to id %v\n", node.Host, node.Id)
 		}
 	}
 
-	// wait for agent/collector to install
+	//Check Agent installation
+	//SERIAL - to be improved
+	for i := 0; i < len(nodesToCheck); i++ {
+		check = false
+		fmt.Printf("Checking Agent installation for nodeId:%v\n", nodesToCheck[i])
+		check, err = checkAgentInstallation(nodesToCheck[i])
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+		if check {
+			fmt.Printf("AGENT correctly installed on nodeId:%v\n", nodesToCheck[i])
+		}
+	}
+
+	//Check Collector installation
+	for i := 0; i < len(nodesToCheck); i++ {
+		fmt.Printf("Checking Collector installation for nodeId:%v\n", nodesToCheck[i])
+		check, err = checkCollectorInstallation(nodesToCheck[i])
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+		if check {
+			fmt.Printf("COLLECTOR correctly installed on nodeId:%v\n", nodesToCheck[i])
+		}
+	}
+
+	// waiting for node becomes online
 	time.Sleep(10 * time.Second)
 	start := time.Now()
 	done := false
@@ -70,7 +100,7 @@ func addInvaders(t *testing.T) {
 				}
 			}
 			done = false
-			endpoint := fmt.Sprintf("node/summary/%v", id)
+			endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
 			if resp, body, err = pccGateway("GET", endpoint, nil); err != nil {
 				fmt.Printf("%v\n%v\n", string(body), err)
 				continue

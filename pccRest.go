@@ -9,6 +9,7 @@ import (
 )
 
 type nodeAddReq struct {
+	Id          uint64
 	Name        string
 	Host        string
 	SN          string
@@ -20,7 +21,7 @@ type nodeAddReq struct {
 	Roles       []uint64
 	Bmc         string
 	BmcUser     string
-	BmcUses     []string
+	BmcUsers    []string
 	BmcPassword string
 	AdminUser   string
 	SSHKeys     []uint64
@@ -39,7 +40,7 @@ type HttpResp struct {
 
 func pccGateway(op string, endPoint string, data []byte) (resp HttpResp, body []byte, err error) {
 	client := &http.Client{}
-	url := fmt.Sprintf("https://%s:9999/pccserver/%v", Env.PccIp, endPoint)
+	url := fmt.Sprintf("https://%s:9999/%v", Env.PccIp, endPoint)
 	req, _ := http.NewRequest(op, url, bytes.NewBuffer(data))
 	req.Header.Add("Authorization", Bearer)
 	r, _ := client.Do(req)

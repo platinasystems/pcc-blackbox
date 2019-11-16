@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/platinasystems/tiles/pccserver/models"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -24,6 +25,9 @@ var Token string
 var Bearer string
 var Env testEnv
 
+var Nodes = make(map[uint64]*models.NodeWithKubernetes)
+var NodebyHostIP = make(map[string]uint64)
+
 func TestMain(m *testing.M) {
 	var (
 		ecode  int
@@ -36,7 +40,7 @@ func TestMain(m *testing.M) {
 			ecode = 1
 		}
 		if ecode != 0 {
-			test.Pause()
+			//test.Pause()
 			os.Exit(ecode)
 		}
 	}()
@@ -47,6 +51,7 @@ func TestMain(m *testing.M) {
 	if err = json.Unmarshal(output, &Env); err != nil {
 		panic(fmt.Errorf("error unmarshalling testEnv.json"))
 	}
+
 	//fmt.Printf("struct:\n%v\n", exampleEnv2)
 
 	type credential struct {
@@ -64,7 +69,7 @@ func TestMain(m *testing.M) {
 			json.Unmarshal(body, &out)
 			Token = out.Token
 			Bearer = "Bearer " + Token
-			//fmt.Printf("token: %v\n", Token)
+			fmt.Printf("token: %v\n", Token)
 		} else {
 			fmt.Printf("Error getting token from pcc:\n%v\n", string(body))
 			return
@@ -90,8 +95,13 @@ func Test(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
 	mayRun(t, "nodes", func(t *testing.T) {
-		mayRun(t, "addNodes", addNodes)
-		mayRun(t, "delNodes", delNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+		//mayRun(t, "delNodes", delNodes)
+
 	})
 }
 

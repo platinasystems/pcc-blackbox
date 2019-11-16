@@ -1,13 +1,17 @@
 {
-   "PccIp": "172.17.2.58",
+   "PccIp": "172.17.2.238",
    "Invaders": [
      {
-       "HostIp": "172.17.2.58",
+       "HostIp": "172.17.2.60",
+       "BMCIp":	 "172.17.3.60",
+       "BMCUser": "ADMIN",
+       "BMCUsers": ["ADMIN"],
+       "BMCPass": "ADMIN",
        "NetInterfaces": [
          {
            "Name": "eth0",
            "Cidrs": [
-             "172.17.2.58/23"
+             "172.17.2.60/23"
            ],
            "MacAddr": "",
            "IsManagement": false,
@@ -21,5 +25,56 @@
        ]
      }
    ],
-   "Servers": null
+   "Servers": [
+     {
+       "HostIp": "172.17.2.115",
+       "BMCIp":	 "172.17.3.115",
+       "BMCUser": "ADMIN",
+       "BMCUsers": ["ADMIN"],
+       "BMCPass": "ADMIN",
+       "KeyId": [3],
+       "KeyAlias": ["test"],
+       "NetInterfaces": [
+         {
+           "Name": "eno1",
+           "Cidrs": [
+             "172.17.2.115/23"
+           ],
+           "MacAddr": "",
+           "IsManagement": false,
+           "ManagedByPcc": false,
+           "Speed": "",
+           "Autoneg": "",
+           "Fec": "",
+           "Media": "",
+           "Mtu": 0
+         }
+       ]
+     },
+     {
+       "HostIp": "172.17.2.114",
+       "BMCIp":	 "172.17.3.114",
+       "BMCUser": "ADMIN",
+       "BMCUsers": ["ADMIN"],
+       "BMCPass": "ADMIN",
+       "KeyId": [3],
+       "KeyAlias": ["test"],
+       "NetInterfaces": [
+         {
+           "Name": "eno1",
+           "Cidrs": [
+             "172.17.2.114/23"
+           ],
+           "MacAddr": "",
+           "IsManagement": false,
+           "ManagedByPcc": false,
+           "Speed": "",
+           "Autoneg": "",
+           "Fec": "",
+           "Media": "",
+           "Mtu": 0
+         }
+       ]
+     }
+   ]
 }

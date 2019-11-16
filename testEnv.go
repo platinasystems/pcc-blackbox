@@ -10,6 +10,12 @@ type testEnv struct {
 
 type node struct {
 	HostIp        string
+	BMCIp         string
+	BMCUser       string
+	BMCUsers      []string
+	BMCPass       string
+	KeyId         []uint64
+	KeyAlias      []string
 	NetInterfaces []netInterface
 }
 
@@ -35,15 +41,21 @@ type server struct {
 }
 
 var exampleEnv = testEnv{
-	PccIp: "172.17.2.34",
+	PccIp: "172.17.2.238",
 	Invaders: []invader{
 		invader{
 			node{
-				HostIp: "172.17.2.34",
+				HostIp:   "172.17.2.60",
+				BMCIp:    "172.17.3.60",
+				BMCUser:  "ADMIN",
+				BMCUsers: []string{"ADMIN"},
+				BMCPass:  "ADMIN",
+				KeyId:    []uint64{3},
+				KeyAlias: []string{"test"},
 				NetInterfaces: []netInterface{
 					netInterface{
 						Name:  "eth0",
-						Cidrs: []string{"172.17.2.34/23"},
+						Cidrs: []string{"172.17.2.60/23"},
 					},
 				},
 			},
