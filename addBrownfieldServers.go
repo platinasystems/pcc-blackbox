@@ -17,14 +17,16 @@ func addServer(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		body       []byte
-		resp       HttpResp
-		err        error
-		check      bool
-		numServers uint64 = 0
+		body  []byte
+		resp  HttpResp
+		err   error
+		check bool
 	)
-	nodesToCheck := make([]uint64, len(Env.Servers))
+	nodesToCheck := make([]uint64, 0)
 	for _, i := range Env.Servers {
+		if Nodes[NodebyHostIP[i.HostIp]] != nil {
+			continue
+		}
 		var (
 			node models.NodeWithKubernetes
 			data []byte
@@ -51,8 +53,7 @@ func addServer(t *testing.T) {
 			return
 		}
 		if node.Id != 0 {
-			nodesToCheck[numServers] = node.Id
-			numServers++
+			nodesToCheck = append(nodesToCheck, node.Id)
 			Nodes[node.Id] = &node
 			fmt.Printf("Add id %v to Nodes\n", node.Id)
 			NodebyHostIP[node.Host] = node.Id

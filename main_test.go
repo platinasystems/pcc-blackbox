@@ -26,6 +26,7 @@ var Bearer string
 var Env testEnv
 
 var Nodes = make(map[uint64]*models.NodeWithKubernetes)
+var SecurityKeys = make(map[string]*securityKey)
 var NodebyHostIP = make(map[string]uint64)
 
 func TestMain(m *testing.M) {
@@ -47,12 +48,9 @@ func TestMain(m *testing.M) {
 	if output, err = exec.Command("cat", "testEnv.json").Output(); err != nil {
 		panic(fmt.Errorf("no testEnv.json found"))
 	}
-	//fmt.Printf("json:\n%s\n", string(output))
 	if err = json.Unmarshal(output, &Env); err != nil {
 		panic(fmt.Errorf("error unmarshalling testEnv.json"))
 	}
-
-	//fmt.Printf("struct:\n%v\n", exampleEnv2)
 
 	type credential struct {
 		UserName string `json:"username"`
@@ -93,13 +91,20 @@ var count uint
 
 func Test(t *testing.T) {
 	count++
+	fmt.Printf("Environment:\n%v", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
 	mayRun(t, "nodes", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		mayRun(t, "getSecKeys", getSecKeys)
+		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+		//mayRun(t,"configNetworkIntefaces", configNetworkIntefaces)
+		//mayRun(t,"CreateK8sCluster", createK8s_3nodes)
 		//mayRun(t, "delNodes", delNodes)
 
 	})
