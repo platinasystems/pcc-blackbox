@@ -83,6 +83,22 @@ func checkLLDPInstallation(id uint64) (found bool, err error) {
 	return checkingLoop(start, timeout, id, str2Check, events)
 }
 
+func checkGenericInstallation(id uint64, appTimeout time.Duration, str2Check string) (found bool, err error) {
+	var (
+		start     = time.Now()
+		timeout   = appTimeout * time.Second
+		events    []models.Notification
+	)
+	events, err = getEvents()
+	if err != nil {
+		return false, err
+	}
+	if checkGenericEvent(id, str2Check, events) {
+		return true, nil
+	}
+	return checkingLoop(start, timeout, id, str2Check, events)
+}
+
 func checkMAASInstallation(id uint64) (found bool, err error) {
 	var (
 		start   = time.Now()

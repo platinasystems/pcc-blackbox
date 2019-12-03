@@ -8,4 +8,5 @@
 *.swp
 *.test
 *.zip
+.idea
 testEnv.json

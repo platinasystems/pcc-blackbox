@@ -103,6 +103,9 @@ func Test(t *testing.T) {
 		//mayRun(t, "delNodes", delNodes)
 
 	})
+	mayRun(t, "addProfile", addAuthenticationProfile)
+	mayRun(t, "installPortus", addPortus)
+
 }
 
 func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
