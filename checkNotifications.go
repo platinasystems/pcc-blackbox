@@ -9,11 +9,12 @@ import (
 )
 
 const (
-	FREQUENCY            = 15
+	FREQUENCY            = 10
 	AGENT_TIMEOUT        = 150
 	COLLECTOR_TIMEOUT    = 150
 	LLDP_TIMEOUT         = 300
 	MAAS_INSTALL_TIMEOUT = 300
+	K8S_INSTALL_TIMEOUT  = 1800
 )
 
 func getEvents() (events []models.Notification, err error) {

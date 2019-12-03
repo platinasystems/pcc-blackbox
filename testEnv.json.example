@@ -1,80 +1,133 @@
 {
-   "PccIp": "172.17.2.238",
-   "Invaders": [
-     {
-       "HostIp": "172.17.2.60",
-       "BMCIp":	 "172.17.3.60",
-       "BMCUser": "ADMIN",
-       "BMCUsers": ["ADMIN"],
-       "BMCPass": "ADMIN",
-       "NetInterfaces": [
-         {
-           "Name": "eth0",
-           "Cidrs": [
-             "172.17.2.60/23"
-           ],
-           "MacAddr": "",
-           "IsManagement": false,
-           "ManagedByPcc": false,
-           "Speed": "",
-           "Autoneg": "",
-           "Fec": "",
-           "Media": "",
-           "Mtu": 0
-         }
-       ]
-     }
-   ],
-   "Servers": [
-     {
-       "HostIp": "172.17.2.115",
-       "BMCIp":	 "172.17.3.115",
-       "BMCUser": "ADMIN",
-       "BMCUsers": ["ADMIN"],
-       "BMCPass": "ADMIN",
-       "KeyId": [3],
-       "KeyAlias": ["test"],
-       "NetInterfaces": [
-         {
-           "Name": "eno1",
-           "Cidrs": [
-             "172.17.2.115/23"
-           ],
-           "MacAddr": "",
-           "IsManagement": false,
-           "ManagedByPcc": false,
-           "Speed": "",
-           "Autoneg": "",
-           "Fec": "",
-           "Media": "",
-           "Mtu": 0
-         }
-       ]
-     },
-     {
-       "HostIp": "172.17.2.114",
-       "BMCIp":	 "172.17.3.114",
-       "BMCUser": "ADMIN",
-       "BMCUsers": ["ADMIN"],
-       "BMCPass": "ADMIN",
-       "KeyId": [3],
-       "KeyAlias": ["test"],
-       "NetInterfaces": [
-         {
-           "Name": "eno1",
-           "Cidrs": [
-             "172.17.2.114/23"
-           ],
-           "MacAddr": "",
-           "IsManagement": false,
-           "ManagedByPcc": false,
-           "Speed": "",
-           "Autoneg": "",
-           "Fec": "",
-           "Media": "",
-           "Mtu": 0
-         }
-       ]
-     }
-   ]
+	"PccIp": "172.17.2.238",
+	"Invaders": [{
+		"HostIp": "172.17.2.60",
+		"BMCIp": "172.17.3.60",
+		"BMCUser": "ADMIN",
+		"BMCUsers": ["ADMIN"],
+		"BMCPass": "ADMIN",
+		"NetInterfaces": [{
+			"Gateway": "172.17.2.1",
+			"Cidrs": [
+				"172.17.2.60/23"
+			],
+			"MacAddr": "",
+			"IsManagement": true,
+			"ManagedByPcc": false,
+			"Speed": "1000",
+			"Autoneg": "off",
+			"Mtu": "1500"
+		},
+		{
+        					"MacAddr": "50:18:4c:00:30:6c",
+        					"Cidrs": [
+        						"10.15.15.0/31"
+        					],
+        					"IsManagement": false,
+        					"ManagedByPcc": true,
+        					"Speed": "10000",
+        					"Autoneg": "off",
+        					"Mtu": "1500"
+        				},
+        				{
+        					"MacAddr": "50:18:4c:00:30:6d",
+        					"Cidrs": [
+        						"10.15.15.2/31"
+        					],
+        					"IsManagement": false,
+        					"ManagedByPcc": true,
+        					"Speed": "10000",
+        					"Autoneg": "off",
+        					"Mtu": "1500"
+        				}]
+	}],
+	"Servers": [{
+			"HostIp": "172.17.2.115",
+			"BMCIp": "172.17.3.115",
+			"BMCUser": "ADMIN",
+			"BMCUsers": ["ADMIN"],
+			"BMCPass": "ADMIN",
+			"KeyId": [3],
+			"KeyAlias": ["test"],
+			"NetInterfaces": [{
+					"MacAddr": "00:25:90:f2:5c:ee",
+					"Gateway": "172.17.2.1",
+					"Cidrs": [
+						"172.17.2.115/23"
+					],
+					"IsManagement": true,
+					"ManagedByPcc": true,
+					"Speed": "1000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				},
+				{
+					"MacAddr": "00:02:c9:e8:b5:c0",
+					"Cidrs": [
+						"10.15.15.3/31"
+					],
+					"IsManagement": false,
+					"ManagedByPcc": true,
+					"Speed": "10000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				},
+				{
+					"MacAddr": "00:02:c9:e8:b5:c1",
+					"Cidrs": [
+						"10.15.16.3/31"
+					],
+					"IsManagement": false,
+					"ManagedByPcc": true,
+					"Speed": "10000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				}
+			]
+		},
+		{
+			"HostIp": "172.17.2.114",
+			"BMCIp": "172.17.3.114",
+			"BMCUser": "ADMIN",
+			"BMCUsers": ["ADMIN"],
+			"BMCPass": "ADMIN",
+			"KeyId": [3],
+			"KeyAlias": ["test"],
+			"NetInterfaces": [{
+					"MacAddr": "00:25:90:f2:48:b6",
+					"Gateway": "172.17.2.1",
+					"Cidrs": [
+						"172.17.2.114/23"
+					],
+					"IsManagement": true,
+					"ManagedByPcc": true,
+					"Speed": "1000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				},
+				{
+					"MacAddr": "00:02:c9:21:db:90",
+					"Cidrs": [
+						"10.15.15.1/31"
+					],
+					"IsManagement": false,
+					"ManagedByPcc": true,
+					"Speed": "10000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				},
+				{
+					"MacAddr": "00:02:c9:21:db:91",
+					"Cidrs": [
+						"10.15.16.1/31"
+					],
+					"IsManagement": false,
+					"ManagedByPcc": true,
+					"Speed": "10000",
+					"Autoneg": "off",
+					"Mtu": "1500"
+				}
+			]
+		}
+	]
 }

@@ -1,8 +1,7 @@
 package main
 
-import ()
-
 type testEnv struct {
+	Env      string
 	PccIp    string
 	Invaders []invader
 	Servers  []server
@@ -14,7 +13,6 @@ type node struct {
 	BMCUser       string
 	BMCUsers      []string
 	BMCPass       string
-	KeyId         []uint64
 	KeyAlias      []string
 	NetInterfaces []netInterface
 }
@@ -22,6 +20,7 @@ type node struct {
 type netInterface struct {
 	Name         string
 	Cidrs        []string
+	Gateway      string
 	MacAddr      string
 	IsManagement bool
 	ManagedByPcc bool
@@ -29,7 +28,7 @@ type netInterface struct {
 	Autoneg      string
 	Fec          string
 	Media        string
-	Mtu          uint
+	Mtu          string
 }
 
 type invader struct {
@@ -50,8 +49,6 @@ var exampleEnv = testEnv{
 				BMCUser:  "ADMIN",
 				BMCUsers: []string{"ADMIN"},
 				BMCPass:  "ADMIN",
-				KeyId:    []uint64{3},
-				KeyAlias: []string{"test"},
 				NetInterfaces: []netInterface{
 					netInterface{
 						Name:  "eth0",
