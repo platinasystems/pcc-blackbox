@@ -49,7 +49,7 @@ func TestMain(m *testing.M) {
 		panic(fmt.Errorf("no testEnv.json found"))
 	}
 	if err = json.Unmarshal(output, &Env); err != nil {
-		panic(fmt.Errorf("error unmarshalling testEnv.json"))
+		panic(fmt.Errorf("error unmarshalling testEnv.json\n %v", err.Error()))
 	}
 
 	type credential struct {
@@ -100,17 +100,27 @@ func Test(t *testing.T) {
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "installMAAS", updateNodes_installMAAS)
-		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+		//mayRun(t, "installLLDP", updateNodes_installLLDP)
+		//mayRun(t, "installMAAS", updateNodes_installMAAS)
+		//mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 		//mayRun(t,"configNetworkIntefaces", configNetworkIntefaces)
 		//mayRun(t,"CreateK8sCluster", createK8s_3nodes)
 		//mayRun(t, "delNodes", delNodes)
 
 	})
-	mayRun(t, "addProfile", addAuthenticationProfile)
-	mayRun(t, "installPortus", addPortus)
+}
 
+func TestPortus(t *testing.T){
+	mayRun(t, "portus", func(t *testing.T) {
+		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		//mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "uploadSecurityAuthProfileCertificate", UploadSecurityAuthProfileCert)
+		mayRun(t, "addProfile", AddAuthenticationProfile)
+		mayRun(t, "uploadSecurityPortusKey", UploadSecurityPortusKey)
+		mayRun(t, "uploadSecurityPortusCertificate", UploadSecurityPortusCert)
+		mayRun(t, "installPortus", AddPortus)
+		mayRun(t, "checkPortusInstallation", CheckPortusInstallation)
+	})
 }
 
 func mayRun(t *testing.T, name string, f func(*testing.T)) bool {

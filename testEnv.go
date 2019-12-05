@@ -1,10 +1,14 @@
 package main
 
+import "tiles/pccserver/models"
+
 type testEnv struct {
-	Env      string
-	PccIp    string
-	Invaders []invader
-	Servers  []server
+	Env                   string
+	PccIp                 string
+	Invaders              []invader
+	Servers               []server
+	AuthenticationProfile models.AuthenticationProfile
+	PortusConfiguration   models.PortusConfiguration
 }
 
 type node struct {

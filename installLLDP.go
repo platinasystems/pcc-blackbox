@@ -6,6 +6,7 @@ import (
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
+	"time"
 )
 
 func updateNodes_installLLDP(t *testing.T) {
@@ -51,10 +52,12 @@ func installLLDP(t *testing.T) {
 		}
 	}
 
+	from := time.Now()
 	//Check LLDP installation
 	for id := range Nodes {
 		fmt.Printf("Checking LLDP installation for nodeId:%v\n", id)
-		check, err = checkLLDPInstallation(id)
+		//check, err = checkLLDPInstallation(id)
+		check, err = checkGenericInstallation(id, LLDP_TIMEOUT, LLDP_NOTIFICATION, from)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}

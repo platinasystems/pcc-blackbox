@@ -6,6 +6,7 @@ import (
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
+	"time"
 )
 
 func updateNodes_installMAAS(t *testing.T) {
@@ -22,6 +23,9 @@ func installMAAS(t *testing.T) {
 		check      bool
 		numInvader uint64 = 0
 	)
+
+	from := time.Now()
+
 	nodesToCheck := make([]uint64, len(Env.Invaders))
 	for _, i := range Env.Invaders {
 		var (
@@ -58,7 +62,7 @@ func installMAAS(t *testing.T) {
 	//Check MAAS installation
 	for i := 0; i < len(nodesToCheck); i++ {
 		fmt.Printf("Checking MAAS installation for nodeId:%v\n", nodesToCheck[i])
-		check, err = checkMAASInstallation(nodesToCheck[i])
+		check, err = checkMAASInstallation(nodesToCheck[i], from)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}

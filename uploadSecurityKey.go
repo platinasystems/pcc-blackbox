@@ -1,14 +1,7 @@
 package main
 
 import (
-	"bytes"
 	"encoding/json"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"path/filepath"
-
-	//"encoding/json"
 	"fmt"
 	"github.com/platinasystems/test"
 	"os"
@@ -47,7 +40,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 			assert.Fatalf("%v\n", err)
 		}
 		if !exist {
-			err = updateFile("./maas_pubkey", label)
+			err = updateMaasFile("./maas_pubkey", label)
 			if err != nil {
 				assert.Fatalf("%v\n", err)
 				return
@@ -77,28 +70,7 @@ func checkIfLabelExist(label string) (exist bool, err error) {
 	return exist, err
 }
 
-func updateFile(filePath string, label string) (err error) {
-	file, err := os.Open(filePath)
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	part, err := writer.CreateFormFile("file", filepath.Base("./maas_pubkey"))
-	if err != nil {
-		return nil
-	}
-	_, err = io.Copy(part, file)
-	if err != nil {
-		return nil
-	}
-	err = writer.Close()
-	if err != nil {
-		return nil
-	}
-	client := &http.Client{}
+func updateMaasFile(filePath string, label string) (err error) {
 	url := fmt.Sprintf("https://%s:9999/key-manager/keys/upload/public/%v", Env.PccIp, label)
-	req, _ := http.NewRequest("POST", url, body)
-	req.Header.Add("Authorization", Bearer)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	r, err := client.Do(req)
-	defer r.Body.Close()
-	return err
+	return UpdateFile(filePath, url)
 }

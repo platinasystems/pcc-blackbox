@@ -61,12 +61,14 @@ func addServer(t *testing.T) {
 		}
 	}
 
+	from := time.Now()
 	//Check Agent installation
 	//SERIAL - to be improved
 	for i := 0; i < len(nodesToCheck); i++ {
 		check = false
 		fmt.Printf("Checking Agent installation for nodeId:%v\n", nodesToCheck[i])
-		check, err = checkAgentInstallation(nodesToCheck[i])
+		//check, err = checkAgentInstallation(nodesToCheck[i])
+		check, err = checkGenericInstallation(nodesToCheck[i], AGENT_TIMEOUT, AGENT_NOTIFICATION, from)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}
@@ -75,10 +77,12 @@ func addServer(t *testing.T) {
 		}
 	}
 
+	from = time.Now()
 	//Check Collector installation
 	for i := 0; i < len(nodesToCheck); i++ {
 		fmt.Printf("Checking Collector installation for nodeId:%v\n", nodesToCheck[i])
-		check, err = checkCollectorInstallation(nodesToCheck[i])
+		//check, err = checkCollectorInstallation(nodesToCheck[i])
+		check, err = checkGenericInstallation(nodesToCheck[i], COLLECTOR_TIMEOUT, COLLECTOR_NOTIFICATION, from)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}

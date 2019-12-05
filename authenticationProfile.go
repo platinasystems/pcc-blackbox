@@ -4,17 +4,31 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/mitchellh/mapstructure"
 	"github.com/platinasystems/test"
-	"io/ioutil"
 	"testing"
 	"tiles/pccserver/models"
 )
 
-const PROFILE_ENDPOINT = "pccserver/profile"
-const PROFILE_JSON = "authProfile.json"
-
-func addAuthenticationProfile(t *testing.T) {
+const (
+	PROFILE_ENDPOINT = "pccserver/profile"
+	LDAP_CERT_FILENAME = "test_ldap_crt"
+)
+func AddAuthenticationProfile(t *testing.T) {
 	t.Run("addAuthProfile", addAuthProfile)
+}
+
+func UploadSecurityAuthProfileCert(t *testing.T) {
+	t.Run("uploadSecurityAuthProfileCert", uploadCertificate_AuthProfile)
+}
+
+func uploadCertificate_AuthProfile(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, CERT)
+	if err != nil{
+		assert.Fatalf(err.Error())
+	}
 }
 
 func addAuthProfile(t *testing.T) {
@@ -27,8 +41,24 @@ func addAuthProfile(t *testing.T) {
 		resp        HttpResp
 	)
 
-	if err := buildAuthProfile(&authProfile); err != nil {
-		assert.Fatalf("Authentication Profile creation failed\n%v\n", err)
+	if Env.AuthenticationProfile.Name == "" {
+		fmt.Printf("Authenticatiom Profile is not defined in the configuration file")
+		return
+	}
+	authProfile = Env.AuthenticationProfile
+
+	certificate, err := GetCertificate(LDAP_CERT_FILENAME)
+	if err != nil {
+		fmt.Printf("Get certificate %s failed\n%v\n", LDAP_CERT_FILENAME, err)
+	} else {
+		if authProfile.Type == "ldap" {
+			var ldapConfiguration models.LDAPConfiguration
+			decodeError := mapstructure.Decode(authProfile.Profile, &ldapConfiguration)
+			if decodeError == nil {
+				ldapConfiguration.CertificateId = &certificate.Id
+				authProfile.Profile = ldapConfiguration
+			}
+		}
 	}
 
 	data, err := json.Marshal(authProfile)
@@ -48,13 +78,14 @@ func addAuthProfile(t *testing.T) {
 }
 
 
-func getAuthProfileByName(name string)(authProfile *models.AuthenticationProfile, err error){
+func GetAuthProfileByName(name string)(authProfile *models.AuthenticationProfile, err error){
 
 	var authProfiles [] models.AuthenticationProfile
 	resp, body, err := pccGateway("GET", PROFILE_ENDPOINT, nil);
 
 	if err == nil {
 		if resp.Status == 200 {
+			fmt.Println(resp.Data)
 			if err = json.Unmarshal(resp.Data, &authProfiles); err == nil {
 				for i := range authProfiles {
 					if authProfiles[i].Name == name {
@@ -68,10 +99,4 @@ func getAuthProfileByName(name string)(authProfile *models.AuthenticationProfile
 	}
 
 	return nil, err
-}
-
-func buildAuthProfile(authProfile *models.AuthenticationProfile) (err error) {
-	confFile, err := ioutil.ReadFile(PROFILE_JSON)
-	json.Unmarshal(confFile, authProfile)
-	return err
 }

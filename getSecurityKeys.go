@@ -7,6 +7,16 @@ import (
 	"testing"
 )
 
+type Certificate struct {
+	Id          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Alias       string `json:"alias"`
+	Owner       uint64 `json:"owner"`
+	Tenant      uint64 `json:"tenant"`
+	Protect     bool   `json:"protect"`
+}
+
 type securityKey struct {
 	Id          uint64 `json:"id"`
 	Name        string `json:"name"`

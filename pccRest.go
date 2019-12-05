@@ -84,21 +84,25 @@ func pccSecurity(op string, endPoint string, data []byte) (resp HttpResp, body [
 	r, _ := client.Do(req)
 	defer r.Body.Close()
 	body, _ = ioutil.ReadAll(r.Body)
-	var (
-		rg       []securityKey
-		dataJson []byte
-	)
-	if err = json.Unmarshal(body, &rg); err != nil {
-		fmt.Printf("Unmarshalling Error:\n%v\n", string(body))
-		return
-	}
+	//var (
+	//	rg       []securityKey
+	//	dataJson []byte
+	//)
 
-	if dataJson, err = json.Marshal(rg); err != nil {
-		fmt.Printf("Marshalling Error:\n%v\n", rg)
-		return
-	}
+	//if err = json.Unmarshal(body, &rg); err != nil {
+	//	fmt.Printf("Unmarshalling Error:\n%v\n", string(body))
+	//	return
+	//}
+	//
+	//
+	//if dataJson, err = json.Marshal(rg); err != nil {
+	//	fmt.Printf("Marshalling Error:\n%v\n", rg)
+	//	return
+	//}
+
 	resp = HttpResp{
-		Data: dataJson,
+		Status: r.StatusCode,
+		Data: body,
 	}
 	return
 }
