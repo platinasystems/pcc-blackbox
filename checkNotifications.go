@@ -15,7 +15,7 @@ const (
 	LLDP_TIMEOUT         = 300
 	MAAS_INSTALL_TIMEOUT = 300
 	K8S_INSTALL_TIMEOUT  = 1800
-	PORTUS_TIMEOUT      = 300
+	PORTUS_TIMEOUT      = 400
 	PORTUS_NOTIFICATION = "[Portus] has been installed correctly"
 	COLLECTOR_NOTIFICATION = "The collector has been installed"
 	AGENT_NOTIFICATION = "The agent has been installed"

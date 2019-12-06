@@ -10,12 +10,10 @@ import (
 )
 
 const (
-	PORTUS_ENDPOINT     = "pccserver/portus"
-	KEYMANAGER_ENDPOINT     = "key-manager"
-	PORTUS_KEY_FILENAME = "test_portus_key"
+	PORTUS_ENDPOINT      = "pccserver/portus"
+	KEYMANAGER_ENDPOINT  = "key-manager"
+	PORTUS_KEY_FILENAME  = "test_portus_key"
 	PORTUS_CERT_FILENAME = "test_portus_crt"
-
-
 )
 
 func AddPortus(t *testing.T) {
@@ -38,7 +36,7 @@ func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY, PRIVATE_KEY)
-	if err != nil{
+	if err != nil {
 		assert.Fatalf(err.Error())
 	}
 }
@@ -47,7 +45,7 @@ func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, CERT)
-	if err != nil{
+	if err != nil {
 		assert.Fatalf(err.Error())
 	}
 }
@@ -61,7 +59,7 @@ func installPortus(t *testing.T) {
 		resp                HttpResp
 	)
 	for id, node := range Nodes {
-		if !IsInvader(node) {
+		if !IsInvader(node) && IsOnline(node) {
 			portusConfiguration = Env.PortusConfiguration
 			portusConfiguration.NodeID = id
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
@@ -118,7 +116,7 @@ func checkPortus(t *testing.T) {
 	from := time.Now()
 
 	for id, node := range Nodes {
-		if !IsInvader(node) {
+		if !IsInvader(node) && IsOnline(node){
 			check, err := checkGenericInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, from)
 			if err != nil {
 				assert.Fatalf("Portus installation has failed\n%v\n", err)
@@ -129,6 +127,3 @@ func checkPortus(t *testing.T) {
 		}
 	}
 }
-
-
-
