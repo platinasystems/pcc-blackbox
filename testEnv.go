@@ -1,6 +1,6 @@
 package main
 
-import "tiles/pccserver/models"
+import "github.com/platinasystems/tiles/pccserver/models"
 
 type testEnv struct {
 	Env                   string

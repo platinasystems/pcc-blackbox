@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"github.com/platinasystems/test"
+	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
-	"tiles/pccserver/models"
 )
 
 const (

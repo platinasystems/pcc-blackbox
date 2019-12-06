@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/platinasystems/test"
 	"testing"
-	"tiles/pccserver/models"
+	"github.com/platinasystems/tiles/pccserver/models"
 	"time"
 )
 
