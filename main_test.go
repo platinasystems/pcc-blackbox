@@ -100,17 +100,47 @@ func Test(t *testing.T) {
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		//mayRun(t, "installLLDP", updateNodes_installLLDP)
-		//mayRun(t, "installMAAS", updateNodes_installMAAS)
-		//mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
-		//mayRun(t,"configNetworkIntefaces", configNetworkIntefaces)
-		//mayRun(t,"CreateK8sCluster", createK8s_3nodes)
-		//mayRun(t, "delNodes", delNodes)
-
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "installMAAS", updateNodes_installMAAS)
 	})
 }
 
-func TestPortus(t *testing.T){
+func TestMaaS(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "nodes", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		mayRun(t, "getSecKeys", getSecKeys)
+		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+	})
+}
+
+func TestK8s(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "nodes", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "configNetworkIntefaces", configNetworkIntefaces)
+		mayRun(t, "CreateK8sCluster", createK8s_3nodes)
+	})
+}
+
+func TestPortus(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		//mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
