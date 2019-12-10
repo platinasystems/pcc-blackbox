@@ -11,9 +11,12 @@ import (
 )
 
 const (
-	PROFILE_ENDPOINT = "pccserver/profile"
+	PROFILE_ENDPOINT   = "pccserver/profile"
 	LDAP_CERT_FILENAME = "test_ldap_crt"
 )
+
+var CurrentAuthProfileName string
+
 func AddAuthenticationProfile(t *testing.T) {
 	t.Run("addAuthProfile", addAuthProfile)
 }
@@ -26,7 +29,7 @@ func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, CERT)
-	if err != nil{
+	if err != nil {
 		assert.Fatalf(err.Error())
 	}
 }
@@ -61,6 +64,16 @@ func addAuthProfile(t *testing.T) {
 		}
 	}
 
+	var label string
+	for i := 1; ; i++ {
+		label = fmt.Sprintf(authProfile.Name+"_%d", i)
+		CurrentAuthProfileName = label
+		if existingProfile, _ := GetAuthProfileByName(label); existingProfile == nil {
+			break
+		}
+	}
+	authProfile.Name = label
+
 	data, err := json.Marshal(authProfile)
 	if err != nil {
 		assert.Fatalf("invalid struct for add authentication profile request")
@@ -77,15 +90,12 @@ func addAuthProfile(t *testing.T) {
 	}
 }
 
-
-func GetAuthProfileByName(name string)(authProfile *models.AuthenticationProfile, err error){
+func GetAuthProfileByName(name string) (authProfile *models.AuthenticationProfile, err error) {
 
 	var authProfiles [] models.AuthenticationProfile
 	resp, body, err := pccGateway("GET", PROFILE_ENDPOINT, nil);
-
 	if err == nil {
 		if resp.Status == 200 {
-			fmt.Println(resp.Data)
 			if err = json.Unmarshal(resp.Data, &authProfiles); err == nil {
 				for i := range authProfiles {
 					if authProfiles[i].Name == name {

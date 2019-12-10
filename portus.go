@@ -67,11 +67,11 @@ func installPortus(t *testing.T) {
 			if Env.AuthenticationProfile.Name == "" {
 				fmt.Printf("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
 			} else {
-				authProfile, err := GetAuthProfileByName(Env.AuthenticationProfile.Name)
+				authProfile, err := GetAuthProfileByName(CurrentAuthProfileName)
 				if err == nil {
 					portusConfiguration.AuthenticationProfile = authProfile
 				} else {
-					assert.Fatalf("Missing authentication profile %s\n, %v\n", Env.AuthenticationProfile.Name, err)
+					fmt.Printf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
 				}
 			}
 
