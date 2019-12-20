@@ -89,7 +89,7 @@ func TestMain(m *testing.M) {
 
 var count uint
 
-func Test(t *testing.T) {
+func TestNodes(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
