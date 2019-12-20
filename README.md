@@ -21,10 +21,12 @@ Options:
 \-test.run <name of test group>: excutes just the test group
 
 Available Test Suites:
-\-test.run TestNodes
-\-test.run TestMaaS
-\-test.run TestK8s
-\-test.run TestPortus
+```
+-test.run TestNodes
+-test.run TestMaaS
+-test.run TestK8s
+-test.run TestPortus
+```
 
 Example:
 ```
