@@ -19,7 +19,13 @@ Options:
 \-test.v:  prints test names as test progresses  
 \-test.dryrun:  along with \-test.v prints test names but does not execute tests  
 \-test.run <name of test group>: excutes just the test group
-  
+
+Available Test Suites:
+\-test.run TestNodes
+\-test.run TestMaaS
+\-test.run TestK8s
+\-test.run TestPortus
+
 Example:
 ```
 fyang@i34:~/src/github.com/platinasystems/pcc-blackbox$ ./pcc-blackbox.test -test.v
