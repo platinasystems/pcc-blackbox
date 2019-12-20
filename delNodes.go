@@ -22,7 +22,7 @@ func delAllNodes(t *testing.T) {
 		err  error
 	)
 	for id, _ := range Nodes {
-		endpoint := fmt.Sprintf("node/%v", id)
+		endpoint := fmt.Sprintf("pccserver/node/%v", id)
 		if resp, body, err = pccGateway("DELETE", endpoint, nil); err != nil {
 			assert.Fatalf("%v\n%v\n", string(body), err)
 			return
@@ -43,7 +43,7 @@ func delAllNodes(t *testing.T) {
 		done = true
 		for id, node := range Nodes {
 			done = false
-			endpoint := fmt.Sprintf("node/summary/%v", id)
+			endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
 			if resp, body, err = pccGateway("GET", endpoint, nil); err != nil {
 				fmt.Printf("%v\n%v\n", string(body), err)
 				continue
