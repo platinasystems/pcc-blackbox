@@ -39,6 +39,7 @@ func updateMAASInfo(t *testing.T) {
 			AdminUser:   "admin",
 			SSHKeys:     keys,
 			Managed:     true,
+			Console:     "ttyS1",
 		}
 		endpoint := fmt.Sprintf("pccserver/node/update")
 		if data, err = json.Marshal(addReq); err != nil {
