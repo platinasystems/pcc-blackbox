@@ -3,9 +3,10 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"testing"
+
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
-	"testing"
 )
 
 func getNodes(t *testing.T) {
@@ -37,8 +38,41 @@ func getAvailableNodes(t *testing.T) {
 	}
 	for i := 0; i < len(nodes); i++ {
 		Nodes[nodes[i].Id] = &nodes[i]
-		fmt.Printf("Update Nodes[%v]\n", nodes[i].Id)
 		NodebyHostIP[nodes[i].Host] = nodes[i].Id
-		fmt.Printf("Mapping hostIP %v to id %v\n", nodes[i].Host, nodes[i].Id)
 	}
+}
+
+func getNodeSummary(id uint64, node *models.NodeWithKubernetes) (err error) {
+	var (
+		resp HttpResp
+	)
+	endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
+	if resp, _, err = pccGateway("GET", endpoint, nil); err != nil {
+		return
+	}
+	if resp.Status == 200 {
+		err = json.Unmarshal(resp.Data, node)
+		if err != nil {
+			return
+		}
+		return
+	}
+	err = fmt.Errorf("%v", resp.Message)
+	return
+}
+
+func getProvisionStatus(id uint64) (status string, err error) {
+	var (
+		resp HttpResp
+	)
+	endpoint := fmt.Sprintf("pccserver/node/%v/provisionStatus", id)
+	if resp, _, err = pccGateway("GET", endpoint, nil); err != nil {
+		return
+	}
+	if resp.Status == 200 {
+		status = string(resp.Data) // status has double quotes
+		return
+	}
+	err = fmt.Errorf("%v", resp.Message)
+	return
 }

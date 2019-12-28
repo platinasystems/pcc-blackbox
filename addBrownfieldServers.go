@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/platinasystems/test"
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 func addBrownfieldServers(t *testing.T) {
@@ -62,6 +64,16 @@ func addServer(t *testing.T) {
 		}
 	}
 
+	// early check for add fail
+	time.Sleep(10 * time.Second)
+	for id := range Nodes {
+		if status, err := getProvisionStatus(id); err == nil {
+			if strings.Contains(status, "Add node failed") {
+				assert.Fatalf("%v for %v\n", status, id)
+			}
+		}
+	}
+
 	from := time.Now()
 	//Check Agent installation
 	//SERIAL - to be improved
@@ -71,7 +83,7 @@ func addServer(t *testing.T) {
 		//check, err = checkAgentInstallation(nodesToCheck[i])
 		check, err = checkGenericInstallation(nodesToCheck[i], AGENT_TIMEOUT, AGENT_NOTIFICATION, from)
 		if err != nil {
-			fmt.Printf("%v", err)
+			fmt.Printf("%v\n", err)
 		}
 		if check {
 			fmt.Printf("AGENT correctly installed on nodeId:%v\n", nodesToCheck[i])
@@ -85,7 +97,7 @@ func addServer(t *testing.T) {
 		//check, err = checkCollectorInstallation(nodesToCheck[i])
 		check, err = checkGenericInstallation(nodesToCheck[i], COLLECTOR_TIMEOUT, COLLECTOR_NOTIFICATION, from)
 		if err != nil {
-			fmt.Printf("%v", err)
+			fmt.Printf("%v\n", err)
 		}
 		if check {
 			fmt.Printf("COLLECTOR correctly installed on nodeId:%v\n", nodesToCheck[i])
@@ -106,24 +118,26 @@ func addServer(t *testing.T) {
 				}
 			}
 			done = false
-			endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
-			if resp, body, err = pccGateway("GET", endpoint, nil); err != nil {
-				fmt.Printf("%v\n%v\n", string(body), err)
+			err = getNodeSummary(id, node)
+			if err != nil {
+				fmt.Printf("node %v, error: %v\n", id, err)
 				continue
 			}
-			if resp.Status == 200 {
-				if err := json.Unmarshal(resp.Data, &node); err == nil {
-					name := fmt.Sprintf("nodeId:%v", id)
-					if node.Name != "" {
-						name = node.Name
-					}
-					fmt.Printf("%v is %v provisionStatus = %v \n",
-						name, node.NodeAvailabilityStatus.ConnectionStatus, node.ProvisionStatus)
-					done = node.NodeAvailabilityStatus.ConnectionStatus == "online"
-					Nodes[id] = node
-				}
+			name := fmt.Sprintf("node:%v", id)
+			if node.Name != "" {
+				name = node.Name
 			}
+			fmt.Printf("%v is %v provisionStatus = %v \n", name,
+				node.NodeAvailabilityStatus.ConnectionStatus,
+				node.ProvisionStatus)
+			if node.ProvisionStatus == "Add node failed" {
+				assert.Fatalf("%v for %v\n",
+					node.ProvisionStatus, name)
+			}
+			done = node.NodeAvailabilityStatus.ConnectionStatus == "online"
+			Nodes[id] = node
 		}
+
 		if !done {
 			time.Sleep(10 * time.Second)
 		}
@@ -131,6 +145,7 @@ func addServer(t *testing.T) {
 			break
 		}
 	}
+
 	if !done {
 		for _, node := range Nodes {
 			if node.NodeAvailabilityStatus == nil {
