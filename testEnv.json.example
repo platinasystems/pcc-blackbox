@@ -129,5 +129,24 @@
 				}
 			]
 		}
-	]
+	],
+	"AuthenticationProfile": {
+        "type": "ldap",
+        "name": "portus_ldap",
+        "profile": {
+          "domain": "ldap1.lab.platinasystems.com",
+          "userIDAttribute": "cn",
+          "port": 636,
+          "userBaseDN": "ou=Internal Customers,ou=people,dc=platinasystems,dc=com",
+          "anonymousBind": true,
+          "bindDN": "cn=admin,dc=platinasystems,dc=com",
+          "bindPassword": "plat1na"
+        }
+      },
+      "PortusConfiguration": {
+        "fullyQualifiedDomainName": "portus.platinasystem.local",
+        "password": "12341234",
+        "secretKeyBase": "test123",
+        "adminState": "Enabled"
+      }
 }
