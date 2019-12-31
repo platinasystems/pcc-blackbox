@@ -6,7 +6,7 @@ require (
 	github.com/actgardner/gogen-avro v6.3.1+incompatible // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
-	github.com/lib/pq v1.3.0 // indirect
+	github.com/lib/pq v1.3.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/platinasystems/go-common v0.0.0-20191223094631-fcfdaf36a4a4 // indirect
