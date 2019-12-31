@@ -3,12 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
+	"testing"
+	"time"
 
 	"github.com/lib/pq"
 	"github.com/platinasystems/test"
 	maas "github.com/platinasystems/tiles/pccserver/maas/models"
 	"github.com/platinasystems/tiles/pccserver/models"
-	"testing"
 )
 
 func reimageAllBrownNodes(t *testing.T) {
@@ -27,6 +29,7 @@ func updateMAASInfo(t *testing.T) {
 		var (
 			node models.NodeWithKubernetes
 			data []byte
+			err  error
 		)
 		keyId, err := getFirstKey()
 		keys := pq.Int64Array{int64(keyId.Id)}
@@ -112,5 +115,39 @@ func reimageAllBrown(t *testing.T) {
 		numServers++
 	}
 
-	//TODO
+	fmt.Println("Sleep for 8 minutes")
+	time.Sleep(8 * time.Minute)
+
+	for {
+		for i, id := range nodesToCheck {
+			status, err := getProvisionStatus(id)
+			if err != nil {
+				fmt.Printf("Node %v error: %v\n", id, err)
+				continue
+			}
+			if strings.Contains(status, "Ready") {
+				fmt.Printf("Node %v has gone Ready\n", id)
+				nodesToCheck = removeIndex(i, nodesToCheck)
+				continue
+			} else if strings.Contains(status, "reimage failed") {
+				fmt.Printf("Node %v has failed reimage\n", id)
+				nodesToCheck = removeIndex(i, nodesToCheck)
+				continue
+			}
+			fmt.Printf("Node %v: %v\n", id, status)
+		}
+		if len(nodesToCheck) == 0 {
+			fmt.Printf("Brownfield re-image done\n")
+			return
+		}
+		time.Sleep(60 * time.Second)
+	}
+}
+
+func removeIndex(i int, n []uint64) []uint64 {
+	if len(n) > 1 {
+		n = append(n[:i], n[i+1:]...)
+		return n
+	}
+	return nil
 }
