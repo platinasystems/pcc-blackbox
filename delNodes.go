@@ -38,7 +38,7 @@ func delAllNodes(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	start := time.Now()
 	done := false
-	timeout := 90 * time.Second
+	timeout := 180 * time.Second
 	for !done {
 		done = true
 		for id, node := range Nodes {
@@ -57,13 +57,16 @@ func delAllNodes(t *testing.T) {
 			if resp.Status == 400 {
 				fmt.Printf("%v deleted\n", node.Name)
 				delete(Nodes, id)
-				done = true
+				if len(Nodes) == 0 {
+					done = true
+				}
 			}
 		}
 		if !done {
 			time.Sleep(5 * time.Second)
 		}
 		if time.Since(start) > timeout {
+			fmt.Printf("delAllNodes timeout\n")
 			break
 		}
 	}
