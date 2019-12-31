@@ -8,28 +8,6 @@ import (
 	"net/http"
 )
 
-type nodeAddReq struct {
-	Id          uint64
-	Name        string
-	Host        string
-	SN          string
-	Model       string
-	Tags        []string
-	Site_Id     uint64
-	ClusterId   uint64
-	Owner       uint64
-	Roles       []uint64
-	Bmc         string
-	BmcUser     string
-	BmcUsers    []string
-	BmcPassword string
-	AdminUser   string
-	SSHKeys     []uint64
-	Console     string
-	Managed     bool
-	Standby     bool
-}
-
 type HttpResp struct {
 	Path    string
 	Status  int
@@ -102,7 +80,7 @@ func pccSecurity(op string, endPoint string, data []byte) (resp HttpResp, body [
 
 	resp = HttpResp{
 		Status: r.StatusCode,
-		Data: body,
+		Data:   body,
 	}
 	return
 }

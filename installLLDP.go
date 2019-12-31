@@ -24,15 +24,16 @@ func installLLDP(t *testing.T) {
 	)
 	for id := range Nodes {
 		var (
-			node models.NodeWithKubernetes
-			data []byte
-			lldp []uint64 = []uint64{2}
+			addReq models.NodeWithAdditionalFields
+			node   models.NodeWithKubernetes
+			data   []byte
+			lldp   []uint64 = []uint64{2}
 		)
-		addReq := nodeAddReq{
-			Host:  Nodes[id].Host,
-			Id:    id,
-			Roles: lldp,
-		}
+
+		addReq.Host = Nodes[id].Host
+		addReq.Id = id
+		addReq.RoleIds = lldp
+
 		endpoint := fmt.Sprintf("pccserver/node/update")
 		if data, err = json.Marshal(addReq); err != nil {
 			assert.Fatalf("invalid struct for node update request")

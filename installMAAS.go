@@ -29,15 +29,16 @@ func installMAAS(t *testing.T) {
 	nodesToCheck := make([]uint64, len(Env.Invaders))
 	for _, i := range Env.Invaders {
 		var (
-			node models.NodeWithKubernetes
-			data []byte
-			maas []uint64 = []uint64{2, 6}
+			addReq models.NodeWithAdditionalFields
+			node   models.NodeWithKubernetes
+			data   []byte
+			maas   []uint64 = []uint64{2, 6}
 		)
-		addReq := nodeAddReq{
-			Host:  i.HostIp,
-			Id:    NodebyHostIP[i.HostIp],
-			Roles: maas,
-		}
+
+		addReq.Host = i.HostIp
+		addReq.Id = NodebyHostIP[i.HostIp]
+		addReq.RoleIds = maas
+
 		endpoint := fmt.Sprintf("pccserver/node/update")
 		if data, err = json.Marshal(addReq); err != nil {
 			assert.Fatalf("invalid struct for node update request")

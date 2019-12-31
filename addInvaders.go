@@ -33,9 +33,11 @@ func addInvaders(t *testing.T) {
 			node models.NodeWithKubernetes
 			data []byte
 		)
-		addReq := nodeAddReq{
+		pBool := new(bool)
+		*pBool = true
+		addReq := models.Node{
 			Host:    i.HostIp,
-			Managed: true,
+			Managed: pBool,
 		}
 		endpoint := fmt.Sprintf("pccserver/node/add")
 		if data, err = json.Marshal(addReq); err != nil {

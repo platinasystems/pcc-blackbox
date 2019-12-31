@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/lib/pq"
 	"github.com/platinasystems/test"
 	maas "github.com/platinasystems/tiles/pccserver/maas/models"
 	"github.com/platinasystems/tiles/pccserver/models"
@@ -27,9 +29,11 @@ func updateMAASInfo(t *testing.T) {
 			data []byte
 		)
 		keyId, err := getFirstKey()
-		var keys []uint64 = []uint64{keyId.Id}
+		keys := pq.Int64Array{int64(keyId.Id)}
 
-		addReq := nodeAddReq{
+		pBool := new(bool)
+		*pBool = true
+		addReq := models.Node{
 			Host:        i.HostIp,
 			Id:          NodebyHostIP[i.HostIp],
 			Bmc:         i.BMCIp,
@@ -38,7 +42,7 @@ func updateMAASInfo(t *testing.T) {
 			BmcPassword: i.BMCPass,
 			AdminUser:   "admin",
 			SSHKeys:     keys,
-			Managed:     true,
+			Managed:     pBool,
 			Console:     "ttyS1",
 		}
 		endpoint := fmt.Sprintf("pccserver/node/update")
