@@ -101,6 +101,7 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "configNetworkIntefaces", configNetworkIntefaces)
 	})
 }
 
@@ -116,6 +117,23 @@ func TestMaaS(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+	})
+}
+
+func TestMaaSTenant(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "nodes", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getSecKeys", getSecKeys)
+		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "addTenant", addTenant)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 	})
 }
@@ -148,6 +166,12 @@ func TestPortus(t *testing.T) {
 		mayRun(t, "installPortus", AddPortus)
 		mayRun(t, "checkPortusInstallation", CheckPortusInstallation)
 	})
+}
+
+func TestClean(t *testing.T) {
+	getAvailableNodes(t)
+	delAllNodes(t)
+	os.Exit(0)
 }
 
 func TestGen(t *testing.T) {
