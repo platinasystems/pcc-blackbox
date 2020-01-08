@@ -5,20 +5,9 @@
 package pcc
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 )
-
-type respGeneric struct {
-	Path    string `json:"path"`
-	Status  int    `json:"status"`
-	Message string `json:"message"`
-	Error   string `json:"error"`
-	Data    interface{}
-}
 
 type Tenant struct {
 	Id          uint64   `json:"id"`
@@ -194,29 +183,5 @@ func (p PccClient) DelUser(user string) (err error) {
 		return
 	}
 	_, err = p.pccUserManagement("POST", endpoint, data)
-	return
-}
-
-func (p PccClient) pccUserManagement(op string, endPoint string, data []byte) (
-	body []byte, err error) {
-
-	client := &http.Client{}
-	url := fmt.Sprintf("https://%s:9999/%v", p.pccIp, endPoint)
-	req, _ := http.NewRequest(op, url, bytes.NewBuffer(data))
-	req.Header.Add("Authorization", p.bearer)
-	req.Header.Add("Content-type", "application/json")
-	r, _ := client.Do(req)
-	defer r.Body.Close()
-	body, _ = ioutil.ReadAll(r.Body)
-	if r.StatusCode == 200 {
-		return
-	}
-
-	var rg respGeneric
-	if err = json.Unmarshal(body, &rg); err != nil {
-		fmt.Printf("Unmarshalling Error:\n%v\n", string(body))
-		return
-	}
-	err = fmt.Errorf("%v: %v", r.Status, rg.Error)
 	return
 }
