@@ -110,7 +110,7 @@ func addServer(t *testing.T) {
 	time.Sleep(10 * time.Second)
 	start := time.Now()
 	done := false
-	timeout := 90 * time.Second
+	timeout := 180 * time.Second
 	for !done {
 		done = true
 		for id, node := range Nodes {
@@ -144,6 +144,7 @@ func addServer(t *testing.T) {
 			time.Sleep(10 * time.Second)
 		}
 		if time.Since(start) > timeout {
+			assert.Fatalf("timeout")
 			break
 		}
 	}
