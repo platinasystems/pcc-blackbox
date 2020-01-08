@@ -143,6 +143,7 @@ func TestMaaSTenant(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "addTenant", addTenant)
+		mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 	})
 }
