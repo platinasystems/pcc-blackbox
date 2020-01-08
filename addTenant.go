@@ -8,21 +8,7 @@ import (
 	"github.com/platinasystems/test"
 )
 
-var Pcc pcc.PccClient
-
 func addTenant(t *testing.T) {
-	assert := test.Assert{t}
-	var err error
-
-	cred := pcc.Credential{
-		UserName: "admin",
-		Password: "admin",
-	}
-
-	Pcc, err = pcc.Authenticate(Env.PccIp, cred)
-	if err != nil {
-		assert.Fatalf("%v\n", err)
-	}
 	t.Run("addTenant", addTenantA)
 }
 

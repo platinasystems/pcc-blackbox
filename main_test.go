@@ -18,12 +18,16 @@ import (
 	"testing"
 	"time"
 
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
 
 var Token string
 var Bearer string
 var Env testEnv
+
+// redundant global till we migrate to golang binding
+var Pcc pcc.PccClient
 
 var Nodes = make(map[uint64]*models.NodeWithKubernetes)
 var SecurityKeys = make(map[string]*securityKey)
@@ -52,12 +56,17 @@ func TestMain(m *testing.M) {
 		panic(fmt.Errorf("error unmarshalling testEnv.json\n %v", err.Error()))
 	}
 
-	type credential struct {
-		UserName string `json:"username"`
-		Password string `json:"password"`
+	credential := pcc.Credential{
+		UserName: "admin",
+		Password: "admin",
 	}
 
-	postData, _ := json.Marshal(credential{UserName: "admin", Password: "admin"})
+	Pcc, err = pcc.Authenticate(Env.PccIp, credential)
+	if err != nil {
+		panic(fmt.Errorf("%v\n", err))
+	}
+
+	postData, _ := json.Marshal(credential)
 	url := fmt.Sprintf("https://%s:9999/security/auth", Env.PccIp)
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	if resp, err := http.Post(url, "application/json", bytes.NewBuffer(postData)); err == nil {
