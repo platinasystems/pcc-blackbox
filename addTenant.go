@@ -106,6 +106,7 @@ func addTenantA(t *testing.T) {
 		assert.Fatalf("%v\n", err)
 	}
 
+	source := fmt.Sprintf("https://%v:7654/setPass", Env.PccIp)
 	addUser := pcc.AddUser{
 		UserName:  "BadBart",
 		FirstName: "Bart",
@@ -116,7 +117,7 @@ func addTenantA(t *testing.T) {
 		Protect:   false,
 		RoleId:    1,
 		TenantId:  1,
-		Source:    "https://172.17.3.215:7654/setPass",
+		Source:    source,
 	}
 	err = Pcc.AddUser(addUser)
 	if err != nil {
