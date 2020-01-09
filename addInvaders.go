@@ -109,7 +109,7 @@ func addInvaders(t *testing.T) {
 	// waiting for node becomes online
 	start := time.Now()
 	done := false
-	timeout := 90 * time.Second
+	timeout := 180 * time.Second
 	for !done {
 		done = true
 		for id, node := range Nodes {
