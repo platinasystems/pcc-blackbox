@@ -38,7 +38,7 @@ func delAllNodes(t *testing.T) {
 	time.Sleep(5 * time.Second)
 	start := time.Now()
 	done := false
-	timeout := 180 * time.Second
+	timeout := 300 * time.Second
 	for !done {
 		done = true
 		for id, node := range Nodes {

@@ -143,6 +143,7 @@ func addInvaders(t *testing.T) {
 			time.Sleep(10 * time.Second)
 		}
 		if time.Since(start) > timeout {
+			assert.Fatalf("timeout")
 			break
 		}
 	}
