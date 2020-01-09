@@ -141,6 +141,7 @@
           "anonymousBind": true,
           "bindDN": "cn=admin,dc=platinasystems,dc=com",
           "bindPassword": "plat1na"
+          "encryptionPolicy": "simple_tls"
         }
       },
       "PortusConfiguration": {
