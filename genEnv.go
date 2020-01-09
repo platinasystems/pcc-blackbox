@@ -16,7 +16,9 @@ func addTestTestNode(testNode *models.NodeWithKubernetes) {
 	n.HostIp = testNode.Host
 	n.BMCIp = testNode.Bmc
 	n.BMCUser = testNode.BmcUser
+	n.BMCUsers = []string{testNode.BmcUser}
 	n.BMCPass = testNode.BmcPassword
+	n.KeyAlias = []string{"test_0"}
 
 	ifaces, err := getIfacesByNodeId(testNode.Id)
 	if err != nil {
