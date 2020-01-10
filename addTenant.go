@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"testing"
-
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/tiles/pccserver/security/model"
+	"testing"
 	"github.com/platinasystems/test"
 )
 
@@ -16,9 +16,9 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		tenants []pcc.Tenant
-		tenant  pcc.Tenant
-		tenant2 pcc.Tenant
+		tenants []model.Tenant
+		tenant  model.Tenant
+		tenant2 model.Tenant
 		err     error
 	)
 
@@ -29,10 +29,10 @@ func addTenantA(t *testing.T) {
 	}
 	for _, t := range tenants {
 		fmt.Printf("delete tenant %v\n", t.Name)
-		Pcc.DelTenant(t.Id)
+		Pcc.DelTenant(t.ID)
 	}
 
-	addReq := pcc.Tenant{
+	addReq := model.Tenant{
 		Name:        "cust-a",
 		Description: "a tenant of ROOT",
 		Parent:      1,
@@ -49,12 +49,12 @@ func addTenantA(t *testing.T) {
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.Id)
+	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.ID)
 
-	addReq2 := pcc.Tenant{
+	addReq2 := model.Tenant{
 		Name:        "cust-b",
 		Description: "a tenant of cust-b",
-		Parent:      tenant.Id,
+		Parent:      tenant.ID,
 	}
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	err = Pcc.AddTenant(addReq2)
@@ -67,10 +67,10 @@ func addTenantA(t *testing.T) {
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant2.Name, tenant2.Id)
+	fmt.Printf("tenant %v, id %v\n", tenant2.Name, tenant2.ID)
 
 	fmt.Printf("deleting tenant %v\n", tenant2.Name)
-	err = Pcc.DelTenant(tenant2.Id)
+	err = Pcc.DelTenant(tenant2.ID)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	} else {
@@ -87,7 +87,7 @@ func addTenantA(t *testing.T) {
 	for _, i := range Env.Servers {
 		nodes = append(nodes, NodebyHostIP[i.HostIp])
 	}
-	err = Pcc.AssignTenantNodes(tenant.Id, nodes)
+	err = Pcc.AssignTenantNodes(tenant.ID, nodes)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
@@ -126,9 +126,9 @@ func addTenantA(t *testing.T) {
 		assert.Fatalf("%v\n", err)
 	}
 	for _, u := range users {
-		if u.UserName == "BadBart" {
+		if u.Username == "BadBart" {
 			fmt.Printf("Found added user %v\n", u)
-			if u.Active == false {
+			if u.Enabled == false {
 				fmt.Printf("user update worked\n")
 			} else {
 				assert.Fatalf("user update failed\n")

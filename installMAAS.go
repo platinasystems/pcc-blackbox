@@ -67,7 +67,7 @@ func installMAAS(t *testing.T) {
 	//Check MAAS installation
 	for i := 0; i < len(nodesToCheck); i++ {
 		fmt.Printf("Checking MAAS installation for nodeId:%v\n", nodesToCheck[i])
-		check, err = checkMAASInstallation(nodesToCheck[i], from)
+		check, err = lightCheckMAASInstallation(nodesToCheck[i], from)
 		if err != nil {
 			fmt.Printf("%v", err)
 		}

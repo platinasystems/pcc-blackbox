@@ -156,6 +156,24 @@ func checkMAASInstallation(id uint64, from time.Time) (found bool, err error) {
 	return found, nil
 }
 
+func lightCheckMAASInstallation(id uint64, from time.Time) (found bool, err error) {
+	var (
+		start   = time.Now()
+		timeout = MAAS_INSTALL_TIMEOUT * time.Second
+		events  []models.Notification
+	)
+	found, err = checkingLoop(start, timeout, id, "[MAAS] Starting Bare-metal Role ", events, from)
+	if err != nil {
+		return false, fmt.Errorf("MAAS Step#1 - Timeout error [%d]", timeout)
+	}
+	found, err = checkingLoop(start, timeout, id, "[MAAS] Bare-metal deployment Role has been installed", events, from)
+	if err != nil {
+		return false, fmt.Errorf("MAAS Step#2 - Timeout error [%d]", timeout)
+	}
+
+	return found, nil
+}
+
 func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []models.Notification, checkFrom bool) (found bool) {
 	for i := 0; i < len(events); i++ {
 		if checkFrom {
