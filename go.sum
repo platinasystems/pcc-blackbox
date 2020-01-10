@@ -214,6 +214,8 @@ github.com/platinasystems/tiles v0.0.0-20191204045221-134f6cb61663 h1:+oDNvDGq9+
 github.com/platinasystems/tiles v0.0.0-20191204045221-134f6cb61663/go.mod h1:tNT0SsnJiPpY12PjAMS0JSED7U1PKoLTFNVTsQLIO0k=
 github.com/platinasystems/tiles v0.0.0-20191230012354-7c38c0d7d510 h1:pqtqE63lhHTXDEXT9BHsrdk313YPiCaR93ngcP4xCRU=
 github.com/platinasystems/tiles v0.0.0-20191230012354-7c38c0d7d510/go.mod h1:lhVVyU4KUIfLUtGTaFXoVJWsl31JJoMw6O+vEY/ooSc=
+github.com/platinasystems/tiles v0.0.0-20200108084614-95405b9ff238 h1:5Jr0Kv+4q9/y93ohNCOUkPF4yw1tI/VvIzp1TmDMYJU=
+github.com/platinasystems/tiles v0.0.0-20200108084614-95405b9ff238/go.mod h1:H6oddxa5cXG0ZQ+8+U6Uaw9QwWh77CszV6IknlYRp+s=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=
