@@ -38,7 +38,7 @@ func installMAAS(t *testing.T) {
 		addReq.Id = NodebyHostIP[i.HostIp]
 		addReq.RoleIds = maas
 
-		isMAASInNodes[addReq.Id] = IsAppInstalled(addReq.Id, "lldpd")
+		isMAASInNodes[addReq.Id] = IsAppInstalled(addReq.Id, "maas")
 		if !isMAASInNodes[addReq.Id] {
 			endpoint := fmt.Sprintf("pccserver/node/update")
 			if data, err = json.Marshal(addReq); err != nil {
