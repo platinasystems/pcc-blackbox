@@ -134,7 +134,7 @@ func TestMaaS(t *testing.T) {
 	})
 }
 
-func TestMaaSTenant(t *testing.T) {
+func TestTenantMaaS(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
