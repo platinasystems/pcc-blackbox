@@ -9,12 +9,12 @@ import (
 	"time"
 )
 
-func configServerIntefaces(t *testing.T) {
-	t.Run("configNetworkIntefaces", configNetworkIntefaces)
+func configServerInterfaces(t *testing.T) {
+	t.Run("configNetworkInterfaces", configNetworkInterfaces)
 
 }
 
-func configNetworkIntefaces(t *testing.T) {
+func configNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
