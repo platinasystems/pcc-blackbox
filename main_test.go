@@ -98,6 +98,8 @@ func TestMain(m *testing.M) {
 
 var count uint
 
+// TestNodes can be used to
+// automatically config a cluser
 func TestNodes(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
@@ -111,6 +113,7 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configNetworkIntefaces", configNetworkIntefaces)
+		mayRun(t, "updateMAASInfo", updateMAASInfo)
 	})
 }
 
