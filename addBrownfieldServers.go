@@ -57,7 +57,6 @@ func addServer(t *testing.T) {
 			return
 		}
 		if node.Id != 0 {
-			node.Invader = false
 			nodesToCheck = append(nodesToCheck, node.Id)
 			Nodes[node.Id] = &node
 			fmt.Printf("Add id %v to Nodes\n", node.Id)

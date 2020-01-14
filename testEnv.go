@@ -1,14 +1,10 @@
 package main
 
-import "github.com/platinasystems/tiles/pccserver/models"
-
 type testEnv struct {
-	Env                   string
-	PccIp                 string
-	Invaders              []invader
-	Servers               []server
-	AuthenticationProfile models.AuthenticationProfile
-	PortusConfiguration   models.PortusConfiguration
+	Env      string
+	PccIp    string
+	Invaders []invader
+	Servers  []server
 }
 
 type node struct {
