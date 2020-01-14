@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"github.com/lib/pq"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
-	maas "github.com/platinasystems/tiles/pccserver/maas/models"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -52,13 +52,15 @@ func updateMAASInfo(t *testing.T) {
 		if data, err = json.Marshal(addReq); err != nil {
 			assert.Fatalf("invalid struct for node update request")
 		}
-		if resp, body, err = pccGateway("PUT", endpoint, data); err != nil {
+		resp, body, err = pccGateway("PUT", endpoint, data)
+		if err != nil {
 			assert.Fatalf("%v\n%v\n", string(body), err)
 			return
 		}
 		if resp.Status != 200 {
 			assert.Fatalf("%v\n", string(body))
-			fmt.Printf("Update node %v failed\n%v\n", i.HostIp, string(body))
+			fmt.Printf("Update node %v failed\n%v\n",
+				i.HostIp, string(body))
 			return
 		}
 		if err := json.Unmarshal(resp.Data, &node); err != nil {
@@ -66,60 +68,38 @@ func updateMAASInfo(t *testing.T) {
 			return
 		}
 	}
-
 }
 
 func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	var (
-		body []byte
-		resp HttpResp
-		err  error
-		//check      bool
-		numServers uint64 = 0
-	)
+
 	key, err := getFirstKey()
-	nodesToCheck := make([]uint64, len(Env.Servers))
+	keys := []string{key.Alias}
 
-	for _, i := range Env.Servers {
-		var (
-			data      []byte
-			nodesList []uint64 = []uint64{NodebyHostIP[i.HostIp]}
-			keys      []string = []string{key.Alias}
-		)
-		request := maas.MaasRequest{
-			Nodes:     nodesList,
-			Image:     "centos76",
-			Locale:    "en-US",
-			Timezone:  "PDT",
-			AdminUser: "admin",
-			SSHKeys:   keys,
-		}
-		fmt.Println(request)
-		endpoint := fmt.Sprintf("maas/deployments")
-		if data, err = json.Marshal(request); err != nil {
-			assert.Fatalf("invalid struct for maas deployments request")
-		}
-		if resp, body, err = pccGateway("POST", endpoint, data); err != nil {
-			assert.Fatalf("%v\n%v\n", string(body), err)
-			return
-		}
-		if resp.Status != 200 {
-			assert.Fatalf("%v\n", string(body))
-			fmt.Printf("Deployment node %v failed\n%v\n", i.HostIp, string(body))
-			return
-		}
+	nodesList := make([]uint64, len(Env.Servers))
+	for i, s := range Env.Servers {
+		nodesList[i] = NodebyHostIP[s.HostIp]
+	}
 
-		nodesToCheck[numServers] = NodebyHostIP[i.HostIp]
-		numServers++
+	var request pcc.MaasRequest
+	request.Nodes = nodesList
+	request.Image = "centos76"
+	request.Locale = "en-US"
+	request.Timezone = "PDT"
+	request.AdminUser = "admin"
+	request.SSHKeys = keys
+
+	fmt.Println(request)
+	if err = Pcc.MaasDeploy(request); err != nil {
+		assert.Fatalf("MaasDeploy failed: %v\n", err)
 	}
 
 	fmt.Println("Sleep for 8 minutes")
 	time.Sleep(8 * time.Minute)
 
 	for {
-		for i, id := range nodesToCheck {
+		for i, id := range nodesList {
 			status, err := getProvisionStatus(id)
 			if err != nil {
 				fmt.Printf("Node %v error: %v\n", id, err)
@@ -127,16 +107,16 @@ func reimageAllBrown(t *testing.T) {
 			}
 			if strings.Contains(status, "Ready") {
 				fmt.Printf("Node %v has gone Ready\n", id)
-				nodesToCheck = removeIndex(i, nodesToCheck)
+				nodesList = removeIndex(i, nodesList)
 				continue
 			} else if strings.Contains(status, "reimage failed") {
 				fmt.Printf("Node %v has failed reimage\n", id)
-				nodesToCheck = removeIndex(i, nodesToCheck)
+				nodesList = removeIndex(i, nodesList)
 				continue
 			}
 			fmt.Printf("Node %v: %v\n", id, status)
 		}
-		if len(nodesToCheck) == 0 {
+		if len(nodesList) == 0 {
 			fmt.Printf("Brownfield re-image done\n")
 			return
 		}
