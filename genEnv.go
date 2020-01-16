@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/platinasystems/tiles/pccserver/models"
 )
@@ -41,8 +42,16 @@ func addTestTestNode(testNode *models.NodeWithKubernetes) {
 			net.MacAddr = intf.Interface.MacAddress
 			net.IsManagement = intf.Interface.IsManagement
 			net.ManagedByPcc = intf.Interface.ManagedByPcc
-			net.Cidrs = intf.Interface.Ipv4Addresses
+			for _, addr := range intf.Interface.Ipv4Addresses {
+				if strings.Contains(addr, "203.0.113.") {
+					// skip MaaS addresses
+					continue
+				}
+				net.Cidrs = append(net.Cidrs, addr)
+			}
 			net.Mtu = strconv.Itoa(int(intf.Interface.Mtu))
+			net.Fec = intf.Interface.FecType
+			net.Media = intf.Interface.MediaType
 			n.NetInterfaces = append(n.NetInterfaces, net)
 		}
 	}
