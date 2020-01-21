@@ -7,19 +7,12 @@ package pcc
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/platinasystems/tiles/pccserver/security/model"
 )
 
 type Tenant struct {
-	Id          uint64   `json:"id"`
-	Name        string   `json:"name"`
-	Description string   `json:"description"`
-	Parent      uint64   `json:"parent"`
-	EntityIds   []uint64 `json:"entityIDs"`
-	EntityNames []string `json:"entityNames"`
-	Owner       uint64   `json:"owner"`
-	Children    []uint64 `json:"children"`
-	Nodes       []uint64 `json:"nodes"`
-	Uuids       []uint64 `json:"uuids"`
+	model.Tenant
 }
 
 type ChangeTenant struct {
@@ -36,12 +29,11 @@ type Profile struct {
 }
 
 type Role struct {
-	Protect     bool   `json:"protect"`
-	Description string `json:"description"`
-	Name        string `json:"name"`
-	Owner       uint64 `json: owner"`
+	model.Role
 }
 
+// tried re-using model.User, but not sure about
+// unmarshal in to type interface
 type User struct {
 	Id       uint64 `json:"id"`
 	UserName string `json:"username"`
@@ -85,7 +77,8 @@ func (p PccClient) DelTenant(tenantId uint64) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/tenant/delete")
-	delReq := Tenant{Id: tenantId}
+	var delReq Tenant
+	delReq.ID = tenantId
 	if data, err = json.Marshal(delReq); err != nil {
 		return
 	}

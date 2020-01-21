@@ -19,8 +19,20 @@ func addTenantA(t *testing.T) {
 		tenants []pcc.Tenant
 		tenant  pcc.Tenant
 		tenant2 pcc.Tenant
+		addReq  pcc.Tenant
+		addReq2 pcc.Tenant
 		err     error
 	)
+
+	fmt.Println("assign all nodes to ROOT")
+	var nodes []uint64
+	for _, i := range Env.Servers {
+		nodes = append(nodes, NodebyHostIP[i.HostIp])
+	}
+	err = Pcc.AssignTenantNodes(1, nodes)
+	if err != nil {
+		assert.Fatalf("%v\n", err)
+	}
 
 	fmt.Println("Delete existing tenants")
 	tenants, err = Pcc.GetTenants()
@@ -29,14 +41,12 @@ func addTenantA(t *testing.T) {
 	}
 	for _, t := range tenants {
 		fmt.Printf("delete tenant %v\n", t.Name)
-		Pcc.DelTenant(t.Id)
+		Pcc.DelTenant(t.ID)
 	}
 
-	addReq := pcc.Tenant{
-		Name:        "cust-a",
-		Description: "a tenant of ROOT",
-		Parent:      1,
-	}
+	addReq.Name = "cust-a"
+	addReq.Description = "a tenant of ROOT"
+	addReq.Parent = 1
 
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	err = Pcc.AddTenant(addReq)
@@ -49,13 +59,12 @@ func addTenantA(t *testing.T) {
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.Id)
+	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.ID)
 
-	addReq2 := pcc.Tenant{
-		Name:        "cust-b",
-		Description: "a tenant of cust-b",
-		Parent:      tenant.Id,
-	}
+	addReq2.Name = "cust-b"
+	addReq2.Description = "a tenant of cust-b"
+	addReq2.Parent = tenant.ID
+
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	err = Pcc.AddTenant(addReq2)
 	if err != nil {
@@ -67,10 +76,10 @@ func addTenantA(t *testing.T) {
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant2.Name, tenant2.Id)
+	fmt.Printf("tenant %v, id %v\n", tenant2.Name, tenant2.ID)
 
 	fmt.Printf("deleting tenant %v\n", tenant2.Name)
-	err = Pcc.DelTenant(tenant2.Id)
+	err = Pcc.DelTenant(tenant2.ID)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	} else {
@@ -83,11 +92,7 @@ func addTenantA(t *testing.T) {
 	}
 
 	fmt.Printf("assign servers to tenant %v\n", addReq.Name)
-	var nodes []uint64
-	for _, i := range Env.Servers {
-		nodes = append(nodes, NodebyHostIP[i.HostIp])
-	}
-	err = Pcc.AssignTenantNodes(tenant.Id, nodes)
+	err = Pcc.AssignTenantNodes(tenant.ID, nodes)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
@@ -102,7 +107,7 @@ func addTenantA(t *testing.T) {
 		Active:    true,
 		Protect:   false,
 		RoleId:    1,
-		TenantId:  1,
+		TenantId:  tenant.ID,
 		Source:    source,
 	}
 	err = Pcc.AddUser(addUser)
@@ -111,12 +116,10 @@ func addTenantA(t *testing.T) {
 	}
 
 	fmt.Printf("try change password\n")
-	req := pcc.AddUser{
-		UserName: "BadBart",
-		Active:   false,
-	}
+	newEmail := "homer@lovesdonuts.io"
+	addUser.Email = newEmail
 
-	err = Pcc.UpdateUser(req)
+	err = Pcc.UpdateUser(addUser)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
@@ -125,17 +128,21 @@ func addTenantA(t *testing.T) {
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
+
+	found := false
 	for _, u := range users {
 		if u.UserName == "BadBart" {
-			fmt.Printf("Found added user %v\n", u)
-			if u.Active == false {
+			fmt.Printf("Found updated user %v\n", u)
+			if u.Email == newEmail {
 				fmt.Printf("user update worked\n")
+				found = true
 			} else {
 				assert.Fatalf("user update failed\n")
 			}
-		} else {
-			fmt.Printf("user %v\n", u)
 		}
+	}
+	if !found {
+		assert.Fatalf("user update failed and not found\n")
 	}
 
 	err = Pcc.DelUser(addUser.UserName)

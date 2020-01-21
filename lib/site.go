@@ -7,14 +7,12 @@ package pcc
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 type Site struct {
-	Id          int64  `json:"Id"`
-	CreatedAt   uint64 `json:"CreatedAt"`
-	ModifiedAt  uint64 `json:"ModifiedAt"`
-	Name        string `json:"Name"`
-	Description string `json:"Description"`
+	models.Site
 }
 
 func (p PccClient) AddSite(siteReq Site) (err error) {
