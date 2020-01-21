@@ -43,7 +43,7 @@ func addTestTestNode(testNode *models.NodeWithKubernetes) {
 			net.IsManagement = intf.Interface.IsManagement
 			net.ManagedByPcc = intf.Interface.ManagedByPcc
 			for _, addr := range intf.Interface.Ipv4Addresses {
-				if strings.Contains(addr, "203.0.113.") {
+				if strings.HasPrefix(addr, "203.0.113.") {
 					// skip MaaS addresses
 					continue
 				}
@@ -56,7 +56,7 @@ func addTestTestNode(testNode *models.NodeWithKubernetes) {
 		}
 	}
 
-	if testNode.Model == "PS-3001-32C-AFA" {
+	if strings.HasPrefix(testNode.Model, "PS-3001") {
 		inv := invader{node: n}
 		outEnv.Invaders = append(outEnv.Invaders, inv)
 	} else {
