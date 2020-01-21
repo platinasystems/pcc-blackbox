@@ -88,6 +88,49 @@ func getEvents() (events []models.Notification, err error) {
 //	}
 //	return checkingLoop(start, timeout, id, str2Check, events)
 //}
+type status struct {
+	msg string
+	isError bool
+}
+// Synchronize checking for installation
+func syncCheckGenericInstallation(id uint64, appTimeout time.Duration, str2Check string, from time.Time, found chan status, breakLoop chan bool) {
+	s := status{}
+	timeout := appTimeout * time.Second
+	for time.Since(from) < timeout {
+		select {
+		case <- breakLoop:
+			return
+		default:
+			var (
+				events    []models.Notification
+				err       error
+			)
+			events, err = getEvents()
+			if err != nil {
+				s.msg = fmt.Sprintf("failed to getEvents ERROR: %v", err)
+				s.isError = true
+				found <- s
+			}else {
+				for i := 0; i < len(events); i++ {
+					if events[i].CreatedAt < ConvertToMillis(from) {
+						continue
+					}
+					if strings.Contains(events[i].Message, str2Check) {
+						s.msg = fmt.Sprintf("\"%v\" notification found in events", str2Check)
+						s.isError = false
+						found <- s
+						break
+					}
+				}
+			}
+		}
+		time.Sleep(FREQUENCY * time.Second)
+	}
+
+	s.msg = fmt.Sprintf("\"%v\" notification not found in events..timeout exceeded", str2Check)
+	s.isError = true
+	found <- s
+}
 
 func checkGenericInstallation(id uint64, appTimeout time.Duration, str2Check string, from time.Time) (found bool, err error) {
 	var (
