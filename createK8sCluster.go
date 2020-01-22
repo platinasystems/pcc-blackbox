@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -108,4 +109,58 @@ func validateK8sCluster(t *testing.T) {
 		assert.Fatalf("Error geting K8s health\n")
 	}
 	fmt.Printf("Kubernetes health = %v\n", health)
+}
+
+func deleteK8sCluster(t *testing.T) {
+	t.Run("DeleteK8sCluster", deleteAllK8sCluster)
+}
+
+func deleteAllK8sCluster(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	clusters, err := Pcc.GetKubernetes()
+	if err != nil {
+		assert.Fatalf("Failed to get kubernetes clusters: %v\n", err)
+	}
+
+	for _, c := range clusters {
+		err := Pcc.DeleteKubernetes(c.ID, false)
+		if err != nil {
+			fmt.Printf("delete K8s cluster failed, try force: %v",
+				err)
+			err := Pcc.DeleteKubernetes(c.ID, true)
+			if err != nil {
+				assert.Fatalf("force delete failed: %v", err)
+			}
+		}
+
+		timeout := time.After(10 * time.Minute)
+		tick := time.Tick(1 * time.Minute)
+		loops := 0
+		for {
+			loops++
+			select {
+			case <-timeout:
+				assert.Fatalf("Time out deleting Kubernetes")
+			case <-tick:
+				cluster, err := Pcc.GetKubernetesId(c.ID)
+				if err != nil && strings.Contains(err.Error(),
+					"doesn't exist") {
+					fmt.Printf("K8s delete OK\n")
+					return
+				}
+				if err != nil {
+					assert.Fatalf("get cluster failed: %v",
+						err)
+				}
+				if loops%2 == 0 {
+					fmt.Printf("delete status: %v\n",
+						cluster.DeployStatus)
+				}
+			}
+		}
+
+	}
+
 }
