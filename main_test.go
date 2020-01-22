@@ -163,7 +163,7 @@ func TestK8s(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
-		mayRun(t, "CreateK8sCluster", createK8s_3nodes)
+		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
 }
 
