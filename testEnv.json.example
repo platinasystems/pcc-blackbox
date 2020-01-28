@@ -131,16 +131,15 @@
 		}
 	],
 	"AuthenticationProfile": {
-        "type": "ldap",
-        "name": "portus_ldap",
+        "type": "LDAP",
+        "name": "portus ldap",
         "profile": {
           "domain": "ldap1.lab.platinasystems.com",
           "userIDAttribute": "cn",
-          "port": 636,
-          "userBaseDN": "ou=Internal Customers,ou=people,dc=platinasystems,dc=com",
-          "anonymousBind": true,
-          "bindDN": "cn=admin,dc=platinasystems,dc=com",
-          "bindPassword": "plat1na"
+          "userBaseDN": "ou=QA,dc=platinasystems,dc=com",
+          "anonymousBind": false,
+          "bindDN": "cn=qa-ldap,ou=Service Accounts,ou=People,dc=platinasystems,dc=com",
+          "bindPassword": "49d46fbb55fe",
           "encryptionPolicy": "simple_tls"
         }
       },
