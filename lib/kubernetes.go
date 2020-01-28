@@ -110,7 +110,7 @@ func (p PccClient) FindKubernetesId(name string) (id uint64, err error) {
 }
 
 func (p PccClient) GetKubernetesDeployStatus(id uint64) (status string,
-	err error) {
+	percent int8, err error) {
 
 	var cluster K8sCluster
 
@@ -118,6 +118,7 @@ func (p PccClient) GetKubernetesDeployStatus(id uint64) (status string,
 		return
 	}
 	status = cluster.DeployStatus
+	percent = cluster.AnsibleJob.ProgressPercentage
 	return
 }
 
