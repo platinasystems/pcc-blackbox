@@ -14,11 +14,11 @@ import (
 )
 
 func reimageAllBrownNodes(t *testing.T) {
-	t.Run("updateMAASInfo", updateMAASInfo)
+	t.Run("updateBmcInfo", updateBmcInfo)
 	t.Run("reimageAllBrown", reimageAllBrown)
 }
 
-func updateMAASInfo(t *testing.T) {
+func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
