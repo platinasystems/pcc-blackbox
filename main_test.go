@@ -167,6 +167,16 @@ func TestK8s(t *testing.T) {
 	})
 }
 
+func TestDeleteK8s(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count,
+		time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "nodes", func(t *testing.T) {
+		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
+	})
+}
+
 func TestPortus(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
