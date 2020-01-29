@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/security/model"
 	"testing"
-	"github.com/platinasystems/test"
 )
 
 func addTenant(t *testing.T) {
