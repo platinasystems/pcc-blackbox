@@ -182,7 +182,18 @@ func TestPortus(t *testing.T) {
 		mayRun(t, "checkPortusInstallation", CheckPortusInstallation)
 	})
 }
-
+func TestHardwareInventory(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "hardwareinventory", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		mayRun(t, "testHardwareInventory", testHardwareInventory)
+	})
+}
 func TestClean(t *testing.T) {
 	getAvailableNodes(t)
 	delAllNodes(t)
@@ -211,3 +222,4 @@ func uutInfo() {
 	defer fmt.Println("...")
 	fmt.Println("pcc instance unknown")
 }
+
