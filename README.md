@@ -24,7 +24,6 @@ Available Test Suites:
 ```
 -test.run TestNodes
 -test.run TestMaaS
--test.run TestTenantMaaS
 -test.run TestK8s
 -test.run TestPortus
 ```
