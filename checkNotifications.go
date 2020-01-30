@@ -1,107 +1,40 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"strings"
 	"time"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 const (
-	FREQUENCY            = 10
-	AGENT_TIMEOUT        = 150
-	COLLECTOR_TIMEOUT    = 150
-	LLDP_TIMEOUT         = 300
-	MAAS_INSTALL_TIMEOUT = 300
-	K8S_INSTALL_TIMEOUT  = 1800
-	PORTUS_TIMEOUT      = 400
-	PORTUS_NOTIFICATION = "[Portus] has been installed correctly"
+	FREQUENCY              = 10
+	AGENT_TIMEOUT          = 150
+	COLLECTOR_TIMEOUT      = 150
+	LLDP_TIMEOUT           = 300
+	MAAS_INSTALL_TIMEOUT   = 300
+	K8S_INSTALL_TIMEOUT    = 1800
+	PORTUS_TIMEOUT         = 400
+	PORTUS_NOTIFICATION    = "[Portus] has been installed correctly"
 	COLLECTOR_NOTIFICATION = "The collector has been installed"
-	AGENT_NOTIFICATION = "The agent has been installed"
-	LLDP_NOTIFICATION = "[LLDPD] Installed version"
+	AGENT_NOTIFICATION     = "The agent has been installed"
+	LLDP_NOTIFICATION      = "[LLDPD] Installed version"
 )
-
-func getEvents() (events []models.Notification, err error) {
-	var (
-		resp HttpResp
-	)
-	resp, _, err = pccGateway("GET", "pccserver/notifications/history?page=0&limit=50", nil)
-	if err != nil {
-		return nil, err
-	}
-	err = json.Unmarshal(resp.Data, &events)
-	if err != nil {
-		return nil, err
-	}
-	return events, nil
-}
-
-//func checkAgentInstallation(id uint64) (found bool, err error) {
-//	var (
-//		start     = time.Now()
-//		timeout   = AGENT_TIMEOUT * time.Second
-//		events    []models.Notification
-//		str2Check = "The agent has been installed"
-//	)
-//	events, err = getEvents()
-//	if err != nil {
-//		return false, err
-//	}
-//	if checkGenericEvent(id, start, str2Check, events, false) {
-//		return true, nil
-//	}
-//	return checkingLoop(start, timeout, id, str2Check, events)
-//}
-
-//func checkCollectorInstallation(id uint64) (found bool, err error) {
-//	var (
-//		start     = time.Now()
-//		timeout   = COLLECTOR_TIMEOUT * time.Second
-//		events    []models.Notification
-//		str2Check = "The collector has been installed"
-//	)
-//
-//	events, err = getEvents()
-//	if err != nil {
-//		return false, err
-//	}
-//	if checkGenericEvent(id, start, str2Check, events, false) {
-//		return true, nil
-//	}
-//	return checkingLoop(start, timeout, id, str2Check, events)
-//}
-
-//func checkLLDPInstallation(id uint64) (found bool, err error) {
-//	var (
-//		start     = time.Now()
-//		timeout   = LLDP_TIMEOUT * time.Second
-//		events    []models.Notification
-//		str2Check = "[LLDPD] Installed version"
-//	)
-//	events, err = getEvents()
-//	if err != nil {
-//		return false, err
-//	}
-//	if checkGenericEvent(id, start, str2Check, events, false) {
-//		return true, nil
-//	}
-//	return checkingLoop(start, timeout, id, str2Check, events)
-//}
 
 func checkGenericInstallation(id uint64, appTimeout time.Duration, str2Check string, from time.Time) (found bool, err error) {
 	var (
-		start     = time.Now()
-		timeout   = appTimeout * time.Second
-		events    []models.Notification
+		start   = time.Now()
+		timeout = appTimeout * time.Second
+		events  []pcc.Notification
 	)
-	events, err = getEvents()
+	events, err = Pcc.GetNotifications()
 	if err != nil {
 		return false, err
 	}
 
 	if checkGenericEvent(id, from, str2Check, events, true) {
-				return true, nil
+		return true, nil
 	}
 
 	return checkingLoop(start, timeout, id, str2Check, events, from)
@@ -111,7 +44,7 @@ func checkMAASInstallation(id uint64, from time.Time) (found bool, err error) {
 	var (
 		start   = time.Now()
 		timeout = MAAS_INSTALL_TIMEOUT * time.Second
-		events  []models.Notification
+		events  []pcc.Notification
 	)
 	found, err = checkingLoop(start, timeout, id, "[MAAS] Starting Bare-metal Role ", events, from)
 	if err != nil {
@@ -156,7 +89,7 @@ func checkMAASInstallation(id uint64, from time.Time) (found bool, err error) {
 	return found, nil
 }
 
-func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []models.Notification, checkFrom bool) (found bool) {
+func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []pcc.Notification, checkFrom bool) (found bool) {
 	for i := 0; i < len(events); i++ {
 		if checkFrom {
 			if events[i].CreatedAt < ConvertToMillis(from) {
@@ -172,10 +105,10 @@ func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events [
 	return false
 }
 
-func checkingLoop(start time.Time, timeout time.Duration, id uint64, str2check string, events []models.Notification, from time.Time) (found bool, err error) {
+func checkingLoop(start time.Time, timeout time.Duration, id uint64, str2check string, events []pcc.Notification, from time.Time) (found bool, err error) {
 	for time.Since(start) < timeout {
 		time.Sleep(FREQUENCY * time.Second)
-		events, err = getEvents()
+		events, err = Pcc.GetNotifications()
 		if err != nil {
 			return false, err
 		}
