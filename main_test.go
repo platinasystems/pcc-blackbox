@@ -10,7 +10,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -20,6 +19,7 @@ import (
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 var Token string
@@ -30,7 +30,7 @@ var Env testEnv
 var Pcc pcc.PccClient
 
 var Nodes = make(map[uint64]*models.NodeWithKubernetes)
-var SecurityKeys = make(map[string]*securityKey)
+var SecurityKeys = make(map[string]*pcc.SecurityKey)
 var NodebyHostIP = make(map[string]uint64)
 
 func TestMain(m *testing.M) {

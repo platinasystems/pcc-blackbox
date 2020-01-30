@@ -1,11 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/test"
 	"os"
 	"testing"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 func updateSecurityKey(t *testing.T) {
@@ -35,12 +36,13 @@ func updateSecurityKey_MaaS(t *testing.T) {
 
 	for i := 0; ; i++ {
 		label := fmt.Sprintf("test_%d", i)
+		description := "Don't be evil"
 		exist, err := checkIfLabelExist(label)
 		if err != nil {
 			assert.Fatalf("%v\n", err)
 		}
 		if !exist {
-			err = updateMaasFile("./maas_pubkey", label)
+			err = Pcc.UploadKey("./maas_pubkey", label, description)
 			if err != nil {
 				assert.Fatalf("%v\n", err)
 				return
@@ -51,15 +53,13 @@ func updateSecurityKey_MaaS(t *testing.T) {
 }
 
 func checkIfLabelExist(label string) (exist bool, err error) {
-	var secKeys []securityKey
-	resp, err := getSecurityKeyLists()
+	var secKeys []pcc.SecurityKey
+
+	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
 		return false, err
 	}
-	if err := json.Unmarshal(resp.Data, &secKeys); err != nil {
-		fmt.Printf("%v\n%v\n", string(resp.Data), err)
-		return false, err
-	}
+
 	for i := 0; i < len(secKeys); i++ {
 		//update
 		SecurityKeys[secKeys[i].Alias] = &secKeys[i]
@@ -68,9 +68,4 @@ func checkIfLabelExist(label string) (exist bool, err error) {
 		}
 	}
 	return exist, err
-}
-
-func updateMaasFile(filePath string, label string) (err error) {
-	url := fmt.Sprintf("https://%s:9999/key-manager/keys/upload/public/%v", Env.PccIp, label)
-	return UpdateFile(filePath, url)
 }
