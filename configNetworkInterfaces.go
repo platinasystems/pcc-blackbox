@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 var nodeIntfMap = make(map[uint64][]int64)
@@ -23,14 +23,15 @@ func configNetworkInterfaces(t *testing.T) {
 	assert := test.Assert{t}
 	var (
 		err    error
-		ifaces []*models.InterfaceDetail
+		ifaces []*pcc.InterfaceDetail
 	)
 	for _, i := range Env.Invaders {
 		id := NodebyHostIP[i.HostIp]
-		ifaces, err = getIfacesByNodeId(id)
+		ifaces, err = Pcc.GetIfacesByNodeId(id)
 		if err != nil {
 			assert.Fatalf("Error retrieving node %v id[%v] "+
 				"interfaces", i.HostIp, NodebyHostIP[i.HostIp])
+			return
 		}
 		var nodeIntfs []int64
 		for _, intf := range ifaces {
@@ -41,10 +42,11 @@ func configNetworkInterfaces(t *testing.T) {
 	}
 	for _, i := range Env.Servers {
 		id := NodebyHostIP[i.HostIp]
-		ifaces, err = getIfacesByNodeId(id)
+		ifaces, err = Pcc.GetIfacesByNodeId(id)
 		if err != nil {
 			assert.Fatalf("Error retrieving node %v id[%v] "+
 				"interfaces", i.HostIp, id)
+			return
 		}
 		var nodeIntfs []int64
 		for _, intf := range ifaces {
@@ -56,52 +58,66 @@ func configNetworkInterfaces(t *testing.T) {
 }
 
 func configNodeInterfaces(t *testing.T, HostIp string,
-	serverInterfaces []netInterface, ifaces []*models.InterfaceDetail) {
+	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
 
 	assert := test.Assert{t}
 	var (
-		iface        *models.InterfaceDetail
-		ifaceRequest models.InterfaceRequest
+		iface        *pcc.InterfaceDetail
+		ifaceRequest pcc.InterfaceRequest
+		nodeId       uint64
 		err          error
+		ok           bool
 	)
 
+	if nodeId, ok = NodebyHostIP[HostIp]; !ok {
+		assert.Fatalf("Failed to get nodeid for %v\n", HostIp)
+		return
+	}
 	for j := 0; j < len(serverInterfaces); j++ {
-		fmt.Printf("Looking for [%v] MacAddress\n",
-			serverInterfaces[j].MacAddr)
-		iface, err = getIfaceByMacAddress(serverInterfaces[j].MacAddr,
-			ifaces)
+		mac := serverInterfaces[j].MacAddr
+		iface, err = Pcc.GetIfaceByMacAddress(mac, ifaces)
 		if err != nil {
 			assert.Fatalf("Error in retrieving interface having "+
 				"MacAddress: %v for node %v id[%v]",
-				serverInterfaces[j].MacAddr, HostIp,
-				NodebyHostIP[HostIp])
+				mac, HostIp, nodeId)
 			return
 		}
-		if iface == nil {
-			assert.Fatalf("Unexpected nil for %v\n",
-				serverInterfaces[j].MacAddr)
+
+		ifaceRequest.InterfaceId = iface.Interface.Id
+		ifaceRequest.NodeId = nodeId
+		ifaceRequest.Name = iface.Interface.Name
+		ifaceRequest.Ipv4Addresses = serverInterfaces[j].Cidrs
+		ifaceRequest.MacAddress = serverInterfaces[j].MacAddr
+		ifaceRequest.ManagedByPcc = serverInterfaces[j].ManagedByPcc
+		ifaceRequest.Gateway = serverInterfaces[j].Gateway
+		ifaceRequest.Autoneg = serverInterfaces[j].Autoneg
+		if ifaceRequest.Autoneg == "off" {
+			ifaceRequest.Speed =
+				json.Number(serverInterfaces[j].Speed)
+		} else {
+			ifaceRequest.Speed = ""
 		}
-		ifaceRequest = models.InterfaceRequest{
-			InterfaceId:   iface.Interface.Id,
-			NodeId:        NodebyHostIP[HostIp],
-			Name:          iface.Interface.Name,
-			Ipv4Addresses: serverInterfaces[j].Cidrs,
-			MacAddress:    serverInterfaces[j].MacAddr,
-			ManagedByPcc:  serverInterfaces[j].ManagedByPcc,
-			Gateway:       serverInterfaces[j].Gateway,
-			Autoneg:       serverInterfaces[j].Autoneg,
-			Speed:         json.Number(serverInterfaces[j].Speed),
-			Mtu:           json.Number(serverInterfaces[j].Mtu),
-			AdminStatus:   "UP",
-		}
-		if iface.Interface.IsManagement {
+		ifaceRequest.Mtu = json.Number(serverInterfaces[j].Mtu)
+		ifaceRequest.AdminStatus = pcc.INTERFACE_STATUS_UP
+		if serverInterfaces[j].IsManagement {
 			ifaceRequest.IsManagement = "true"
+		} else {
+			ifaceRequest.IsManagement = "false"
 		}
-		if setIface(ifaceRequest) == nil {
-			continue
+		fmt.Printf("Configuring node %v interface %v %v\n", nodeId,
+			iface.Interface.Name, ifaceRequest)
+		if err := Pcc.SetIface(ifaceRequest); err != nil {
+			assert.Fatalf("Error setting interface %v for node "+
+				"%v id[%v]: %v\n", ifaceRequest, HostIp,
+				nodeId, err)
+			return
 		}
-		assert.Fatalf("Error setting interface %v for node %v id[%v]",
-			ifaceRequest, HostIp, NodebyHostIP[HostIp])
+	}
+
+	fmt.Printf("Apply interface changes for node %d\n", nodeId)
+	if err = Pcc.ApplyIface(nodeId); err != nil {
+		assert.Fatalf("Interface apply failed: %v\n", err)
+		return
 	}
 }
 
@@ -124,11 +140,12 @@ func verifyNetworkInterfaces(t *testing.T) {
 				if !found {
 					assert.Fatalf("map lookup failed %v\n",
 						id)
+					return
 				}
 				for _, i := range intfs {
-					intf, _ := getIfaceById(id, i)
+					intf, _ := Pcc.GetIfaceById(id, i)
 					state := intf.Interface.IntfState
-					if state != "ready" {
+					if state != pcc.Ready {
 						fmt.Printf("failed to update"+
 							" %v %v %v\n", id,
 							intf.Interface.Name,
@@ -137,6 +154,7 @@ func verifyNetworkInterfaces(t *testing.T) {
 				}
 			}
 			assert.Fatalf("time out updating interfaces\n")
+			return
 		case <-tick:
 			for id, intfs := range nodeIntfMap {
 				if _, found := nodesToCheck[id]; !found {
@@ -145,21 +163,22 @@ func verifyNetworkInterfaces(t *testing.T) {
 				intf_count := len(intfs)
 				intf_up := 0
 				for _, i := range intfs {
-					intf, err := getIfaceById(id, i)
+					intf, err := Pcc.GetIfaceById(id, i)
 					if err != nil {
 						return
 					}
 					state := intf.Interface.IntfState
 					switch state {
-					case "ready":
+					case pcc.Ready:
 						intf_up++
-					case "queued":
-					case "updating":
-					case "offline":
+					case pcc.Queued:
+					case pcc.Updating:
+					case pcc.Unknown:
 					default:
 						assert.Fatalf("unexpected "+
 							"IntfState %v\n",
 							state)
+						return
 					}
 				}
 				if intf_count == intf_up {
@@ -194,9 +213,10 @@ func verifyNetworkUp(t *testing.T) {
 				if !found {
 					assert.Fatalf("map lookup failed %v\n",
 						id)
+					return
 				}
 				for _, i := range intfs {
-					intf, err := getIfaceById(id, i)
+					intf, err := Pcc.GetIfaceById(id, i)
 					if err != nil {
 						assert.Fatalf("getIfaceById: %v",
 							err)
@@ -207,11 +227,13 @@ func verifyNetworkUp(t *testing.T) {
 					ifName := intf.Interface.Name
 					carrier := intf.Interface.CarrierStatus
 					admin := intf.Interface.AdminStatus
-					fmt.Printf("%v %v admin %v carrier %v",
+					fmt.Printf("%v %v admin %v carrier "+
+						"%v\n",
 						id, ifName, admin, carrier)
 				}
 			}
 			assert.Fatalf("time out updating interfaces\n")
+			return
 		case <-tick:
 			for id, intfs := range nodeIntfMap {
 				if _, found := nodesToCheck[id]; !found {
@@ -221,32 +243,32 @@ func verifyNetworkUp(t *testing.T) {
 				intf_up := 0
 				admin_down := 0
 				for _, i := range intfs {
-					intf, _ := getIfaceById(id, i)
+					intf, _ := Pcc.GetIfaceById(id, i)
 					if !intf.Interface.ManagedByPcc {
 						intf_count--
 						continue
 					}
 					status := intf.Interface.AdminStatus
-					if status == "DOWN" {
+					if status == pcc.INTERFACE_STATUS_DOWN {
 						admin_down++
 					}
 				}
 
 				for _, i := range intfs {
-					intf, _ := getIfaceById(id, i)
+					intf, _ := Pcc.GetIfaceById(id, i)
 					if !intf.Interface.ManagedByPcc {
 						continue
 					}
 					ifName := intf.Interface.Name
 					carrier := intf.Interface.CarrierStatus
 					admin := intf.Interface.AdminStatus
-					if admin == "DOWN" {
+					if admin == pcc.INTERFACE_STATUS_DOWN {
 						fmt.Printf("%v %v admin down\n",
 							id, ifName)
 					} else {
 						fmt.Printf("%v %v carrier %v\n",
 							id, ifName, carrier)
-						if carrier == "UP" {
+						if carrier == pcc.INTERFACE_STATUS_UP {
 							intf_up++
 						}
 					}
@@ -254,7 +276,7 @@ func verifyNetworkUp(t *testing.T) {
 				}
 				if intf_up+admin_down == intf_count {
 					fmt.Printf("Node %v interfaces "+
-						"UP\n", id)
+						"all UP\n", id)
 					delete(nodesToCheck, id)
 				}
 			}

@@ -6,12 +6,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/platinasystems/tiles/pccserver/models"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 var outEnv testEnv
 
-func addTestTestNode(testNode *models.NodeWithKubernetes) {
+var nodes = make(map[uint64]*pcc.NodeDetail)
+
+func addTestTestNode(testNode *pcc.NodeDetail) {
 	var n node
 
 	n.HostIp = testNode.Host
@@ -21,7 +23,7 @@ func addTestTestNode(testNode *models.NodeWithKubernetes) {
 	n.BMCPass = testNode.BmcPassword
 	n.KeyAlias = []string{"test_0"}
 
-	ifaces, err := getIfacesByNodeId(testNode.Id)
+	ifaces, err := Pcc.GetIfacesByNodeId(testNode.Id)
 	if err != nil {
 		fmt.Printf("error node %v: %v\n", testNode.Id, err)
 		return
@@ -69,7 +71,12 @@ func genEnv() {
 
 	outEnv.PccIp = Env.PccIp
 
-	for _, testNode := range Nodes {
+	nodes, err := Pcc.GetNodes()
+	if err != nil {
+		fmt.Printf("Failed to GetNodes: %v\n", err)
+		return
+	}
+	for _, testNode := range nodes {
 		addTestTestNode(testNode)
 	}
 
