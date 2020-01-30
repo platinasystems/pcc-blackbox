@@ -10,3 +10,4 @@
 *.zip
 .idea
 testEnv.json
+maas_pubkey
