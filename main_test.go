@@ -213,7 +213,6 @@ func TestClean(t *testing.T) {
 func TestGen(t *testing.T) {
 	// Not a real testcase, but can be used to generate a
 	// testEnv.json file from existing PCC setup.
-	getAvailableNodes(t)
 	genEnv()
 	os.Exit(0)
 }
