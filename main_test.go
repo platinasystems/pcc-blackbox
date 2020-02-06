@@ -113,7 +113,7 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
-		mayRun(t, "updateMAASInfo", updateMAASInfo)
+		mayRun(t, "updateBmcInfo", updateBmcInfo)
 	})
 }
 
