@@ -1,27 +1,19 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/test"
-	//"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
+	"time"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
-type simpleKClusterRequest struct {
-	ID         uint64
-	Name       string         `json:"name" validate:"required"`
-	K8sVersion string         `json:"k8sVersion" validate:"required"`
-	CniPlugin  string         `json:"cniPlugin" validate:"required"`
-	Nodes      []simpleKNodes `json:"nodes"`
-}
-
-type simpleKNodes struct {
-	ID uint64
-}
+var k8sname string = "k8stest"
 
 func createK8sCluster(t *testing.T) {
 	t.Run("CreateK8sCluster", createK8s_3nodes)
+	t.Run("ValidateK8sCluster", validateK8sCluster)
 }
 
 func createK8s_3nodes(t *testing.T) {
@@ -29,17 +21,14 @@ func createK8s_3nodes(t *testing.T) {
 	assert := test.Assert{t}
 	const DIM = 3
 	var (
-		body              []byte
-		data              []byte
-		resp              HttpResp
 		err               error
-		sk8sRequest       simpleKClusterRequest
-		sNodes                 = make([]simpleKNodes, DIM)
+		k8sRequest        pcc.K8sClusterRequest
+		k8sNodes               = make([]pcc.K8sNodes, DIM)
 		nodesSetCompleted bool = false
 	)
 	var j = 0
 	for _, i := range Env.Invaders {
-		sNodes[j] = simpleKNodes{ID: NodebyHostIP[i.HostIp]}
+		k8sNodes[j] = pcc.K8sNodes{ID: NodebyHostIP[i.HostIp]}
 		j++
 		if j == DIM {
 			nodesSetCompleted = true
@@ -50,33 +39,73 @@ func createK8s_3nodes(t *testing.T) {
 		if nodesSetCompleted {
 			continue
 		}
-		sNodes[j] = simpleKNodes{ID: NodebyHostIP[i.HostIp]}
+		k8sNodes[j] = pcc.K8sNodes{ID: NodebyHostIP[i.HostIp]}
 		j++
 		if j == DIM {
 			nodesSetCompleted = true
 			continue
 		}
 	}
-	sk8sRequest = simpleKClusterRequest{
+	k8sRequest = pcc.K8sClusterRequest{
 		ID:         0,         //todo dynamic counter
-		Name:       "k8stest", //todo dynamic
+		Name:       k8sname,   //todo dynamic
 		K8sVersion: "v1.14.3", //todo dynamic
 		CniPlugin:  "kube-router",
-		Nodes:      sNodes,
+		Nodes:      k8sNodes,
 	}
-	endpoint := fmt.Sprintf("pccserver/kubernetes")
-	if data, err = json.Marshal(sk8sRequest); err != nil {
-		assert.Fatalf("invalid struct for K8s creation")
-	}
-	if resp, body, err = pccGateway("POST", endpoint, data); err != nil {
-		assert.Fatalf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		assert.Fatalf("%v\n", string(body))
-		fmt.Printf("K8s cretion failed:\n%v\n", string(body))
-		return
+	err = Pcc.CreateKubernetes(k8sRequest)
+	if err != nil {
+		assert.Fatalf("%v", err)
 	}
 }
 
-//todo check k8s status
+func validateK8sCluster(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	id, err := Pcc.FindKubernetesId(k8sname)
+	if err != nil {
+		assert.Fatalf("%v", err)
+	}
+
+	timeout := time.After(30 * time.Minute)
+	tick := time.Tick(1 * time.Minute)
+	done := false
+	loops := 0
+	for !done {
+		loops++
+		select {
+		case <-timeout:
+			assert.Fatalf("Timed out waiting for Kubernetes")
+		case <-tick:
+			status, err := Pcc.GetKubernetesDeployStatus(id)
+			if err != nil {
+				assert.Fatalf("Failed to get deploy status "+
+					"%v\n", err)
+			}
+			switch status {
+			case pcc.K8S_DEPLOY_STATUS_PROGRESS:
+				if loops%5 == 0 {
+					fmt.Printf("Cluster %v = %v\n",
+						id, status)
+				}
+			case pcc.K8S_DEPLOY_STATUS_COMPLETED:
+				fmt.Println("Kubernetes cluster installed")
+				done = true
+			case pcc.K8S_DEPLOY_STATUS_FAILED:
+				assert.Fatalf("Kubernetes cluster install " +
+					"failed")
+			case pcc.K8S_DEPLOY_APP_STATUS_PROGRESS:
+				fmt.Println("Kubernetes app progress")
+			default:
+				assert.Fatalf("Unexpected status - %v\n",
+					status)
+			}
+		}
+	}
+	health, err := Pcc.GetKubernetesHealth(id)
+	if err != nil {
+		assert.Fatalf("Error geting K8s health\n")
+	}
+	fmt.Printf("Kubernetes health = %v\n", health)
+}
