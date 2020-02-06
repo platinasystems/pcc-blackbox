@@ -54,7 +54,7 @@ func addAuthProfile(t *testing.T) {
 	if err != nil {
 		fmt.Printf("Get certificate %s failed\n%v\n", LDAP_CERT_FILENAME, err)
 	} else {
-		if authProfile.Type == "ldap" {
+		if authProfile.Type == "LDAP" {
 			var ldapConfiguration models.LDAPConfiguration
 			decodeError := mapstructure.Decode(authProfile.Profile, &ldapConfiguration)
 			if decodeError == nil {
