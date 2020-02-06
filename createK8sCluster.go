@@ -104,11 +104,27 @@ func validateK8sCluster(t *testing.T) {
 			}
 		}
 	}
-	health, err := Pcc.GetKubernetesHealth(id)
-	if err != nil {
-		assert.Fatalf("Error geting K8s health\n")
+
+	timeout = time.After(5 * time.Minute)
+	tick = time.Tick(5 * time.Second)
+	done = false
+	for !done {
+		select {
+		case <-timeout:
+			assert.Fatalf("health check timed out\n")
+		case <-tick:
+			health, err := Pcc.GetKubernetesHealth(id)
+			if err != nil {
+				assert.Fatalf("Error geting K8s health\n")
+			}
+			fmt.Printf("Kubernetes health = %v\n", health)
+			if health == "good" {
+				done = true
+				return
+			}
+
+		}
 	}
-	fmt.Printf("Kubernetes health = %v\n", health)
 }
 
 func deleteK8sCluster(t *testing.T) {
