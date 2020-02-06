@@ -18,6 +18,7 @@ func addSites(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
+	var site pcc.Site
 	fmt.Println("Add sites")
 	for _, x := range []struct {
 		name        string
@@ -29,8 +30,9 @@ func addSites(t *testing.T) {
 		{"OSL", "Oslo"},
 	} {
 		fmt.Printf("add site %v\n", x.name)
-		err := Pcc.AddSite(pcc.Site{Name: x.name,
-			Description: x.description})
+		site.Name = x.name
+		site.Description = x.description
+		err := Pcc.AddSite(site)
 		if err != nil {
 			assert.Fatalf("%v\n", err)
 		}
@@ -69,10 +71,9 @@ func addAssignSite(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
-	addReq := pcc.Site{
-		Name:        "SJC",
-		Description: "San Jose",
-	}
+	var addReq pcc.Site
+	addReq.Name = "SJC"
+	addReq.Description = "San Jose"
 	fmt.Printf("add site %v\n", addReq.Name)
 	err := Pcc.AddSite(addReq)
 	if err != nil {
