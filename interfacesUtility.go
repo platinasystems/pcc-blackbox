@@ -48,12 +48,18 @@ func getIfaceById(nodeId uint64, ifaceId int64) (iface *models.InterfaceDetail, 
 }
 
 func getIfaceByMacAddress(mAddr string, ifaces []*models.InterfaceDetail) (iface *models.InterfaceDetail, err error) {
+	if mAddr == "" {
+		err = fmt.Errorf("Invalid mac [%v]\n", mAddr)
+		return
+	}
 	for i := 0; i < len(ifaces); i++ {
 		if ifaces[i].Interface.MacAddress == mAddr {
-			return ifaces[i], nil
+			iface = ifaces[i]
+			return
 		}
 	}
-	return nil, err
+	err = fmt.Errorf("Error: couldn't find mac [%v]\n", mAddr)
+	return
 }
 
 func setIface(iface models.InterfaceRequest) (err error) {
