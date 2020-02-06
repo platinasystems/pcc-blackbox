@@ -31,6 +31,22 @@ func getIfacesByNodeId(nodeId uint64) (ifaces []*models.InterfaceDetail, err err
 	return nil, err
 }
 
+func getIfaceById(nodeId uint64, ifaceId int64) (iface *models.InterfaceDetail, err error) {
+	ifaces, err := getIfacesByNodeId(nodeId)
+	if err != nil {
+		return
+	}
+	for _, i := range ifaces {
+		if i.Interface.Id == ifaceId {
+			iface = i
+			return
+		}
+	}
+	err = fmt.Errorf("error getting interface %v on node %v",
+		ifaceId, nodeId)
+	return
+}
+
 func getIfaceByMacAddress(mAddr string, ifaces []*models.InterfaceDetail) (iface *models.InterfaceDetail, err error) {
 	for i := 0; i < len(ifaces); i++ {
 		if ifaces[i].Interface.MacAddress == mAddr {
