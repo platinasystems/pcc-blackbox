@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"os"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 const (
@@ -59,8 +61,8 @@ func BuildKeyManagerEndpoint(fileType string, label string, method string, id ui
 
 }
 
-func GetSecurityKey(alias string, keyType string) (securityKey, error) {
-	var securityKey securityKey
+func GetSecurityKey(alias string, keyType string) (pcc.SecurityKey, error) {
+	var securityKey pcc.SecurityKey
 	endpoint := BuildKeyManagerEndpoint(keyType, alias, DESCRIBE, 0)
 	resp, body, err := pccSecurity("GET", endpoint, nil)
 	if err != nil {
@@ -74,8 +76,8 @@ func GetSecurityKey(alias string, keyType string) (securityKey, error) {
 	return securityKey, err
 }
 
-func GetCertificate(alias string) (certificate Certificate, err error) {
-	var certificates [] Certificate
+func GetCertificate(alias string) (certificate pcc.Certificate, err error) {
+	var certificates []pcc.Certificate
 	endpoint := BuildKeyManagerEndpoint(CERT, alias, DESCRIBE, 0)
 	resp, body, err := pccSecurity("GET", endpoint, nil)
 	if err != nil {
@@ -145,14 +147,14 @@ func checkAliasExist(alias string, fileType string) (exist bool, id uint64, err 
 		return false, 0, err
 	} else {
 		if fileType != CERT {
-			var secKey securityKey
+			var secKey pcc.SecurityKey
 			err = json.Unmarshal(resp.Data, &secKey)
 			if err == nil {
 				exist = true
 				id = secKey.Id
 			}
 		} else {
-			var certificates [] Certificate
+			var certificates []pcc.Certificate
 			err = json.Unmarshal(resp.Data, &certificates)
 			if err == nil {
 				for i := 0; i < len(certificates); i++ {

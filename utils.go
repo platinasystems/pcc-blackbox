@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"io"
 	"mime/multipart"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 func UpdateFile(filePath string, url string) (err error) {
@@ -47,7 +48,6 @@ func IsInvader(node *models.NodeWithKubernetes) bool {
 	return false
 }
 
-
 func IsOnline(node *models.NodeWithKubernetes) bool {
 	if node.NodeAvailabilityStatus.ConnectionStatus == "online" {
 		return true
@@ -59,15 +59,14 @@ func ConvertToMillis(startTime time.Time) uint64 {
 	return uint64(startTime.UnixNano()) / uint64(time.Millisecond)
 }
 
-
-func IsAppInstalled(nodeId uint64, appId string) (isInstalled bool){
+func IsAppInstalled(nodeId uint64, appId string) (isInstalled bool) {
 
 	endpoint := fmt.Sprintf("pccserver/node/%v/apps", nodeId)
 	var (
-		body  []byte
-		resp  HttpResp
-		err   error
-		apps [] models.ProvisionedApp
+		body []byte
+		resp HttpResp
+		err  error
+		apps []models.ProvisionedApp
 	)
 
 	if resp, body, err = pccGateway("GET", endpoint, nil); err != nil {
@@ -83,8 +82,8 @@ func IsAppInstalled(nodeId uint64, appId string) (isInstalled bool){
 		return
 	}
 
-	for i := range apps{
-		if apps[i].ID == appId && apps[i].Local.Installed{
+	for i := range apps {
+		if apps[i].ID == appId && apps[i].Local.Installed {
 			isInstalled = true
 			return
 		}
