@@ -57,6 +57,7 @@ func createK8s_3nodes(t *testing.T) {
 	err = Pcc.CreateKubernetes(k8sRequest)
 	if err != nil {
 		assert.Fatalf("%v", err)
+		return
 	}
 }
 
@@ -67,28 +68,32 @@ func validateK8sCluster(t *testing.T) {
 	id, err := Pcc.FindKubernetesId(k8sname)
 	if err != nil {
 		assert.Fatalf("%v", err)
+		return
 	}
 
 	timeout := time.After(30 * time.Minute)
 	tick := time.Tick(1 * time.Minute)
 	done := false
-	loops := 0
+	var last_percent int8 = -1
 	for !done {
-		loops++
 		select {
 		case <-timeout:
 			assert.Fatalf("Timed out waiting for Kubernetes")
+			return
 		case <-tick:
-			status, err := Pcc.GetKubernetesDeployStatus(id)
+			status, percent, err := Pcc.GetKubernetesDeployStatus(id)
 			if err != nil {
 				assert.Fatalf("Failed to get deploy status "+
 					"%v\n", err)
+				return
 			}
+
 			switch status {
 			case pcc.K8S_DEPLOY_STATUS_PROGRESS:
-				if loops%5 == 0 {
-					fmt.Printf("Cluster %v = %v\n",
-						id, status)
+				if percent != last_percent {
+					fmt.Printf("Cluster %v = %v  %v%%\n",
+						id, status, percent)
+					last_percent = percent
 				}
 			case pcc.K8S_DEPLOY_STATUS_COMPLETED:
 				fmt.Println("Kubernetes cluster installed")
@@ -101,6 +106,7 @@ func validateK8sCluster(t *testing.T) {
 			default:
 				assert.Fatalf("Unexpected status - %v\n",
 					status)
+				return
 			}
 		}
 	}
@@ -112,10 +118,12 @@ func validateK8sCluster(t *testing.T) {
 		select {
 		case <-timeout:
 			assert.Fatalf("health check timed out\n")
+			return
 		case <-tick:
 			health, err := Pcc.GetKubernetesHealth(id)
 			if err != nil {
 				assert.Fatalf("Error geting K8s health\n")
+				return
 			}
 			fmt.Printf("Kubernetes health = %v\n", health)
 			if health == "good" {
@@ -138,6 +146,7 @@ func deleteAllK8sCluster(t *testing.T) {
 	clusters, err := Pcc.GetKubernetes()
 	if err != nil {
 		assert.Fatalf("Failed to get kubernetes clusters: %v\n", err)
+		return
 	}
 
 	for _, c := range clusters {
@@ -148,17 +157,18 @@ func deleteAllK8sCluster(t *testing.T) {
 			err := Pcc.DeleteKubernetes(c.ID, true)
 			if err != nil {
 				assert.Fatalf("force delete failed: %v", err)
+				return
 			}
 		}
 
 		timeout := time.After(10 * time.Minute)
-		tick := time.Tick(1 * time.Minute)
-		loops := 0
+		tick := time.Tick(5 * time.Second)
+		var last_percent int8 = -1
 		for {
-			loops++
 			select {
 			case <-timeout:
 				assert.Fatalf("Time out deleting Kubernetes")
+				return
 			case <-tick:
 				cluster, err := Pcc.GetKubernetesId(c.ID)
 				if err != nil && strings.Contains(err.Error(),
@@ -169,10 +179,13 @@ func deleteAllK8sCluster(t *testing.T) {
 				if err != nil {
 					assert.Fatalf("get cluster failed: %v",
 						err)
+					return
 				}
-				if loops%2 == 0 {
-					fmt.Printf("delete status: %v\n",
-						cluster.DeployStatus)
+				percent := cluster.AnsibleJob.ProgressPercentage
+				if percent != last_percent {
+					fmt.Printf("delete status: %v  %v%%\n",
+						cluster.DeployStatus, percent)
+					last_percent = percent
 				}
 			}
 		}
