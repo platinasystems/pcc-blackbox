@@ -87,7 +87,7 @@ func checkHardWareInventory(t *testing.T) {
 		}
 	}
 	if !flag{
-		assert.Fatal("inventory for node with id %v not persisted in db", PxeBootSelectedNodeId)
+		assert.Fatalf("inventory for node with id %v not persisted in db", PxeBootSelectedNodeId)
 		return
 	}
 }
