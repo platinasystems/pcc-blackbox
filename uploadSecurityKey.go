@@ -37,7 +37,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	for i := 0; ; i++ {
 		label := fmt.Sprintf("test_%d", i)
 		description := "Don't be evil"
-		exist, err := checkIfLabelExist(label)
+		exist, err := Pcc.CheckKeyLabelExists(label)
 		if err != nil {
 			assert.Fatalf("%v\n", err)
 		}
@@ -52,20 +52,26 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	}
 }
 
-func checkIfLabelExist(label string) (exist bool, err error) {
-	var secKeys []pcc.SecurityKey
+func delAllKeys(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		secKeys []pcc.SecurityKey
+		err     error
+	)
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		return false, err
+		assert.Fatalf("Failed to GetSecurityKeys: %v\n", err)
+		return
 	}
 
 	for i := 0; i < len(secKeys); i++ {
-		//update
-		SecurityKeys[secKeys[i].Alias] = &secKeys[i]
-		if secKeys[i].Alias == label {
-			exist = true
+		err = Pcc.DeleteKey(secKeys[i].Alias)
+		if err != nil {
+			assert.Fatalf("Failed to delete key %v: %v\n",
+				secKeys[i].Alias, err)
+			return
 		}
 	}
-	return exist, err
 }

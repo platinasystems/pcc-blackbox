@@ -13,7 +13,7 @@ const (
 	AGENT_TIMEOUT          = 150
 	COLLECTOR_TIMEOUT      = 150
 	LLDP_TIMEOUT           = 300
-	MAAS_INSTALL_TIMEOUT   = 300
+	MAAS_INSTALL_TIMEOUT   = 600
 	K8S_INSTALL_TIMEOUT    = 1800
 	PORTUS_TIMEOUT         = 400
 	PORTUS_NOTIFICATION    = "[Portus] has been installed correctly"
@@ -33,8 +33,11 @@ func checkGenericInstallation(id uint64, appTimeout time.Duration, str2Check str
 		return false, err
 	}
 
-	if checkGenericEvent(id, from, str2Check, events, true) {
-		return true, nil
+	found, err = checkGenericEvent(id, from, str2Check, events, true)
+	if err != nil {
+		return
+	} else if found {
+		return
 	}
 
 	return checkingLoop(start, timeout, id, str2Check, events, from)
@@ -89,7 +92,8 @@ func checkMAASInstallation(id uint64, from time.Time) (found bool, err error) {
 	return found, nil
 }
 
-func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []pcc.Notification, checkFrom bool) (found bool) {
+func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []pcc.Notification, checkFrom bool) (found bool, err error) {
+	found = false
 	for i := 0; i < len(events); i++ {
 		if checkFrom {
 			if events[i].CreatedAt < ConvertToMillis(from) {
@@ -97,24 +101,37 @@ func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events [
 			}
 		}
 		if events[i].TargetId == nodeId {
+			if events[i].Level == "error" {
+				err = fmt.Errorf("%v", events[i].Message)
+				fmt.Printf("Error event: [%v]\n", events[i])
+				return
+			}
 			if strings.Contains(events[i].Message, str2Check) {
-				return true
+				found = true
+				return
 			}
 		}
 	}
-	return false
+	return
 }
 
 func checkingLoop(start time.Time, timeout time.Duration, id uint64, str2check string, events []pcc.Notification, from time.Time) (found bool, err error) {
+	found = false
 	for time.Since(start) < timeout {
 		time.Sleep(FREQUENCY * time.Second)
 		events, err = Pcc.GetNotifications()
 		if err != nil {
-			return false, err
+			err = fmt.Errorf("getNofications error: %v", err)
+			return
 		}
-		if checkGenericEvent(id, from, str2check, events, true) {
-			return true, nil
+		found, err = checkGenericEvent(id, from, str2check, events, true)
+		if err != nil {
+			return
+		} else if found {
+			return
 		}
 	}
-	return false, fmt.Errorf("Timeout error [%d]", timeout)
+	fmt.Printf("timeout [%v] [%v]\n", start, timeout)
+	err = fmt.Errorf("Timeout error [%d]", timeout)
+	return
 }

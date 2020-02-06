@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
 	"testing"
@@ -10,7 +9,6 @@ import (
 	"github.com/lib/pq"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 func reimageAllBrownNodes(t *testing.T) {
@@ -21,50 +19,32 @@ func reimageAllBrownNodes(t *testing.T) {
 func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	var (
-		body []byte
-		resp HttpResp
-	)
+
 	for _, i := range Env.Servers {
 		var (
-			node models.NodeWithKubernetes
-			data []byte
-			err  error
+			addReq pcc.NodeWithKubernetes
+			err    error
 		)
 		keyId, err := getFirstKey()
 		keys := pq.Int64Array{int64(keyId.Id)}
 
 		pBool := new(bool)
 		*pBool = true
-		addReq := models.Node{
-			Host:        i.HostIp,
-			Id:          NodebyHostIP[i.HostIp],
-			Bmc:         i.BMCIp,
-			BmcUser:     i.BMCUser,
-			BmcUsers:    i.BMCUsers,
-			BmcPassword: i.BMCPass,
-			AdminUser:   "admin",
-			SSHKeys:     keys,
-			Managed:     pBool,
-			Console:     "ttyS1",
-		}
-		endpoint := fmt.Sprintf("pccserver/node/update")
-		if data, err = json.Marshal(addReq); err != nil {
-			assert.Fatalf("invalid struct for node update request")
-		}
-		resp, body, err = pccGateway("PUT", endpoint, data)
+
+		addReq.Host = i.HostIp
+		addReq.Id = NodebyHostIP[i.HostIp]
+		addReq.Bmc = i.BMCIp
+		addReq.BmcUser = i.BMCUser
+		addReq.BmcUsers = i.BMCUsers
+		addReq.BmcPassword = i.BMCPass
+		addReq.AdminUser = "admin"
+		addReq.SSHKeys = keys
+		addReq.Managed = pBool
+		addReq.Console = "ttyS1"
+
+		_, err = Pcc.UpdateNode(addReq)
 		if err != nil {
-			assert.Fatalf("%v\n%v\n", string(body), err)
-			return
-		}
-		if resp.Status != 200 {
-			assert.Fatalf("%v\n", string(body))
-			fmt.Printf("Update node %v failed\n%v\n",
-				i.HostIp, string(body))
-			return
-		}
-		if err := json.Unmarshal(resp.Data, &node); err != nil {
-			assert.Fatalf("%v\n%v\n", string(resp.Data), err)
+			assert.Fatalf("Failed to update BMC info: %v\n", err)
 			return
 		}
 	}
@@ -100,7 +80,7 @@ func reimageAllBrown(t *testing.T) {
 
 	for {
 		for i, id := range nodesList {
-			status, err := getProvisionStatus(id)
+			status, err := Pcc.GetProvisionStatus(id)
 			if err != nil {
 				fmt.Printf("Node %v error: %v\n", id, err)
 				continue

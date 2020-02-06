@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-
 	"testing"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"

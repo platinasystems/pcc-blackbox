@@ -71,7 +71,7 @@ func genEnv() {
 
 	outEnv.PccIp = Env.PccIp
 
-	nodes, err := Pcc.GetNodes()
+	nodes, err := Pcc.GetNodesDetail()
 	if err != nil {
 		fmt.Printf("Failed to GetNodes: %v\n", err)
 		return

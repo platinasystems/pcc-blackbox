@@ -150,3 +150,55 @@ func addTenantA(t *testing.T) {
 		assert.Fatalf("%v\n", err)
 	}
 }
+
+func delAllTenants(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		tenants []pcc.Tenant
+		err     error
+	)
+
+	tenants, err = Pcc.GetTenants()
+	if err != nil {
+		assert.Fatalf("Failed to GetTenants: %v\n", err)
+		return
+	}
+	for _, t := range tenants {
+		id := t.ID
+		if t.Name == "ROOT" {
+			continue
+		}
+		err = Pcc.DelTenant(id)
+		if err != nil {
+			assert.Fatalf("Failed to DelTenant %v: %v\n", id, err)
+			return
+		}
+	}
+}
+
+func delAllUsers(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		users []pcc.User
+		err   error
+	)
+
+	users, err = Pcc.GetUsers()
+	if err != nil {
+		assert.Fatalf("Failed to GetUsers: %v\n", err)
+		return
+	}
+	for _, u := range users {
+		user := u.UserName
+		if user == "admin" {
+			continue
+		}
+		err = Pcc.DelUser(user)
+		if err != nil {
+			assert.Fatalf("Failed to Deluser %v: %v\n", user, err)
+			return
+		}
+	}
+}
