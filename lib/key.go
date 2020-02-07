@@ -106,3 +106,19 @@ func (p PccClient) GetSecurityKeys() (secKeys []SecurityKey, err error) {
 	err = json.Unmarshal(resp.Data, &secKeys)
 	return
 }
+
+func (p PccClient) CheckKeyLabelExists(label string) (exists bool, err error) {
+	var secKeys []SecurityKey
+
+	secKeys, err = p.GetSecurityKeys()
+	if err != nil {
+		return
+	}
+
+	for i := 0; i < len(secKeys); i++ {
+		if secKeys[i].Alias == label {
+			exists = true
+		}
+	}
+	return
+}

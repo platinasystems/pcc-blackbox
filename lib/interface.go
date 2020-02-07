@@ -32,74 +32,12 @@ const (
 // Fields with "Desired" suffix can be specified by user
 // Otherfields are discovered or managed internally by PCC
 type Interface struct {
-	// The interface id
-	Id        int64            `json:"id" gorm:"primary_key"`
-	IntfState models.IntfState `json:"intfState" gorm:"intf_state"`
-
-	// The node identifier
-	NodeId uint64 `json:"nodeId"`
-
-	// The interface name
-	Name string `json:"name"`
-
-	// The ipv4 addresses related to the interface
-	Ipv4Addresses        pq.StringArray `json:"ipv4Addresses" gorm:"column:ipv4_addresses;type:string[]"`
-	Ipv4AddressesDesired pq.StringArray `json:"ipv4AddressesDesired" gorm:"column:ipv4_addresses_desired;type:string[]"`
-
-	// The ipv6 addresses related to the interface
-	Ipv6Addresses        pq.StringArray `json:"ipv6Addresses" gorm:"column:ipv6_addresses;type:string[]"`
-	Ipv6AddressesDesired pq.StringArray `json:"ipv6AddressesDesired" gorm:"column:ipv6_addresses_desired;type:string[]"`
-
-	// The interface default gateway ( if present )
-	// In the form "ipAddr,metric"
-	Gateway        string `json:"gateway"`
-	GatewayDesired string `json:"gatewayDesired"`
-
-	// If true, the interface is a management one
-	IsManagement        bool   `json:"isManagement"`
-	IsManagementDesired string `json:"isManagementDesired"`
-
-	// The interface carrier status
-	CarrierStatus string `json:"carrierStatus"`
-
-	// The interface administration status
-	AdminStatus        string `json:"adminStatus"`
-	AdminStatusDesired string `json:"adminStatusDesired"`
-
-	// The mac address
-	MacAddress string `json:"macAddress"`
-
-	// The autoneg boolean
-	Autoneg        bool   `json:"autoneg" gorm:"autoneg"`
-	AutonegDesired string `json:"autonegDesired" gorm:"autoneg_desired"`
-
-	// The fec type
-	FecType        string `json:"fecType"`
-	FecTypeDesired string `json:"fecTypeDesired"`
-
-	// The media type
-	MediaType        string `json:"mediaType"`
-	MediaTypeDesired string `json:"mediaTypeDesired"`
-
-	// The speed
-	Speed        string `json:"speed"`
-	SpeedDesired string `json:"speedDesired"`
-
-	// The maximum transmission unit (MTU) for the interface
-	Mtu        int32  `json:"mtu"`
-	MtuDesired string `json:"mtuDesired"`
-
-	Physical bool `json:"physical" gorm:"physical"`
-
-	// The links with remote interfaces
-	RemoteLinks []*avro.InterfaceLink `json:"remoteLinks" gorm:"foreignkey:Source"`
-
-	ManagedByPcc        bool `json:"managedByPcc"`
-	ManagedByPccDesired bool `json:"managedByPccDesired"`
+	models.Interface
 }
 
 type InterfaceDetail struct {
-	Interface *Interface `json:"interface"`
+	Interface          *Interface        `json:"interface"`
+	RemoteLinksDetails []*avro.Interface `json:"remoteLinksDetails"`
 }
 
 type InterfaceRequest struct {

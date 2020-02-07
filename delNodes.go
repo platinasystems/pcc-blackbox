@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -9,30 +8,31 @@ import (
 	"github.com/platinasystems/test"
 )
 
-func delNodes(t *testing.T) {
-	t.Run("delAllNodes", delAllNodes)
+func delAllNodes(t *testing.T) {
+	t.Run("delNodes", delNodes)
+	t.Run("validateDeleteNodes", validateDeleteNodes)
 }
 
-func delAllNodes(t *testing.T) {
+func delNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	var (
-		body []byte
-		resp HttpResp
-		err  error
-	)
+	var err error
+
 	for id, _ := range Nodes {
-		endpoint := fmt.Sprintf("pccserver/node/%v", id)
-		if resp, body, err = pccGateway("DELETE", endpoint, nil); err != nil {
-			assert.Fatalf("%v\n%v\n", string(body), err)
-			return
-		}
-		if resp.Status != 200 {
-			assert.Fatalf("%v\n", string(body))
-			fmt.Printf("delete node %v failed\n%v\n", id, string(body))
+		err = Pcc.DelNode(id)
+		if err != nil {
+			assert.Fatalf("Failed to delete %v: %v\n", id, err)
 			return
 		}
 	}
+
+}
+
+func validateDeleteNodes(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var err error
 
 	// wait for node to be removed
 	time.Sleep(5 * time.Second)
@@ -43,22 +43,14 @@ func delAllNodes(t *testing.T) {
 		done = true
 		for id, node := range Nodes {
 			done = false
-			endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
-			if resp, body, err = pccGateway("GET", endpoint, nil); err != nil {
-				fmt.Printf("%v\n%v\n", string(body), err)
-				continue
-			}
-			if resp.Status == 200 {
-				if err := json.Unmarshal(resp.Data, &node); err == nil {
-					fmt.Printf("%v provisionStatus = %v\n", node.Name, node.ProvisionStatus)
-					Nodes[id] = node
-				}
-			}
-			if resp.Status == 400 {
-				fmt.Printf("%v deleted\n", node.Name)
-				delete(Nodes, id)
-				if len(Nodes) == 0 {
-					done = true
+			err = Pcc.GetNodeSummary(id, node)
+			if err != nil {
+				if err.Error() == "no such node" {
+					fmt.Printf("%v deleted\n", node.Name)
+					delete(Nodes, id)
+					if len(Nodes) == 0 {
+						done = true
+					}
 				}
 			}
 		}
@@ -72,7 +64,8 @@ func delAllNodes(t *testing.T) {
 	}
 	if !done {
 		for _, node := range Nodes {
-			assert.Fatalf("node %v provisionStatus = %v was not deleted\n", node.Name, node.ProvisionStatus)
+			assert.Fatalf("node %v provisionStatus = %v was not "+
+				"deleted\n", node.Name, node.ProvisionStatus)
 		}
 	}
 }

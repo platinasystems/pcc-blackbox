@@ -82,7 +82,9 @@ func checkGenericInstallation(id uint64, appTimeout time.Duration, str2Check str
 		return
 	}
 
-	if found = checkGenericEvent(id, from, str2Check, events, true); found {
+	if err != nil {
+		return
+	} else if found {
 		return
 	}
 
@@ -138,7 +140,7 @@ func checkMAASInstallation(id uint64, from time.Time) (found bool, err error) {
 	return found, nil
 }
 
-func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []pcc.Notification, checkFrom bool) (found bool) {
+func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events []pcc.Notification, checkFrom bool) (found bool, err error) {
 	found = false
 	for i := 0; i < len(events); i++ {
 		if checkFrom {
@@ -147,8 +149,14 @@ func checkGenericEvent(nodeId uint64, from time.Time, str2Check string, events [
 			}
 		}
 		if events[i].TargetId == nodeId {
+			if events[i].Level == "error" {
+				err = fmt.Errorf("%v", events[i].Message)
+				fmt.Printf("Error event: [%v]\n", events[i])
+				return
+			}
 			if strings.Contains(events[i].Message, str2Check) {
 				found = true
+				return
 			}
 		}
 	}
@@ -161,13 +169,17 @@ func checkingLoop(start time.Time, timeout time.Duration, id uint64, str2check s
 		time.Sleep(FREQUENCY * time.Second)
 		events, err = Pcc.GetNotifications()
 		if err != nil {
+			err = fmt.Errorf("getNofications error: %v", err)
 			return
 		}
-		if checkGenericEvent(id, from, str2check, events, true) {
-			found = true
+		found, err = checkGenericEvent(id, from, str2check, events, true)
+		if err != nil {
+			return
+		} else if found {
 			return
 		}
 	}
+	fmt.Printf("timeout [%v] [%v]\n", start, timeout)
 	err = fmt.Errorf("Timeout error [%d]", timeout)
 	return
 }

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
 	"time"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 func updateNodes_installLLDP(t *testing.T) {
@@ -17,8 +17,6 @@ func installLLDP(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		body  []byte
-		resp  HttpResp
 		err   error
 		check bool
 	)
@@ -26,9 +24,7 @@ func installLLDP(t *testing.T) {
 	var isLLDPInNodes = make(map[uint64]bool)
 	for id := range Nodes {
 		var (
-			addReq models.NodeWithAdditionalFields
-			node   models.NodeWithKubernetes
-			data   []byte
+			addReq pcc.NodeWithKubernetes
 			lldp   []uint64 = []uint64{2}
 		)
 
@@ -36,24 +32,12 @@ func installLLDP(t *testing.T) {
 		addReq.Id = id
 		addReq.RoleIds = lldp
 
-		isLLDPInNodes[id] = IsAppInstalled(id, "lldpd")
+		isLLDPInNodes[id] = Pcc.IsAppInstalled(id, "lldpd")
 		if !isLLDPInNodes[id] {
-
-			endpoint := fmt.Sprintf("pccserver/node/update")
-			if data, err = json.Marshal(addReq); err != nil {
-				assert.Fatalf("invalid struct for node update request")
-			}
-			if resp, body, err = pccGateway("PUT", endpoint, data); err != nil {
-				assert.Fatalf("%v\n%v\n", string(body), err)
-				return
-			}
-			if resp.Status != 200 {
-				assert.Fatalf("%v\n", string(body))
-				fmt.Printf("Update node %v failed\n%v\n", Nodes[id].Host, string(body))
-				return
-			}
-			if err := json.Unmarshal(resp.Data, &node); err != nil {
-				assert.Fatalf("%v\n%v\n", string(resp.Data), err)
+			_, err = Pcc.UpdateNode(addReq)
+			if err != nil {
+				assert.Fatalf("Failed to install LLDP on id "+
+					"%v : %v", id, err)
 				return
 			}
 		} else {
@@ -65,14 +49,19 @@ func installLLDP(t *testing.T) {
 	//Check LLDP installation
 	for id := range Nodes {
 		if !isLLDPInNodes[id] {
-			fmt.Printf("Checking LLDP installation for nodeId:%v\n", id)
-			//check, err = checkLLDPInstallation(id)
-			check, err = checkGenericInstallation(id, LLDP_TIMEOUT, LLDP_NOTIFICATION, from)
+			fmt.Printf("Checking LLDP installation for nodeId:"+
+				"%v\n", id)
+
+			check, err = checkGenericInstallation(id, LLDP_TIMEOUT,
+				LLDP_NOTIFICATION, from)
 			if err != nil {
-				fmt.Printf("%v", err)
+				assert.Fatalf("Failed checking LLDP on %v "+
+					": %v", id, err)
+				return
 			}
 			if check {
-				fmt.Printf("LLDP correctly installed on nodeId:%v\n", id)
+				fmt.Printf("LLDP correctly installed on "+
+					"nodeId:%v\n", id)
 			}
 		}
 	}

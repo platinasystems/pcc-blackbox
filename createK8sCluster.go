@@ -67,11 +67,13 @@ func validateK8sCluster(t *testing.T) {
 
 	id, err := Pcc.FindKubernetesId(k8sname)
 	if err != nil {
-		assert.Fatalf("%v", err)
+		assert.Fatalf("Failed to find cluster %v: %v", k8sname, err)
 		return
 	}
 
-	timeout := time.After(30 * time.Minute)
+	time.Sleep(10 * time.Minute)
+
+	timeout := time.After(45 * time.Minute)
 	tick := time.Tick(1 * time.Minute)
 	done := false
 	var last_percent int8 = -1

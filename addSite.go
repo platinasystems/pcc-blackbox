@@ -81,3 +81,26 @@ func addAssignSite(t *testing.T) {
 	}
 
 }
+
+func delAllSites(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		sites []pcc.Site
+		err   error
+	)
+
+	sites, err = Pcc.GetSites()
+	if err != nil {
+		assert.Fatalf("Failed to GetSites: %v\n", err)
+		return
+	}
+	for _, s := range sites {
+		fmt.Printf("deleting site %v\n", s.Name)
+		err = Pcc.DelSite(s)
+		if err != nil {
+			assert.Fatalf("Failed to DelSite %v: %v\n", s.Name, err)
+		}
+	}
+
+}
