@@ -41,18 +41,23 @@ func addAuthProfile(t *testing.T) {
 	)
 
 	if Env.AuthenticationProfile.Name == "" {
-		fmt.Printf("Authenticatiom Profile is not defined in the configuration file")
+		fmt.Printf("Authenticatiom Profile is not defined in the" +
+			" configuration file\n")
 		return
 	}
 	authProfile = Env.AuthenticationProfile
 
 	certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
-		fmt.Printf("Get certificate %s failed\n%v\n", LDAP_CERT_FILENAME, err)
+		assert.Fatalf("Get certificate %s failed\n%v\n",
+			LDAP_CERT_FILENAME, err)
+		return
 	} else {
 		if authProfile.Type == "LDAP" {
 			var ldapConfiguration pcc.LDAPConfiguration
-			decodeError := mapstructure.Decode(authProfile.Profile, &ldapConfiguration)
+
+			decodeError := mapstructure.Decode(authProfile.Profile,
+				&ldapConfiguration)
 			if decodeError == nil {
 				ldapConfiguration.CertificateId = &certificate.Id
 				authProfile.Profile = ldapConfiguration
@@ -64,7 +69,8 @@ func addAuthProfile(t *testing.T) {
 	for i := 1; ; i++ {
 		label = fmt.Sprintf(authProfile.Name+"_%d", i)
 		CurrentAuthProfileName = label
-		if existingProfile, _ := GetAuthProfileByName(label); existingProfile == nil {
+		existingProfile, _ := Pcc.GetAuthProfileByName(label)
+		if existingProfile == nil {
 			break
 		}
 	}
@@ -75,10 +81,4 @@ func addAuthProfile(t *testing.T) {
 		assert.Fatalf("Error: %v\n", err)
 		return
 	}
-}
-
-func GetAuthProfileByName(name string) (authProfile *pcc.AuthenticationProfile, err error) {
-
-	authProfile, err = Pcc.GetAuthProfileByName(name)
-	return
 }

@@ -15,8 +15,14 @@ const (
 	PROFILE_ENDPOINT = "pccserver/profile"
 )
 
+// couldn't re-use models.AuthenticationProfile as
+// it has a field of type interface{}
 type AuthenticationProfile struct {
-	models.AuthenticationProfile
+	ID      uint64            `json:"id"`
+	Name    string            `json:"name" validate:"required" gorm:"name"`
+	Type    string            `json:"type" validate:"required,eq=LDAP" gorm:"type"`
+	Tenant  uint64            `json:"tenant" gorm:"tenant"`
+	Profile LDAPConfiguration `json:"profile,omitempty" gorm:"-"`
 }
 
 type LDAPConfiguration struct {

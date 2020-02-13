@@ -66,19 +66,18 @@ func installPortus(t *testing.T) {
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
 
 			if Env.AuthenticationProfile.Name == "" {
-				fmt.Printf("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
+				fmt.Println("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
 			} else {
-				authProfile, err := GetAuthProfileByName(CurrentAuthProfileName)
+				authProfile, err := Pcc.GetAuthProfileByName(CurrentAuthProfileName)
 				if err == nil {
-					// portusConfiguration.AuthenticationProfile = authProfile
 					data, err := json.Marshal(authProfile)
 					if err != nil {
-						assert.Fatalf("marshal failed")
+						assert.Fatalf("marshal failed\n")
 						return
 					}
 					err = json.Unmarshal(data, &portusConfiguration.AuthenticationProfile)
 					if err != nil {
-						assert.Fatalf("unmarshal failed")
+						assert.Fatalf("unmarshal failed\n")
 						return
 					}
 				} else {
