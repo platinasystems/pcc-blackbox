@@ -11,3 +11,4 @@
 .idea
 testEnv.json
 maas_pubkey
+test_ldap_crt
