@@ -100,7 +100,7 @@ func installPortus(t *testing.T) {
 				portusConfiguration.RegistryKeyId = &privateKey.Id
 			}
 
-			fmt.Printf("Installing Portus on Node with id %v",
+			fmt.Printf("Installing Portus on Node with id %v\n",
 				node.Id)
 
 			err = Pcc.InstallPortusNode(portusConfiguration)
