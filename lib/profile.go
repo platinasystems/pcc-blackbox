@@ -40,7 +40,7 @@ func (p PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error)
 	}
 	if resp.Status != 200 {
 		err = fmt.Errorf("add Authenticatiom Profile %v failed: %v\n",
-			authProfile.Name, err)
+			authProfile.Name, resp.Error)
 		return
 	}
 	return
