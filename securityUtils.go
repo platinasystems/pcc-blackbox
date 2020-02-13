@@ -1,12 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
 	"os"
-
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 const (
@@ -19,152 +15,29 @@ const (
 	DELETE   = "delete"
 )
 
-func BuildKeyManagerEndpoint(fileType string, label string, method string, id uint64) string {
+func CreateFileAndUpload(fileName string, key string, fileType string) (err error) {
 
-	var relativePath string
-	if method != DELETE {
-
-		switch fileType {
-		case PRIVATE_KEY:
-			relativePath = "keys/upload/private"
-			if method == DESCRIBE {
-				relativePath = "keys/describe"
-				return fmt.Sprintf("%s/%s/%v", KEYMANAGER_ENDPOINT, relativePath, label)
-			}
-
-		case PUBLIC_KEY:
-			relativePath = "keys/upload/public"
-			if method == DESCRIBE {
-				relativePath = "keys/describe"
-				return fmt.Sprintf("%s/%s/%v", KEYMANAGER_ENDPOINT, relativePath, label)
-			}
-
-		case CERT:
-
-			relativePath = fmt.Sprintf("certificates/%s", method)
-			if method == DESCRIBE {
-				if id > 0 {
-					relativePath = fmt.Sprintf(relativePath+"/%v", id)
-				}
-				return fmt.Sprintf("%s/%s", KEYMANAGER_ENDPOINT, relativePath)
-			}
-		}
-		return fmt.Sprintf("https://%s:9999/%s/%s/%v", Env.PccIp, KEYMANAGER_ENDPOINT, relativePath, label)
-
-	} else {
-		relativePath = "certificates"
-		if fileType != CERT {
-			relativePath = "keys"
-		}
-		return fmt.Sprintf("%s/%s/%v", KEYMANAGER_ENDPOINT, relativePath, id)
-	}
-
-}
-
-func GetSecurityKey(alias string, keyType string) (pcc.SecurityKey, error) {
-	var securityKey pcc.SecurityKey
-	endpoint := BuildKeyManagerEndpoint(keyType, alias, DESCRIBE, 0)
-	resp, body, err := pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		fmt.Printf("Get key %s failed\n%v\n", alias, string(body))
-		return securityKey, err
-	}
-	err = json.Unmarshal(resp.Data, &securityKey)
-	if err != nil {
-		fmt.Printf("Umarshal key %s failed\n%v\n", alias, err)
-	}
-	return securityKey, err
-}
-
-func GetCertificate(alias string) (certificate pcc.Certificate, err error) {
-	var certificates []pcc.Certificate
-	endpoint := BuildKeyManagerEndpoint(CERT, alias, DESCRIBE, 0)
-	resp, body, err := pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		fmt.Printf("Get certificates %s failed\n%v\n", alias, string(body))
-		return certificate, err
-	}
-	err = json.Unmarshal(resp.Data, &certificates)
-	if err == nil {
-		for i := 0; i < len(certificates); i++ {
-			if certificates[i].Alias == alias {
-				certificate = certificates[i]
-			}
-		}
-	} else {
-		fmt.Printf("Unmarshal certificate %s failed\n%v\n", alias, err)
-	}
-
-	return certificate, err
-}
-
-func CreateFileAndUpload(fileName string, key string, fileType string) error {
-
-	var err error
 	var f *os.File
 	f, err = os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to create file:\n%v\n", err))
+		err = fmt.Errorf("Unable to create file:\n%v\n", err)
+		return
 	}
+	defer f.Close()
 	_, err = f.Write([]byte(key))
 	if err != nil {
-		return errors.New(fmt.Sprintf("Unable to write on disk:\n%v\n", err))
+		err = fmt.Errorf("Unable to write on disk:\n%v\n", err)
+		return
 	}
-	f.Close()
 
 	filePath := fmt.Sprintf("./%s", fileName)
 
-	exist, id, err := checkAliasExist(fileName, fileType)
+	// check if exist and delete if so
 
-	if exist {
-		removeKeyCert(id, fileType)
-	}
-
-	url := BuildKeyManagerEndpoint(fileType, fileName, UPLOAD, 0)
-	err = UpdateFile(filePath, url)
+	err = Pcc.UploadCert(filePath, "foo", "")
 	if err != nil {
-		return err
+		return
 	}
 
-	return err
-}
-
-func removeKeyCert(id uint64, fileType string) error {
-	url := BuildKeyManagerEndpoint(fileType, "", DELETE, id)
-	_, body, err := pccSecurity("DELETE", url, nil)
-	if err != nil {
-		fmt.Printf("DELETE %s failed\n%v\n", fileType, string(body))
-	}
-	return err
-}
-
-func checkAliasExist(alias string, fileType string) (exist bool, id uint64, err error) {
-	url := BuildKeyManagerEndpoint(fileType, alias, DESCRIBE, 0)
-
-	resp, body, err := pccSecurity("GET", url, nil)
-	if err != nil {
-		fmt.Printf("%s %s not found \n%v\n", fileType, alias, string(body))
-		return false, 0, err
-	} else {
-		if fileType != CERT {
-			var secKey pcc.SecurityKey
-			err = json.Unmarshal(resp.Data, &secKey)
-			if err == nil {
-				exist = true
-				id = secKey.Id
-			}
-		} else {
-			var certificates []pcc.Certificate
-			err = json.Unmarshal(resp.Data, &certificates)
-			if err == nil {
-				for i := 0; i < len(certificates); i++ {
-					if certificates[i].Alias == alias {
-						exist = true
-						id = certificates[i].Id
-					}
-				}
-			}
-		}
-	}
 	return
 }

@@ -32,7 +32,7 @@ func (p PccClient) AddSite(siteReq Site) (err error) {
 func (p PccClient) DelSite(siteReq Site) (err error) {
 	var data []byte
 
-	val := []int64{siteReq.Id}
+	val := []uint64{siteReq.Id}
 
 	endpoint := fmt.Sprintf("pccserver/site/delete")
 	if data, err = json.Marshal(val); err != nil {

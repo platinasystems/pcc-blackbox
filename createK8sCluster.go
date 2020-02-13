@@ -20,7 +20,7 @@ func createK8sCluster(t *testing.T) {
 func createK8s_3nodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	const DIM = 3
+	const DIM = 4
 	var (
 		err               error
 		k8sRequest        pcc.K8sClusterRequest
@@ -53,6 +53,7 @@ func createK8s_3nodes(t *testing.T) {
 		K8sVersion: "v1.14.3", //todo dynamic
 		CniPlugin:  "kube-router",
 		Nodes:      k8sNodes,
+		IgwPolicy:  "default",
 	}
 	err = Pcc.CreateKubernetes(k8sRequest)
 	if err != nil {
@@ -65,13 +66,16 @@ func validateK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
-	id, err := Pcc.FindKubernetesId(k8sname)
+	var (
+		id  uint64
+		err error
+	)
+
+	id, err = Pcc.FindKubernetesId(k8sname)
 	if err != nil {
 		assert.Fatalf("Failed to find cluster %v: %v", k8sname, err)
 		return
 	}
-
-	time.Sleep(10 * time.Minute)
 
 	timeout := time.After(45 * time.Minute)
 	tick := time.Tick(1 * time.Minute)

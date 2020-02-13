@@ -152,6 +152,17 @@ func (p PccClient) GetNodeConnectionStatus(node *NodeWithKubernetes) (status str
 	return
 }
 
+func (p PccClient) IsNodeOnline(node *NodeWithKubernetes) bool {
+	status, err := p.GetNodeConnectionStatus(node)
+	if err != nil {
+		return false
+	}
+	if status == "online" {
+		return true
+	}
+	return false
+}
+
 func (p PccClient) AddNode(hostIp string, pccManaged bool) (node NodeWithKubernetes, err error) {
 
 	var (

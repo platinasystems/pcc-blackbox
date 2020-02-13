@@ -97,12 +97,31 @@ func addTenantA(t *testing.T) {
 		assert.Fatalf("%v\n", err)
 	}
 
-	source := fmt.Sprintf("https://%v:7654/setPass", Env.PccIp)
+	// remove existing users
+	users, err := Pcc.GetUsers()
+	if err != nil {
+		assert.Fatalf("Failed to get users: %v\n", err)
+		return
+	}
+
+	for _, u := range users {
+		if u.UserName == "admin" {
+			continue
+		}
+		err = Pcc.DelUser(u.UserName)
+		if err != nil {
+			assert.Fatalf("Failed to delete user %v: %v\n",
+				u.UserName, err)
+			return
+		}
+	}
+
+	source := fmt.Sprintf("https://%v:9999/gui/setPass", Env.PccIp)
 	addUser := pcc.AddUser{
-		UserName:  "BadBart",
+		UserName:  "bsimpson@platinasystems.com",
 		FirstName: "Bart",
 		LastName:  "Simpson",
-		Email:     "stig@platinasystems.com",
+		Email:     "bsimpson@platinasystems.com",
 		Password:  "lisasux",
 		Active:    true,
 		Protect:   false,
@@ -112,40 +131,64 @@ func addTenantA(t *testing.T) {
 	}
 	err = Pcc.AddUser(addUser)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		assert.Fatalf("Failed to add user %v: %v\n", addUser.UserName,
+			err)
+		return
 	}
 
-	fmt.Printf("try change password\n")
-	newEmail := "homer@lovesdonuts.io"
-	addUser.Email = newEmail
+	addUser2 := pcc.AddUser{
+		UserName:  "lsimpson@platinasystems.com",
+		FirstName: "Lisa",
+		LastName:  "Simpson",
+		Email:     "lsimpson@platinasystems.com",
+		Password:  "bartsux",
+		Active:    true,
+		Protect:   false,
+		RoleId:    1,
+		TenantId:  tenant.ID,
+		Source:    source,
+	}
+	err = Pcc.AddUser(addUser2)
+	if err != nil {
+		assert.Fatalf("Failed to add user %v: %v\n", addUser2.UserName,
+			err)
+		return
+	}
+
+	fmt.Printf("Try change firstname\n")
+	newName := "Mr Bart"
+	addUser.LastName = newName
 
 	err = Pcc.UpdateUser(addUser)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		assert.Fatalf("Failed to update user %v: %v\n", newName, err)
+		return
 	}
 
-	users, err := Pcc.GetUsers()
+	users, err = Pcc.GetUsers()
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
 
 	found := false
 	for _, u := range users {
-		if u.UserName == "BadBart" {
+		if u.Email == addUser.Email {
 			fmt.Printf("Found updated user %v\n", u)
-			if u.Email == newEmail {
+			if u.LastName == newName {
 				fmt.Printf("user update worked\n")
 				found = true
 			} else {
 				assert.Fatalf("user update failed\n")
+				return
 			}
 		}
 	}
 	if !found {
 		assert.Fatalf("user update failed and not found\n")
+		return
 	}
 
-	err = Pcc.DelUser(addUser.UserName)
+	err = Pcc.DelUser(addUser2.UserName)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}

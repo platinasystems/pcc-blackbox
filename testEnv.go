@@ -1,14 +1,14 @@
 package main
 
-import "github.com/platinasystems/tiles/pccserver/models"
+import pcc "github.com/platinasystems/pcc-blackbox/lib"
 
 type testEnv struct {
 	Env                   string
 	PccIp                 string
 	Invaders              []invader
 	Servers               []server
-	AuthenticationProfile models.AuthenticationProfile
-	PortusConfiguration   models.PortusConfiguration
+	AuthenticationProfile pcc.AuthenticationProfile
+	PortusConfiguration   pcc.PortusConfiguration
 }
 
 type node struct {

@@ -1,17 +1,15 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
+
+	"github.com/mitchellh/mapstructure"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 const (
-	PROFILE_ENDPOINT   = "pccserver/profile"
 	LDAP_CERT_FILENAME = "test_ldap_crt"
 )
 
@@ -39,9 +37,7 @@ func addAuthProfile(t *testing.T) {
 	assert := test.Assert{t}
 
 	var (
-		authProfile models.AuthenticationProfile
-		body        []byte
-		resp        HttpResp
+		authProfile pcc.AuthenticationProfile
 	)
 
 	if Env.AuthenticationProfile.Name == "" {
@@ -50,12 +46,12 @@ func addAuthProfile(t *testing.T) {
 	}
 	authProfile = Env.AuthenticationProfile
 
-	certificate, err := GetCertificate(LDAP_CERT_FILENAME)
+	certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
 		fmt.Printf("Get certificate %s failed\n%v\n", LDAP_CERT_FILENAME, err)
 	} else {
 		if authProfile.Type == "ldap" {
-			var ldapConfiguration models.LDAPConfiguration
+			var ldapConfiguration pcc.LDAPConfiguration
 			decodeError := mapstructure.Decode(authProfile.Profile, &ldapConfiguration)
 			if decodeError == nil {
 				ldapConfiguration.CertificateId = &certificate.Id
@@ -74,39 +70,15 @@ func addAuthProfile(t *testing.T) {
 	}
 	authProfile.Name = label
 
-	data, err := json.Marshal(authProfile)
+	err = Pcc.AddAuthProfile(authProfile)
 	if err != nil {
-		assert.Fatalf("invalid struct for add authentication profile request")
-	}
-
-	if resp, body, err = pccGateway("POST", PROFILE_ENDPOINT, data); err != nil {
-		assert.Fatalf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		assert.Fatalf("%v\n", string(body))
-		fmt.Printf("add Authenticatiom Profile %v failed\n%v\n", authProfile.Name, string(body))
+		assert.Fatalf("Error: %v\n", err)
 		return
 	}
 }
 
-func GetAuthProfileByName(name string) (authProfile *models.AuthenticationProfile, err error) {
+func GetAuthProfileByName(name string) (authProfile *pcc.AuthenticationProfile, err error) {
 
-	var authProfiles [] models.AuthenticationProfile
-	resp, body, err := pccGateway("GET", PROFILE_ENDPOINT, nil);
-	if err == nil {
-		if resp.Status == 200 {
-			if err = json.Unmarshal(resp.Data, &authProfiles); err == nil {
-				for i := range authProfiles {
-					if authProfiles[i].Name == name {
-						return &authProfiles[i], err
-					}
-				}
-			}
-		} else {
-			err = errors.New(string(body))
-		}
-	}
-
-	return nil, err
+	authProfile, err = Pcc.GetAuthProfileByName(name)
+	return
 }
