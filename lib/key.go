@@ -163,7 +163,7 @@ func (p PccClient) FindSecurityKey(alias string) (secKey SecurityKey, err error)
 
 func (p PccClient) UploadCert(filePath string, label string, description string) (err error) {
 
-	url := fmt.Sprintf("https://%s:9999/key-manager/certificate/upload/%v",
+	url := fmt.Sprintf("https://%s:9999/key-manager/certificates/upload/%v",
 		p.pccIp, label)
 
 	file, err := os.Open(filePath)
