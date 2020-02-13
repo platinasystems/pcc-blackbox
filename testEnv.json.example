@@ -131,7 +131,7 @@
 		}
 	],
 	"AuthenticationProfile": {
-        "type": "ldap",
+        "type": "LDAP",
         "name": "portus_ldap",
         "profile": {
           "domain": "ldap1.lab.platinasystems.com",
