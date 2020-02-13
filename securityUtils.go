@@ -34,7 +34,7 @@ func CreateFileAndUpload(fileName string, key string, fileType string) (err erro
 
 	// check if exist and delete if so
 
-	err = Pcc.UploadCert(filePath, "foo", "")
+	err = Pcc.UploadCert(filePath, fileName, "")
 	if err != nil {
 		return
 	}
