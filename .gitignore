@@ -12,3 +12,5 @@
 testEnv.json
 maas_pubkey
 test_ldap_crt
+test_portus_crt
+test_portus_key
