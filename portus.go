@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/platinasystems/test"
-	"testing"
 	"github.com/platinasystems/tiles/pccserver/models"
+	"testing"
 	"time"
 )
 
@@ -61,7 +61,7 @@ func installPortus(t *testing.T) {
 		resp                HttpResp
 	)
 	for id, node := range Nodes {
-		if !IsInvader(node) && IsOnline(node) {
+		if IsOnline(node) {
 			portusConfiguration = Env.PortusConfiguration
 			portusConfiguration.NodeID = id
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
@@ -121,7 +121,7 @@ func checkPortus(t *testing.T) {
 	from := time.Now()
 
 	for id, node := range Nodes {
-		if 	idInSlice(node.Id, PortusSelectedNodeIds){
+		if idInSlice(node.Id, PortusSelectedNodeIds) {
 			check, err := checkGenericInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, from)
 			if err != nil {
 				assert.Fatalf("Portus installation has failed\n%v\n", err)
