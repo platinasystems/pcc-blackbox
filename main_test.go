@@ -206,11 +206,11 @@ func TestClean(t *testing.T) {
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
+		mayRun(t, "delAllPortus", delAllPortus)
 		mayRun(t, "delAllNodes", delAllNodes)
 		mayRun(t, "delAllUsers", delAllUsers)
 		mayRun(t, "delAllTenants", delAllTenants)
 		mayRun(t, "delAllKeys", delAllKeys)
-
 	})
 }
 

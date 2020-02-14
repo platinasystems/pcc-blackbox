@@ -134,3 +134,56 @@ func checkPortus(t *testing.T) {
 		}
 	}
 }
+
+func delAllPortus(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var (
+		portusConfigs []pcc.PortusConfiguration
+		err           error
+		id            uint64
+	)
+
+	portusConfigs, err = Pcc.GetPortusNodes()
+	if err != nil {
+		assert.Fatalf("Failed to get portus nodes: %v\n", err)
+		return
+	}
+
+	for _, p := range portusConfigs {
+		fmt.Printf("Deleting Portus %v\n", p.Name)
+		id = p.ID
+		err = Pcc.DelPortusNode(id, true)
+		if err != nil {
+			assert.Fatalf("Failed to delete Portus %v: %v\n",
+				p.Name, err)
+			return
+		}
+		// wait till deleted
+		done := false
+		timeout := time.After(10 * time.Minute)
+		tick := time.Tick(30 * time.Second)
+		for !done {
+			select {
+			case <-tick:
+				_, err = Pcc.GetPortusNodeById(id)
+				if err != nil {
+					assert.Fatalf("Failed Get Portus: %v\n",
+						err)
+					return
+				}
+				fmt.Printf("get portus by id err: %v\n", err)
+				if err.Error() == "record not found" {
+					done = true
+					continue
+				} else {
+					fmt.Printf("get portus by id err: %v\n",
+						err)
+				}
+			case <-timeout:
+				assert.Fatal("Timeout deleting Portus\n")
+			}
+		}
+	}
+}
