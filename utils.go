@@ -91,3 +91,12 @@ func IsAppInstalled(nodeId uint64, appId string) (isInstalled bool){
 	}
 	return
 }
+
+func idInSlice(idToFind uint64, list []uint64) bool {
+	for _, str := range list {
+		if str == idToFind {
+			return true
+		}
+	}
+	return false
+}

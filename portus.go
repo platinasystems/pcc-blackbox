@@ -16,7 +16,7 @@ const (
 	PORTUS_CERT_FILENAME = "test_portus_crt"
 )
 
-var PortusSelectedNodeId uint64
+var PortusSelectedNodeIds []uint64
 
 func AddPortus(t *testing.T) {
 	t.Run("addPortus", installPortus)
@@ -95,18 +95,20 @@ func installPortus(t *testing.T) {
 			if err != nil {
 				assert.Fatalf("invalid struct for install portus request")
 			}
-			fmt.Println(fmt.Sprintf("Installing Portus on Node with id %v", node.Id))
-			PortusSelectedNodeId = node.Id
+			fmt.Println(fmt.Sprintf("Installing Portus on Node with id %v\n", node.Id))
+
 			if resp, body, err = pccGateway("POST", PORTUS_ENDPOINT, data); err != nil {
 				assert.Fatalf("%v\n%v\n", string(body), err)
 				return
 			}
+
 			if resp.Status != 200 {
-				assert.Fatalf("%v\n", string(body))
-				fmt.Printf("install Portus %v failed\n%v\n", node.Host, string(body))
-				return
+				fmt.Printf("Portus installation in %v failed\n%v\n", node.Host, string(body))
+				fmt.Printf("Trying in another node\n")
+			} else {
+				PortusSelectedNodeIds = append(PortusSelectedNodeIds, node.Id)
+				break
 			}
-			break
 		}
 
 	}
@@ -119,7 +121,7 @@ func checkPortus(t *testing.T) {
 	from := time.Now()
 
 	for id, node := range Nodes {
-		if !IsInvader(node) && IsOnline(node) && node.Id == PortusSelectedNodeId{
+		if 	idInSlice(node.Id, PortusSelectedNodeIds){
 			check, err := checkGenericInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, from)
 			if err != nil {
 				assert.Fatalf("Portus installation has failed\n%v\n", err)
