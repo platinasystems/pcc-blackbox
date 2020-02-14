@@ -132,7 +132,11 @@
 	],
 	"AuthenticationProfile": {
         "type": "LDAP",
+<<<<<<< HEAD
         "name": "portus ldap",
+=======
+        "name": "portus_ldap",
+>>>>>>> master
         "profile": {
           "domain": "ldap1.lab.platinasystems.com",
           "userIDAttribute": "cn",
