@@ -82,3 +82,31 @@ func addAuthProfile(t *testing.T) {
 		return
 	}
 }
+
+func delAllProfiles(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var (
+		authProfiles []pcc.AuthenticationProfile
+		err          error
+		id           uint64
+	)
+
+	authProfiles, err = Pcc.GetAuthProfiles()
+	if err != nil {
+		assert.Fatalf("Failed to get auth profiles: %v\n", err)
+		return
+	}
+
+	for _, aP := range authProfiles {
+		id = aP.ID
+		fmt.Printf("Deleting auth profile %v\n", aP.Name)
+		err = Pcc.DelAuthProfile(id)
+		if err != nil {
+			assert.Fatalf("Failed to delete auth profile %v: %v\n",
+				id, err)
+		}
+		// seems to be syncronous. API should document
+	}
+}

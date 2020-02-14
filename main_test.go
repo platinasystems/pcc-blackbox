@@ -211,6 +211,7 @@ func TestClean(t *testing.T) {
 		mayRun(t, "delAllUsers", delAllUsers)
 		mayRun(t, "delAllTenants", delAllTenants)
 		mayRun(t, "delAllKeys", delAllKeys)
+		mayRun(t, "delAllProfiles", delAllProfiles)
 	})
 }
 

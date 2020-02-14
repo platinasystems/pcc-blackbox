@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	PROFILE_ENDPOINT = "pccserver/profile"
+	PROFILE_ENDPOINT = "pccserver/v1/profile"
 )
 
 // couldn't re-use models.AuthenticationProfile as
@@ -52,6 +52,46 @@ func (p PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error)
 	return
 }
 
+func (p PccClient) GetAuthProfiles() (authProfiles []AuthenticationProfile, err error) {
+	var (
+		resp HttpResp
+	)
+
+	resp, _, err = p.pccGateway("GET", PROFILE_ENDPOINT, nil)
+	if err != nil {
+		return
+	}
+	if resp.Status == 200 {
+		err = json.Unmarshal(resp.Data, &authProfiles)
+		return
+	}
+
+	err = fmt.Errorf("%v", resp.Error)
+	return
+}
+
+func (p PccClient) GetAuthProfileById(id uint64) (authProfile AuthenticationProfile, err error) {
+	var (
+		endpoint string
+		resp     HttpResp
+	)
+
+	endpoint = fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
+
+	resp, _, err = p.pccGateway("GET", endpoint, nil)
+	if err != nil {
+		return
+	}
+	if resp.Status == 200 {
+		err = json.Unmarshal(resp.Data, &authProfile)
+		return
+	}
+
+	err = fmt.Errorf("%v", resp.Error)
+	return
+
+}
+
 func (p PccClient) GetAuthProfileByName(name string) (authProfile *AuthenticationProfile, err error) {
 
 	var (
@@ -78,4 +118,23 @@ func (p PccClient) GetAuthProfileByName(name string) (authProfile *Authenticatio
 	err = fmt.Errorf("%v", resp.Error)
 	return
 
+}
+
+func (p PccClient) DelAuthProfile(id uint64) (err error) {
+	var (
+		resp     HttpResp
+		endpoint string
+	)
+
+	endpoint = fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
+
+	resp, _, err = p.pccGateway("DELETE", endpoint, nil)
+	if err != nil {
+		return
+	}
+	if resp.Status != 200 {
+		err = fmt.Errorf("%v", resp.Error)
+		return
+	}
+	return
 }
