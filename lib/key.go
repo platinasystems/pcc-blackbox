@@ -15,6 +15,12 @@ import (
 	"path/filepath"
 )
 
+const (
+	PUBLIC_KEY  = "public"
+	PRIVATE_KEY = "private"
+	CERT        = "certificate"
+)
+
 type Certificate struct {
 	Id          uint64 `json:"id"`
 	Name        string `json:"name"`
@@ -37,10 +43,14 @@ type SecurityKey struct {
 	PublicPath  string `json:"PublicPath"`
 }
 
-func (p PccClient) UploadKey(filePath string, label string, description string) (err error) {
+func (p PccClient) UploadKey(filePath string, label string, fileType string, description string) (err error) {
 
-	url := fmt.Sprintf("https://%s:9999/key-manager/keys/upload/public/%v",
-		p.pccIp, label)
+	if fileType != PRIVATE_KEY && fileType != PUBLIC_KEY {
+		err = fmt.Errorf("Invalid security key type [%v]\n", fileType)
+		return
+	}
+	url := fmt.Sprintf("https://%v:9999/key-manager/keys/upload/%v/%v",
+		p.pccIp, fileType, label)
 
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -142,11 +152,11 @@ func (p PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error) 
 	return
 }
 
-func (p PccClient) FindSecurityKey(alias string) (secKey SecurityKey, err error) {
+func (p PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKey, err error) {
 	var (
 		secKeys []SecurityKey
 	)
-
+	exist = false
 	secKeys, err = p.GetSecurityKeys()
 	if err != nil {
 		return
@@ -155,6 +165,7 @@ func (p PccClient) FindSecurityKey(alias string) (secKey SecurityKey, err error)
 	for _, k := range secKeys {
 		if k.Alias == alias {
 			secKey = k
+			exist = true
 			return
 		}
 	}
@@ -196,12 +207,13 @@ func (p PccClient) UploadCert(filePath string, label string, description string)
 	return
 }
 
-func (p PccClient) FindCertificate(alias string) (certificate Certificate, err error) {
+func (p PccClient) FindCertificate(alias string) (exist bool, certificate Certificate, err error) {
 	var (
 		certificates []Certificate
 		endpoint     string
 	)
 
+	exist = false
 	endpoint = fmt.Sprintf("key-manager/certificates/describe")
 	resp, _, err := p.pccSecurity("GET", endpoint, nil)
 	if err != nil {
@@ -211,12 +223,35 @@ func (p PccClient) FindCertificate(alias string) (certificate Certificate, err e
 	if err == nil {
 		for i := 0; i < len(certificates); i++ {
 			if certificates[i].Alias == alias {
+				exist = true
 				certificate = certificates[i]
+				return
 			}
 		}
 	} else {
-		err = fmt.Errorf("Unmarshal certificate %s failed\n%v\n",
-			alias, err)
+		err = fmt.Errorf("%v", resp.Error)
+	}
+
+	return
+}
+
+func (p PccClient) GetCertificates() (certificates []Certificate, err error) {
+	var (
+		endpoint string
+	)
+
+	endpoint = fmt.Sprintf("key-manager/certificates/describe")
+	resp, _, err := p.pccSecurity("GET", endpoint, nil)
+	if err != nil {
+		return
+	}
+	if resp.Status == 200 {
+		err = json.Unmarshal(resp.Data, &certificates)
+		if err != nil {
+			return
+		}
+	} else {
+		err = fmt.Errorf("%v", resp.Error)
 	}
 
 	return

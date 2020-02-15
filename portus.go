@@ -37,7 +37,8 @@ func UploadSecurityPortusCert(t *testing.T) {
 func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY, PRIVATE_KEY)
+	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY,
+		pcc.PRIVATE_KEY)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -46,7 +47,7 @@ func uploadSecurityKey_Portus(t *testing.T) {
 func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, CERT)
+	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, pcc.CERT)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -85,17 +86,17 @@ func installPortus(t *testing.T) {
 				}
 			}
 
-			certificate, err := Pcc.FindCertificate(PORTUS_CERT_FILENAME)
+			exist, certificate, err := Pcc.FindCertificate(PORTUS_CERT_FILENAME)
 			if err != nil {
 				fmt.Printf("Get certificate %s failed\n%v\n", PORTUS_CERT_FILENAME, err)
-			} else {
+			} else if exist {
 				portusConfiguration.RegistryCertId = &certificate.Id
 			}
 
-			privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
+			exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
 			if err != nil {
 				fmt.Printf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
-			} else {
+			} else if exist {
 				portusConfiguration.RegistryKeyId = &privateKey.Id
 			}
 
@@ -169,17 +170,13 @@ func delAllPortus(t *testing.T) {
 			case <-tick:
 				_, err = Pcc.GetPortusNodeById(id)
 				if err != nil {
+					if err.Error() == "record not found" {
+						done = true
+						continue
+					}
 					assert.Fatalf("Failed Get Portus: %v\n",
 						err)
 					return
-				}
-				fmt.Printf("get portus by id err: %v\n", err)
-				if err.Error() == "record not found" {
-					done = true
-					continue
-				} else {
-					fmt.Printf("get portus by id err: %v\n",
-						err)
 				}
 			case <-timeout:
 				assert.Fatal("Timeout deleting Portus\n")

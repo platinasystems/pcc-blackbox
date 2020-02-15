@@ -42,7 +42,8 @@ func updateSecurityKey_MaaS(t *testing.T) {
 			assert.Fatalf("%v\n", err)
 		}
 		if !exist {
-			err = Pcc.UploadKey("./maas_pubkey", label, description)
+			err = Pcc.UploadKey("./maas_pubkey", label,
+				pcc.PUBLIC_KEY, description)
 			if err != nil {
 				assert.Fatalf("%v\n", err)
 				return

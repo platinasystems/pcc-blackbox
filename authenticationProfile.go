@@ -26,7 +26,7 @@ func UploadSecurityAuthProfileCert(t *testing.T) {
 func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, CERT)
+	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -47,12 +47,12 @@ func addAuthProfile(t *testing.T) {
 	}
 	authProfile = Env.AuthenticationProfile
 
-	certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
+	exist, certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
 		assert.Fatalf("Get certificate %s failed\n%v\n",
 			LDAP_CERT_FILENAME, err)
 		return
-	} else {
+	} else if exist {
 		if authProfile.Type == "LDAP" {
 			var ldapConfiguration pcc.LDAPConfiguration
 

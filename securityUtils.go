@@ -3,20 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
-)
+	"testing"
 
-const (
-	PUBLIC_KEY  = "public_key"
-	PRIVATE_KEY = "private_key"
-	CERT        = "certificate"
-
-	UPLOAD   = "upload"
-	DESCRIBE = "describe"
-	DELETE   = "delete"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 func CreateFileAndUpload(fileName string, key string, fileType string) (err error) {
-
 	var f *os.File
 	f, err = os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
@@ -33,11 +26,63 @@ func CreateFileAndUpload(fileName string, key string, fileType string) (err erro
 	filePath := fmt.Sprintf("./%s", fileName)
 
 	// check if exist and delete if so
+	switch fileType {
+	case pcc.PRIVATE_KEY, pcc.PUBLIC_KEY:
+		var (
+			exist bool
+		)
+		exist, _, err = Pcc.FindSecurityKey(fileName)
+		if exist {
+			Pcc.DeleteKey(fileName)
+		}
 
-	err = Pcc.UploadCert(filePath, fileName, "")
-	if err != nil {
-		return
+		err = Pcc.UploadKey(filePath, fileName, fileType, "")
+		if err != nil {
+			return
+		}
+	case pcc.CERT:
+		var (
+			cert  pcc.Certificate
+			exist bool
+		)
+		exist, cert, err = Pcc.FindCertificate(fileName)
+		if exist {
+			Pcc.DeleteCertificate(cert.Id)
+		}
+
+		err = Pcc.UploadCert(filePath, fileName, "")
+		if err != nil {
+			return
+		}
 	}
 
 	return
+}
+
+func delAllCerts(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var (
+		certificates []pcc.Certificate
+		id           uint64
+		err          error
+	)
+
+	certificates, err = Pcc.GetCertificates()
+	if err != nil {
+		assert.Fatalf("Failed to get certificates: %v\n", err)
+		return
+	}
+
+	for _, c := range certificates {
+		id = c.Id
+		fmt.Printf("Deleting certificate %v\n", c.Alias)
+		err = Pcc.DeleteCertificate(id)
+		if err != nil {
+			assert.Fatalf("Failed to delete Certificate %v: %v\n",
+				id, err)
+			return
+		}
+	}
 }
