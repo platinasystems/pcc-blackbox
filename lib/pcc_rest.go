@@ -62,6 +62,22 @@ func (p PccClient) pccGateway(op string, endPoint string, data []byte) (
 	return
 }
 
+func (p PccClient) pccSecurity(op string, endPoint string, data []byte) (resp HttpResp, body []byte, err error) {
+	client := &http.Client{}
+	url := fmt.Sprintf("https://%s:9999/%v", p.pccIp, endPoint)
+	req, _ := http.NewRequest(op, url, bytes.NewBuffer(data))
+	req.Header.Add("Authorization", p.bearer)
+	r, _ := client.Do(req)
+	defer r.Body.Close()
+	body, _ = ioutil.ReadAll(r.Body)
+
+	resp = HttpResp{
+		Status: r.StatusCode,
+		Data:   body,
+	}
+	return
+}
+
 func (p PccClient) pccUserManagement(op string, endPoint string, data []byte) (
 	body []byte, err error) {
 

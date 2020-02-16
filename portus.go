@@ -3,14 +3,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
 	"time"
+
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 const (
-	PORTUS_ENDPOINT      = "pccserver/portus"
 	KEYMANAGER_ENDPOINT  = "key-manager"
 	PORTUS_KEY_FILENAME  = "test_portus_key"
 	PORTUS_CERT_FILENAME = "test_portus_crt"
@@ -37,7 +37,8 @@ func UploadSecurityPortusCert(t *testing.T) {
 func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY, PRIVATE_KEY)
+	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY,
+		pcc.PRIVATE_KEY)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -46,7 +47,7 @@ func uploadSecurityKey_Portus(t *testing.T) {
 func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, CERT)
+	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, pcc.CERT)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -56,61 +57,63 @@ func installPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		portusConfiguration models.PortusConfiguration
-		body                []byte
-		resp                HttpResp
+		portusConfiguration pcc.PortusConfiguration
 	)
+
 	for id, node := range Nodes {
-		if IsOnline(node) {
+		if Pcc.IsNodeOnline(node) {
 			portusConfiguration = Env.PortusConfiguration
 			portusConfiguration.NodeID = id
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
 
 			if Env.AuthenticationProfile.Name == "" {
-				fmt.Printf("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
+				fmt.Println("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
 			} else {
-				authProfile, err := GetAuthProfileByName(CurrentAuthProfileName)
+				authProfile, err := Pcc.GetAuthProfileByName(CurrentAuthProfileName)
 				if err == nil {
-					portusConfiguration.AuthenticationProfile = authProfile
+					data, err := json.Marshal(authProfile)
+					if err != nil {
+						assert.Fatalf("marshal failed\n")
+						return
+					}
+					err = json.Unmarshal(data, &portusConfiguration.AuthenticationProfile)
+					if err != nil {
+						assert.Fatalf("unmarshal failed\n")
+						return
+					}
 				} else {
 					fmt.Printf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
 				}
 			}
 
-			certificate, err := GetCertificate(PORTUS_CERT_FILENAME)
+			exist, certificate, err := Pcc.FindCertificate(PORTUS_CERT_FILENAME)
 			if err != nil {
 				fmt.Printf("Get certificate %s failed\n%v\n", PORTUS_CERT_FILENAME, err)
-			} else {
+			} else if exist {
 				portusConfiguration.RegistryCertId = &certificate.Id
 			}
 
-			privateKey, err := GetSecurityKey(PORTUS_KEY_FILENAME, PRIVATE_KEY)
+			exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
 			if err != nil {
 				fmt.Printf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
-			} else {
+			} else if exist {
 				portusConfiguration.RegistryKeyId = &privateKey.Id
 			}
 
-			data, err := json.Marshal(portusConfiguration)
-			if err != nil {
-				assert.Fatalf("invalid struct for install portus request")
-			}
-			fmt.Println(fmt.Sprintf("Installing Portus on Node with id %v\n", node.Id))
+			fmt.Printf("Installing Portus on Node with id %v\n",
+				node.Id)
 
-			if resp, body, err = pccGateway("POST", PORTUS_ENDPOINT, data); err != nil {
-				assert.Fatalf("%v\n%v\n", string(body), err)
+			err = Pcc.InstallPortusNode(portusConfiguration)
+			if err != nil {
+				assert.Fatalf("Failed to install Portus: %v\n",
+					err)
 				return
 			}
 
-			if resp.Status != 200 {
-				fmt.Printf("Portus installation in %v failed\n%v\n", node.Host, string(body))
-				fmt.Printf("Trying in another node\n")
-			} else {
-				PortusSelectedNodeIds = append(PortusSelectedNodeIds, node.Id)
-				break
-			}
+			PortusSelectedNodeIds = append(PortusSelectedNodeIds,
+				node.Id)
+			break
 		}
-
 	}
 }
 
@@ -128,6 +131,55 @@ func checkPortus(t *testing.T) {
 			}
 			if check {
 				fmt.Printf("Portus correctly installed on nodeId:%v\n", id)
+			}
+		}
+	}
+}
+
+func delAllPortus(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var (
+		portusConfigs []pcc.PortusConfiguration
+		err           error
+		id            uint64
+	)
+
+	portusConfigs, err = Pcc.GetPortusNodes()
+	if err != nil {
+		assert.Fatalf("Failed to get portus nodes: %v\n", err)
+		return
+	}
+
+	for _, p := range portusConfigs {
+		fmt.Printf("Deleting Portus %v\n", p.Name)
+		id = p.ID
+		err = Pcc.DelPortusNode(id, true)
+		if err != nil {
+			assert.Fatalf("Failed to delete Portus %v: %v\n",
+				p.Name, err)
+			return
+		}
+		// wait till deleted
+		done := false
+		timeout := time.After(10 * time.Minute)
+		tick := time.Tick(30 * time.Second)
+		for !done {
+			select {
+			case <-tick:
+				_, err = Pcc.GetPortusNodeById(id)
+				if err != nil {
+					if err.Error() == "record not found" {
+						done = true
+						continue
+					}
+					assert.Fatalf("Failed Get Portus: %v\n",
+						err)
+					return
+				}
+			case <-timeout:
+				assert.Fatal("Timeout deleting Portus\n")
 			}
 		}
 	}

@@ -1,17 +1,15 @@
 package main
 
 import (
-	"encoding/json"
-	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
+
+	"github.com/mitchellh/mapstructure"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 )
 
 const (
-	PROFILE_ENDPOINT   = "pccserver/profile"
 	LDAP_CERT_FILENAME = "test_ldap_crt"
 )
 
@@ -28,7 +26,7 @@ func UploadSecurityAuthProfileCert(t *testing.T) {
 func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, CERT)
+	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -39,24 +37,27 @@ func addAuthProfile(t *testing.T) {
 	assert := test.Assert{t}
 
 	var (
-		authProfile models.AuthenticationProfile
-		body        []byte
-		resp        HttpResp
+		authProfile pcc.AuthenticationProfile
 	)
 
 	if Env.AuthenticationProfile.Name == "" {
-		fmt.Printf("Authenticatiom Profile is not defined in the configuration file")
+		fmt.Printf("Authenticatiom Profile is not defined in the" +
+			" configuration file\n")
 		return
 	}
 	authProfile = Env.AuthenticationProfile
 
-	certificate, err := GetCertificate(LDAP_CERT_FILENAME)
+	exist, certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
-		fmt.Printf("Get certificate %s failed\n%v\n", LDAP_CERT_FILENAME, err)
-	} else {
+		assert.Fatalf("Get certificate %s failed\n%v\n",
+			LDAP_CERT_FILENAME, err)
+		return
+	} else if exist {
 		if authProfile.Type == "LDAP" {
-			var ldapConfiguration models.LDAPConfiguration
-			decodeError := mapstructure.Decode(authProfile.Profile, &ldapConfiguration)
+			var ldapConfiguration pcc.LDAPConfiguration
+
+			decodeError := mapstructure.Decode(authProfile.Profile,
+				&ldapConfiguration)
 			if decodeError == nil {
 				ldapConfiguration.CertificateId = &certificate.Id
 				authProfile.Profile = ldapConfiguration
@@ -68,45 +69,44 @@ func addAuthProfile(t *testing.T) {
 	for i := 1; ; i++ {
 		label = fmt.Sprintf(authProfile.Name+"_%d", i)
 		CurrentAuthProfileName = label
-		if existingProfile, _ := GetAuthProfileByName(label); existingProfile == nil {
+		existingProfile, _ := Pcc.GetAuthProfileByName(label)
+		if existingProfile == nil {
 			break
 		}
 	}
 	authProfile.Name = label
 
-	data, err := json.Marshal(authProfile)
+	err = Pcc.AddAuthProfile(authProfile)
 	if err != nil {
-		assert.Fatalf("invalid struct for add authentication profile request")
-	}
-
-	if resp, body, err = pccGateway("POST", PROFILE_ENDPOINT, data); err != nil {
-		assert.Fatalf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		assert.Fatalf("%v\n", string(body))
-		fmt.Printf("add Authenticatiom Profile %v failed\n%v\n", authProfile.Name, string(body))
+		assert.Fatalf("Error: %v\n", err)
 		return
 	}
 }
 
-func GetAuthProfileByName(name string) (authProfile *models.AuthenticationProfile, err error) {
+func delAllProfiles(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
 
-	var authProfiles [] models.AuthenticationProfile
-	resp, body, err := pccGateway("GET", PROFILE_ENDPOINT, nil);
-	if err == nil {
-		if resp.Status == 200 {
-			if err = json.Unmarshal(resp.Data, &authProfiles); err == nil {
-				for i := range authProfiles {
-					if authProfiles[i].Name == name {
-						return &authProfiles[i], err
-					}
-				}
-			}
-		} else {
-			err = errors.New(string(body))
-		}
+	var (
+		authProfiles []pcc.AuthenticationProfile
+		err          error
+		id           uint64
+	)
+
+	authProfiles, err = Pcc.GetAuthProfiles()
+	if err != nil {
+		assert.Fatalf("Failed to get auth profiles: %v\n", err)
+		return
 	}
 
-	return nil, err
+	for _, aP := range authProfiles {
+		id = aP.ID
+		fmt.Printf("Deleting auth profile %v\n", aP.Name)
+		err = Pcc.DelAuthProfile(id)
+		if err != nil {
+			assert.Fatalf("Failed to delete auth profile %v: %v\n",
+				id, err)
+		}
+		// seems to be syncronous. API should document
+	}
 }

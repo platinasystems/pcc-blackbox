@@ -1,3 +1,7 @@
+// Copyright © 2020 Platina Systems, Inc. All rights reserved.
+// Use of this source code is governed by the GPL-2 license described in the
+// LICENSE file.
+
 package pcc
 
 import (
@@ -16,11 +20,14 @@ const (
 )
 
 type K8sClusterRequest struct {
-	ID         uint64
-	Name       string     `json:"name" validate:"required"`
-	K8sVersion string     `json:"k8sVersion" validate:"required"`
-	CniPlugin  string     `json:"cniPlugin" validate:"required"`
-	Nodes      []K8sNodes `json:"nodes"`
+	ID          uint64
+	Name        string     `json:"name" validate:"required"`
+	K8sVersion  string     `json:"k8sVersion" validate:"required"`
+	CniPlugin   string     `json:"cniPlugin" validate:"required"`
+	Nodes       []K8sNodes `json:"nodes"`
+	Pools       []*int     `json:"-" gorm:"-"`
+	ControlCIDR string     `json:"controlCIDR" validate:"required,cidrv4"`
+	IgwPolicy   string     `json:"igwPolicy" validate:"required"`
 }
 
 type K8sNodes struct {
@@ -47,7 +54,7 @@ func (p PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
 		return
 	}
 	if resp.Status != 200 {
-		err = fmt.Errorf("K8s cretion failed:\n%v\n", string(body))
+		err = fmt.Errorf("K8s creation failed:\n%v\n", string(body))
 		return
 	}
 	return

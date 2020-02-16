@@ -7,14 +7,12 @@ package pcc
 import (
 	"encoding/json"
 	"fmt"
+
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 type Site struct {
-	Id          int64  `json:"Id"`
-	CreatedAt   uint64 `json:"CreatedAt"`
-	ModifiedAt  uint64 `json:"ModifiedAt"`
-	Name        string `json:"Name"`
-	Description string `json:"Description"`
+	models.Site
 }
 
 func (p PccClient) AddSite(siteReq Site) (err error) {
@@ -34,7 +32,7 @@ func (p PccClient) AddSite(siteReq Site) (err error) {
 func (p PccClient) DelSite(siteReq Site) (err error) {
 	var data []byte
 
-	val := []int64{siteReq.Id}
+	val := []uint64{siteReq.Id}
 
 	endpoint := fmt.Sprintf("pccserver/site/delete")
 	if data, err = json.Marshal(val); err != nil {

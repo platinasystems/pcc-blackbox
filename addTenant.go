@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	"testing"
+
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/security/model"
-	"testing"
 )
 
 func addTenant(t *testing.T) {
@@ -16,11 +16,23 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		tenants []model.Tenant
-		tenant  model.Tenant
-		tenant2 model.Tenant
+		tenants []pcc.Tenant
+		tenant  pcc.Tenant
+		tenant2 pcc.Tenant
+		addReq  pcc.Tenant
+		addReq2 pcc.Tenant
 		err     error
 	)
+
+	fmt.Println("assign all nodes to ROOT")
+	var nodes []uint64
+	for _, i := range Env.Servers {
+		nodes = append(nodes, NodebyHostIP[i.HostIp])
+	}
+	err = Pcc.AssignTenantNodes(1, nodes)
+	if err != nil {
+		assert.Fatalf("%v\n", err)
+	}
 
 	fmt.Println("Delete existing tenants")
 	tenants, err = Pcc.GetTenants()
@@ -32,11 +44,9 @@ func addTenantA(t *testing.T) {
 		Pcc.DelTenant(t.ID)
 	}
 
-	addReq := model.Tenant{
-		Name:        "cust-a",
-		Description: "a tenant of ROOT",
-		Parent:      1,
-	}
+	addReq.Name = "cust-a"
+	addReq.Description = "a tenant of ROOT"
+	addReq.Parent = 1
 
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	err = Pcc.AddTenant(addReq)
@@ -51,11 +61,10 @@ func addTenantA(t *testing.T) {
 	}
 	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.ID)
 
-	addReq2 := model.Tenant{
-		Name:        "cust-b",
-		Description: "a tenant of cust-b",
-		Parent:      tenant.ID,
-	}
+	addReq2.Name = "cust-b"
+	addReq2.Description = "a tenant of cust-b"
+	addReq2.Parent = tenant.ID
+
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	err = Pcc.AddTenant(addReq2)
 	if err != nil {
@@ -83,63 +92,156 @@ func addTenantA(t *testing.T) {
 	}
 
 	fmt.Printf("assign servers to tenant %v\n", addReq.Name)
-	var nodes []uint64
-	for _, i := range Env.Servers {
-		nodes = append(nodes, NodebyHostIP[i.HostIp])
-	}
 	err = Pcc.AssignTenantNodes(tenant.ID, nodes)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
 
-	source := fmt.Sprintf("https://%v:7654/setPass", Env.PccIp)
+	// remove existing users
+	users, err := Pcc.GetUsers()
+	if err != nil {
+		assert.Fatalf("Failed to get users: %v\n", err)
+		return
+	}
+
+	for _, u := range users {
+		if u.UserName == "admin" {
+			continue
+		}
+		err = Pcc.DelUser(u.UserName)
+		if err != nil {
+			assert.Fatalf("Failed to delete user %v: %v\n",
+				u.UserName, err)
+			return
+		}
+	}
+
+	source := fmt.Sprintf("https://%v:9999/gui/setPass", Env.PccIp)
 	addUser := pcc.AddUser{
-		UserName:  "BadBart",
+		UserName:  "bsimpson@platinasystems.com",
 		FirstName: "Bart",
 		LastName:  "Simpson",
-		Email:     "stig@platinasystems.com",
+		Email:     "bsimpson@platinasystems.com",
 		Password:  "lisasux",
 		Active:    true,
 		Protect:   false,
 		RoleId:    1,
-		TenantId:  1,
+		TenantId:  tenant.ID,
 		Source:    source,
 	}
 	err = Pcc.AddUser(addUser)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		assert.Fatalf("Failed to add user %v: %v\n", addUser.UserName,
+			err)
+		return
 	}
 
-	fmt.Printf("try change password\n")
-	req := pcc.AddUser{
-		UserName: "BadBart",
-		Active:   false,
+	addUser2 := pcc.AddUser{
+		UserName:  "lsimpson@platinasystems.com",
+		FirstName: "Lisa",
+		LastName:  "Simpson",
+		Email:     "lsimpson@platinasystems.com",
+		Password:  "bartsux",
+		Active:    true,
+		Protect:   false,
+		RoleId:    1,
+		TenantId:  tenant.ID,
+		Source:    source,
+	}
+	err = Pcc.AddUser(addUser2)
+	if err != nil {
+		assert.Fatalf("Failed to add user %v: %v\n", addUser2.UserName,
+			err)
+		return
 	}
 
-	err = Pcc.UpdateUser(req)
+	fmt.Printf("Try change firstname\n")
+	newName := "Mr Bart"
+	addUser.LastName = newName
+
+	err = Pcc.UpdateUser(addUser)
+	if err != nil {
+		assert.Fatalf("Failed to update user %v: %v\n", newName, err)
+		return
+	}
+
+	users, err = Pcc.GetUsers()
 	if err != nil {
 		assert.Fatalf("%v\n", err)
 	}
 
-	users, err := Pcc.GetUsers()
-	if err != nil {
-		assert.Fatalf("%v\n", err)
-	}
+	found := false
 	for _, u := range users {
-		if u.Username == "BadBart" {
-			fmt.Printf("Found added user %v\n", u)
-			if u.Enabled == false {
+		if u.Email == addUser.Email {
+			fmt.Printf("Found updated user %v\n", u)
+			if u.LastName == newName {
 				fmt.Printf("user update worked\n")
+				found = true
 			} else {
 				assert.Fatalf("user update failed\n")
+				return
 			}
-		} else {
-			fmt.Printf("user %v\n", u)
 		}
 	}
+	if !found {
+		assert.Fatalf("user update failed and not found\n")
+		return
+	}
 
-	err = Pcc.DelUser(addUser.UserName)
+	err = Pcc.DelUser(addUser2.UserName)
 	if err != nil {
 		assert.Fatalf("%v\n", err)
+	}
+}
+
+func delAllTenants(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		tenants []pcc.Tenant
+		err     error
+	)
+
+	tenants, err = Pcc.GetTenants()
+	if err != nil {
+		assert.Fatalf("Failed to GetTenants: %v\n", err)
+		return
+	}
+	for _, t := range tenants {
+		id := t.ID
+		if t.Name == "ROOT" {
+			continue
+		}
+		err = Pcc.DelTenant(id)
+		if err != nil {
+			assert.Fatalf("Failed to DelTenant %v: %v\n", id, err)
+			return
+		}
+	}
+}
+
+func delAllUsers(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+	var (
+		users []pcc.User
+		err   error
+	)
+
+	users, err = Pcc.GetUsers()
+	if err != nil {
+		assert.Fatalf("Failed to GetUsers: %v\n", err)
+		return
+	}
+	for _, u := range users {
+		user := u.UserName
+		if user == "admin" {
+			continue
+		}
+		err = Pcc.DelUser(user)
+		if err != nil {
+			assert.Fatalf("Failed to Deluser %v: %v\n", user, err)
+			return
+		}
 	}
 }

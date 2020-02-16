@@ -7,21 +7,13 @@ package pcc
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/platinasystems/tiles/pccserver/security/model"
 )
 
-//type Tenant struct {
-//	Id          uint64   `json:"id"`
-//	Name        string   `json:"name"`
-//	Description string   `json:"description"`
-//	Parent      uint64   `json:"parent"`
-//	EntityIds   []uint64 `json:"entityIDs"`
-//	EntityNames []string `json:"entityNames"`
-//	Owner       uint64   `json:"owner"`
-//	Children    []uint64 `json:"children"`
-//	Nodes       []uint64 `json:"nodes"`
-//	Uuids       []uint64 `json:"uuids"`
-//}
+type Tenant struct {
+	model.Tenant
+}
 
 type ChangeTenant struct {
 	TenantId uint64   `json:"tenant"`
@@ -37,22 +29,21 @@ type Profile struct {
 }
 
 type Role struct {
-	Protect     bool   `json:"protect"`
-	Description string `json:"description"`
-	Name        string `json:"name"`
-	Owner       uint64 `json: owner"`
+	model.Role
 }
 
-//type User struct {
-//	Id       uint64 `json:"id"`
-//	UserName string `json:"username"`
-//	Active   bool   `json:"active"`
-//	Owner    uint64 `json:"owner"`
-//	Tenant   Tenant `json:"tenant"`
-//	Protect  bool   `json:"protect"`
-//	Role     Role   `json:"role"`
-//	Profile  `json:"profile"`
-//}
+// tried re-using model.User, but not sure about
+// unmarshal in to type interface
+type User struct {
+	Id       uint64 `json:"id"`
+	UserName string `json:"username"`
+	Active   bool   `json:"active"`
+	Owner    uint64 `json:"owner"`
+	Tenant   Tenant `json:"tenant"`
+	Protect  bool   `json:"protect"`
+	Role     Role   `json:"role"`
+	Profile  `json:"profile"`
+}
 
 type AddUser struct {
 	UserName  string `json:"username"`
@@ -71,7 +62,7 @@ type DelUser struct {
 	UserName string `json:"username"`
 }
 
-func (p PccClient) AddTenant(addReq model.Tenant) (err error) {
+func (p PccClient) AddTenant(addReq Tenant) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/tenant/register")
@@ -83,10 +74,13 @@ func (p PccClient) AddTenant(addReq model.Tenant) (err error) {
 }
 
 func (p PccClient) DelTenant(tenantId uint64) (err error) {
-	var data []byte
+	var (
+		data   []byte
+		delReq Tenant
+	)
 
 	endpoint := fmt.Sprintf("user-management/tenant/delete")
-	delReq := model.Tenant{ID: tenantId}
+	delReq.ID = tenantId
 	if data, err = json.Marshal(delReq); err != nil {
 		return
 	}
@@ -94,7 +88,7 @@ func (p PccClient) DelTenant(tenantId uint64) (err error) {
 	return
 }
 
-func (p PccClient) GetTenants() (tenants []model.Tenant, err error) {
+func (p PccClient) GetTenants() (tenants []Tenant, err error) {
 	var body []byte
 
 	endpoint := fmt.Sprintf("user-management/tenant/list")
@@ -123,8 +117,8 @@ func (p PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (
 	return
 }
 
-func (p PccClient) FindTenant(tenantName string) (tenant model.Tenant, err error) {
-	var tenants []model.Tenant
+func (p PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
+	var tenants []Tenant
 
 	tenants, err = p.GetTenants()
 	if err != nil {
@@ -141,7 +135,7 @@ func (p PccClient) FindTenant(tenantName string) (tenant model.Tenant, err error
 	return
 }
 
-func (p PccClient) GetUsers() (users []model.User, err error) {
+func (p PccClient) GetUsers() (users []User, err error) {
 	var body []byte
 
 	endpoint := fmt.Sprintf("user-management/user/list")
