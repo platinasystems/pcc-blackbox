@@ -99,7 +99,7 @@ func (p PccClient) InstallPortusNode(portusConfig PortusConfiguration) (err erro
 		return
 	}
 	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
+		err = fmt.Errorf("%v: %v", resp.Error, resp.Message)
 		return
 	}
 	return
