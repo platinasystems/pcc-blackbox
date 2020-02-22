@@ -70,7 +70,7 @@ type InterfaceRequest struct {
 	Restore    bool   `json:"-" gorm:"restore"`
 }
 
-func (p PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail,
+func (p *PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail,
 	err error) {
 
 	var (
@@ -95,7 +95,7 @@ func (p PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail,
 	return
 }
 
-func (p PccClient) GetIfaceById(nodeId uint64, ifaceId int64) (iface *InterfaceDetail, err error) {
+func (p *PccClient) GetIfaceById(nodeId uint64, ifaceId int64) (iface *InterfaceDetail, err error) {
 
 	ifaces, err := p.GetIfacesByNodeId(nodeId)
 	if err != nil {
@@ -112,7 +112,7 @@ func (p PccClient) GetIfaceById(nodeId uint64, ifaceId int64) (iface *InterfaceD
 	return
 }
 
-func (p PccClient) GetIfaceByMacAddress(mAddr string, ifaces []*InterfaceDetail) (iface *InterfaceDetail, err error) {
+func (p *PccClient) GetIfaceByMacAddress(mAddr string, ifaces []*InterfaceDetail) (iface *InterfaceDetail, err error) {
 	if mAddr == "" {
 		err = fmt.Errorf("Invalid mac [%v]\n", mAddr)
 		return
@@ -127,7 +127,7 @@ func (p PccClient) GetIfaceByMacAddress(mAddr string, ifaces []*InterfaceDetail)
 	return
 }
 
-func (p PccClient) SetIfaceApply(iface InterfaceRequest) (err error) {
+func (p *PccClient) SetIfaceApply(iface InterfaceRequest) (err error) {
 	var (
 		data     []byte
 		resp     HttpResp
@@ -161,7 +161,7 @@ func (p PccClient) SetIfaceApply(iface InterfaceRequest) (err error) {
 	return fmt.Errorf(resp.Message)
 }
 
-func (p PccClient) SetIface(iface InterfaceRequest) (err error) {
+func (p *PccClient) SetIface(iface InterfaceRequest) (err error) {
 	var (
 		data     []byte
 		resp     HttpResp
@@ -183,7 +183,7 @@ func (p PccClient) SetIface(iface InterfaceRequest) (err error) {
 	return
 }
 
-func (p PccClient) ApplyIface(nodeId uint64) (err error) {
+func (p *PccClient) ApplyIface(nodeId uint64) (err error) {
 	var (
 		data     []byte
 		resp     HttpResp
@@ -206,7 +206,7 @@ func (p PccClient) ApplyIface(nodeId uint64) (err error) {
 	return
 }
 
-func (p PccClient) SetIfaceAdmin(nodeId uint64, ifaceId int64, upDown string) (err error) {
+func (p *PccClient) SetIfaceAdmin(nodeId uint64, ifaceId int64, upDown string) (err error) {
 	var (
 		ir       InterfaceRequest
 		data     []byte

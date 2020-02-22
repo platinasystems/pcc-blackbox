@@ -28,7 +28,7 @@ type HttpResp struct {
 	Data    []byte
 }
 
-func (p PccClient) pccGateway(op string, endPoint string, data []byte) (
+func (p *PccClient) pccGateway(op string, endPoint string, data []byte) (
 	resp HttpResp, body []byte, err error) {
 
 	client := &http.Client{}
@@ -62,7 +62,7 @@ func (p PccClient) pccGateway(op string, endPoint string, data []byte) (
 	return
 }
 
-func (p PccClient) pccSecurity(op string, endPoint string, data []byte) (resp HttpResp, body []byte, err error) {
+func (p *PccClient) pccSecurity(op string, endPoint string, data []byte) (resp HttpResp, body []byte, err error) {
 	client := &http.Client{}
 	url := fmt.Sprintf("https://%s:9999/%v", p.pccIp, endPoint)
 	req, _ := http.NewRequest(op, url, bytes.NewBuffer(data))
@@ -78,7 +78,7 @@ func (p PccClient) pccSecurity(op string, endPoint string, data []byte) (resp Ht
 	return
 }
 
-func (p PccClient) pccUserManagement(op string, endPoint string, data []byte) (
+func (p *PccClient) pccUserManagement(op string, endPoint string, data []byte) (
 	body []byte, err error) {
 
 	client := &http.Client{}

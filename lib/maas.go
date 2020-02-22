@@ -15,7 +15,7 @@ type MaasRequest struct {
 	models.MaasRequest
 }
 
-func (p PccClient) MaasDeploy(maasReq MaasRequest) (err error) {
+func (p *PccClient) MaasDeploy(maasReq MaasRequest) (err error) {
 	var (
 		data []byte
 		resp HttpResp

@@ -15,7 +15,7 @@ type Site struct {
 	models.Site
 }
 
-func (p PccClient) AddSite(siteReq Site) (err error) {
+func (p *PccClient) AddSite(siteReq Site) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("pccserver/site/add")
@@ -29,7 +29,7 @@ func (p PccClient) AddSite(siteReq Site) (err error) {
 	return
 }
 
-func (p PccClient) DelSite(siteReq Site) (err error) {
+func (p *PccClient) DelSite(siteReq Site) (err error) {
 	var data []byte
 
 	val := []uint64{siteReq.Id}
@@ -45,7 +45,7 @@ func (p PccClient) DelSite(siteReq Site) (err error) {
 	return
 }
 
-func (p PccClient) GetSites() (sites []Site, err error) {
+func (p *PccClient) GetSites() (sites []Site, err error) {
 	var resp HttpResp
 
 	endpoint := fmt.Sprintf("pccserver/site")
@@ -57,7 +57,7 @@ func (p PccClient) GetSites() (sites []Site, err error) {
 	return
 }
 
-func (p PccClient) FindSite(name string) (site Site, err error) {
+func (p *PccClient) FindSite(name string) (site Site, err error) {
 	var sites []Site
 
 	sites, err = p.GetSites()

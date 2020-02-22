@@ -62,7 +62,7 @@ type DelUser struct {
 	UserName string `json:"username"`
 }
 
-func (p PccClient) AddTenant(addReq Tenant) (err error) {
+func (p *PccClient) AddTenant(addReq Tenant) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/tenant/register")
@@ -73,7 +73,7 @@ func (p PccClient) AddTenant(addReq Tenant) (err error) {
 	return
 }
 
-func (p PccClient) DelTenant(tenantId uint64) (err error) {
+func (p *PccClient) DelTenant(tenantId uint64) (err error) {
 	var (
 		data   []byte
 		delReq Tenant
@@ -88,7 +88,7 @@ func (p PccClient) DelTenant(tenantId uint64) (err error) {
 	return
 }
 
-func (p PccClient) GetTenants() (tenants []Tenant, err error) {
+func (p *PccClient) GetTenants() (tenants []Tenant, err error) {
 	var body []byte
 
 	endpoint := fmt.Sprintf("user-management/tenant/list")
@@ -100,7 +100,7 @@ func (p PccClient) GetTenants() (tenants []Tenant, err error) {
 	return
 }
 
-func (p PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (
+func (p *PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (
 	err error) {
 
 	var data []byte
@@ -117,7 +117,7 @@ func (p PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (
 	return
 }
 
-func (p PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
+func (p *PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
 	var tenants []Tenant
 
 	tenants, err = p.GetTenants()
@@ -135,7 +135,7 @@ func (p PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
 	return
 }
 
-func (p PccClient) GetUsers() (users []User, err error) {
+func (p *PccClient) GetUsers() (users []User, err error) {
 	var body []byte
 
 	endpoint := fmt.Sprintf("user-management/user/list")
@@ -147,7 +147,7 @@ func (p PccClient) GetUsers() (users []User, err error) {
 	return
 }
 
-func (p PccClient) AddUser(addUser AddUser) (err error) {
+func (p *PccClient) AddUser(addUser AddUser) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/user/register")
@@ -158,7 +158,7 @@ func (p PccClient) AddUser(addUser AddUser) (err error) {
 	return
 }
 
-func (p PccClient) UpdateUser(addUser AddUser) (err error) {
+func (p *PccClient) UpdateUser(addUser AddUser) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/user/update")
@@ -169,7 +169,7 @@ func (p PccClient) UpdateUser(addUser AddUser) (err error) {
 	return
 }
 
-func (p PccClient) DelUser(user string) (err error) {
+func (p *PccClient) DelUser(user string) (err error) {
 	var data []byte
 
 	endpoint := fmt.Sprintf("user-management/user/delete")

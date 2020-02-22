@@ -8,8 +8,8 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
-	"os/exec"
 	"testing"
 	"time"
 
@@ -18,7 +18,8 @@ import (
 )
 
 var Env testEnv
-var Pcc pcc.PccClient
+var envFile string = "testEnv.json"
+var Pcc *pcc.PccClient
 
 var Nodes = make(map[uint64]*pcc.NodeWithKubernetes)
 var SecurityKeys = make(map[string]*pcc.SecurityKey)
@@ -26,9 +27,8 @@ var NodebyHostIP = make(map[string]uint64)
 
 func TestMain(m *testing.M) {
 	var (
-		ecode  int
-		output []byte
-		err    error
+		ecode int
+		err   error
 	)
 	defer func() {
 		if r := recover(); r != nil {
@@ -40,14 +40,14 @@ func TestMain(m *testing.M) {
 		}
 	}()
 
-	output, err = exec.Command("cat", "testEnv.json").Output()
+	data, err := ioutil.ReadFile(envFile)
 	if err != nil {
-		panic(fmt.Errorf("no testEnv.json found"))
+		panic(fmt.Errorf("Error opening %v: %v", envFile, err))
 	}
 
-	if err = json.Unmarshal(output, &Env); err != nil {
-		panic(fmt.Errorf("error unmarshalling testEnv.json\n %v",
-			err.Error()))
+	if err = json.Unmarshal(data, &Env); err != nil {
+		panic(fmt.Errorf("error unmarshalling %v: %v\n",
+			envFile, err.Error()))
 	}
 
 	credential := pcc.Credential{
@@ -56,7 +56,7 @@ func TestMain(m *testing.M) {
 	}
 	Pcc, err = pcc.Authenticate(Env.PccIp, credential)
 	if err != nil {
-		panic(fmt.Errorf("%v\n", err))
+		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
 
 	flag.Parse()
@@ -153,7 +153,7 @@ func TestDeleteK8s(t *testing.T) {
 func TestPortus(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
@@ -169,7 +169,7 @@ func TestPortus(t *testing.T) {
 func TestHardwareInventory(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "hardwareinventory", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
