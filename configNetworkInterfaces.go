@@ -172,7 +172,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	if intfReq.Autoneg == "off" {
 		if intfReq.Speed != json.Number(iface.Interface.Speed) {
 			fmt.Printf("    speed mismatch %v %v\n",
-				intfReq.Autoneg, iface.Interface.Speed)
+				intfReq.Speed, iface.Interface.Speed)
 			return
 		}
 	}
