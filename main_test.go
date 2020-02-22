@@ -156,7 +156,7 @@ func TestPortus(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
-		//mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "uploadSecurityAuthProfileCertificate", UploadSecurityAuthProfileCert)
 		mayRun(t, "addProfile", AddAuthenticationProfile)
 		mayRun(t, "uploadSecurityPortusKey", UploadSecurityPortusKey)
