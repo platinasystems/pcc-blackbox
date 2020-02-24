@@ -3,6 +3,7 @@ module github.com/platinasystems/pcc-blackbox
 go 1.13
 
 require (
+	github.com/KyleBanks/dockerstats v0.0.0-20180213183355-b5fec062e953
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.3.0

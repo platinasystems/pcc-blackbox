@@ -25,6 +25,8 @@ var Nodes = make(map[uint64]*pcc.NodeWithKubernetes)
 var SecurityKeys = make(map[string]*pcc.SecurityKey)
 var NodebyHostIP = make(map[string]uint64)
 
+var dockerStats *pcc.DockerStats
+
 func TestMain(m *testing.M) {
 	var (
 		ecode int
@@ -59,6 +61,7 @@ func TestMain(m *testing.M) {
 		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
 
+	dockerStats = pcc.InitDockerStats(Env.DockerStats)
 	flag.Parse()
 	if *test.DryRun {
 		m.Run()
@@ -66,6 +69,9 @@ func TestMain(m *testing.M) {
 	}
 
 	ecode = m.Run()
+
+	dockerStats.Stop()
+	fmt.Println("\n\nTEST COMPLETED")
 }
 
 var count uint
@@ -225,6 +231,7 @@ func TestGen(t *testing.T) {
 }
 
 func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
+	dockerStats.ChangePhase(name)
 	var ret bool
 	t.Helper()
 	if !t.Failed() {
