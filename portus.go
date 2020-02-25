@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"fmt"
 	"testing"
 	"time"
@@ -71,16 +70,7 @@ func installPortus(t *testing.T) {
 			} else {
 				authProfile, err := Pcc.GetAuthProfileByName(CurrentAuthProfileName)
 				if err == nil {
-					data, err := json.Marshal(authProfile)
-					if err != nil {
-						assert.Fatalf("marshal failed\n")
-						return
-					}
-					err = json.Unmarshal(data, &portusConfiguration.AuthenticationProfile)
-					if err != nil {
-						assert.Fatalf("unmarshal failed\n")
-						return
-					}
+					portusConfiguration.AuthenticationProfileId = &authProfile.ID
 				} else {
 					fmt.Printf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
 				}
@@ -105,15 +95,16 @@ func installPortus(t *testing.T) {
 
 			err = Pcc.InstallPortusNode(portusConfiguration)
 			if err != nil {
-				assert.Fatalf("Failed to install Portus: %v\n",
-					err)
-				return
+				fmt.Printf("Portus installation in %v failed\n%v\n", node.Host, err)
+				fmt.Printf("Trying in another node\n")
+			} else {
+				PortusSelectedNodeIds = append(PortusSelectedNodeIds, node.Id)
+				break
 			}
-
-			PortusSelectedNodeIds = append(PortusSelectedNodeIds,
-				node.Id)
-			break
 		}
+	}
+	if len(PortusSelectedNodeIds) == 0 {
+		assert.Fatal("Failed to install Portus: No available nodes\n")
 	}
 }
 
