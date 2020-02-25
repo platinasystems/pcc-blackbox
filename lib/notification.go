@@ -15,7 +15,7 @@ type Notification struct {
 	models.Notification
 }
 
-func (p PccClient) GetNotifications() (notifications []Notification, err error) {
+func (p *PccClient) GetNotifications() (notifications []Notification, err error) {
 	var (
 		resp     HttpResp
 		endpoint string

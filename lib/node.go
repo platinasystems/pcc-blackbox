@@ -37,7 +37,7 @@ type NodeDetail struct {
 	Interfaces []*InterfaceDetail `json:"interfaces"`
 }
 
-func (p PccClient) GetNodesDetail() (nodes []*NodeDetail, err error) {
+func (p *PccClient) GetNodesDetail() (nodes []*NodeDetail, err error) {
 	var resp HttpResp
 
 	endpoint := fmt.Sprintf("pccserver/node")
@@ -54,7 +54,7 @@ func (p PccClient) GetNodesDetail() (nodes []*NodeDetail, err error) {
 	return
 }
 
-func (p PccClient) GetNodesWithKubernetes() (nodes []*NodeWithKubernetes,
+func (p *PccClient) GetNodesWithKubernetes() (nodes []*NodeWithKubernetes,
 	err error) {
 
 	var resp HttpResp
@@ -73,7 +73,7 @@ func (p PccClient) GetNodesWithKubernetes() (nodes []*NodeWithKubernetes,
 	return
 }
 
-func (p PccClient) GetNodesId(id uint64) (node NodeDetail, err error) {
+func (p *PccClient) GetNodesId(id uint64) (node NodeDetail, err error) {
 	var resp HttpResp
 
 	endpoint := fmt.Sprintf("pccserver/node/%v", id)
@@ -90,7 +90,7 @@ func (p PccClient) GetNodesId(id uint64) (node NodeDetail, err error) {
 	return
 }
 
-func (p PccClient) FindNodeId(name string) (id uint64, err error) {
+func (p *PccClient) FindNodeId(name string) (id uint64, err error) {
 
 	var nodes []*NodeWithKubernetes
 
@@ -108,7 +108,7 @@ func (p PccClient) FindNodeId(name string) (id uint64, err error) {
 	return
 }
 
-func (p PccClient) GetProvisionStatus(id uint64) (status string, err error) {
+func (p *PccClient) GetProvisionStatus(id uint64) (status string, err error) {
 
 	var resp HttpResp
 
@@ -124,7 +124,7 @@ func (p PccClient) GetProvisionStatus(id uint64) (status string, err error) {
 	return
 }
 
-func (p PccClient) GetNodeSummary(id uint64, node *NodeWithKubernetes) (err error) {
+func (p *PccClient) GetNodeSummary(id uint64, node *NodeWithKubernetes) (err error) {
 
 	var resp HttpResp
 
@@ -143,7 +143,7 @@ func (p PccClient) GetNodeSummary(id uint64, node *NodeWithKubernetes) (err erro
 	return
 }
 
-func (p PccClient) GetNodeConnectionStatus(node *NodeWithKubernetes) (status string, err error) {
+func (p *PccClient) GetNodeConnectionStatus(node *NodeWithKubernetes) (status string, err error) {
 	if node.NodeAvailabilityStatus != nil {
 		status = node.NodeAvailabilityStatus.ConnectionStatus
 		return
@@ -152,7 +152,7 @@ func (p PccClient) GetNodeConnectionStatus(node *NodeWithKubernetes) (status str
 	return
 }
 
-func (p PccClient) IsNodeOnline(node *NodeWithKubernetes) bool {
+func (p *PccClient) IsNodeOnline(node *NodeWithKubernetes) bool {
 	status, err := p.GetNodeConnectionStatus(node)
 	if err != nil {
 		return false
@@ -163,7 +163,7 @@ func (p PccClient) IsNodeOnline(node *NodeWithKubernetes) bool {
 	return false
 }
 
-func (p PccClient) AddNode(hostIp string, pccManaged bool) (node NodeWithKubernetes, err error) {
+func (p *PccClient) AddNode(hostIp string, pccManaged bool) (node NodeWithKubernetes, err error) {
 
 	var (
 		addReq   NodeWithKubernetes
@@ -196,7 +196,7 @@ func (p PccClient) AddNode(hostIp string, pccManaged bool) (node NodeWithKuberne
 	return
 }
 
-func (p PccClient) UpdateNode(addReq NodeWithKubernetes) (node NodeWithKubernetes, err error) {
+func (p *PccClient) UpdateNode(addReq NodeWithKubernetes) (node NodeWithKubernetes, err error) {
 
 	var (
 		data     []byte
@@ -224,7 +224,7 @@ func (p PccClient) UpdateNode(addReq NodeWithKubernetes) (node NodeWithKubernete
 	return
 }
 
-func (p PccClient) DelNode(id uint64) (err error) {
+func (p *PccClient) DelNode(id uint64) (err error) {
 	var (
 		endpoint string
 		resp     HttpResp

@@ -29,7 +29,7 @@ type LDAPConfiguration struct {
 	models.LDAPConfiguration
 }
 
-func (p PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error) {
+func (p *PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error) {
 	var (
 		data []byte
 		resp HttpResp
@@ -52,7 +52,7 @@ func (p PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error)
 	return
 }
 
-func (p PccClient) GetAuthProfiles() (authProfiles []AuthenticationProfile, err error) {
+func (p *PccClient) GetAuthProfiles() (authProfiles []AuthenticationProfile, err error) {
 	var (
 		resp HttpResp
 	)
@@ -70,7 +70,7 @@ func (p PccClient) GetAuthProfiles() (authProfiles []AuthenticationProfile, err 
 	return
 }
 
-func (p PccClient) GetAuthProfileById(id uint64) (authProfile AuthenticationProfile, err error) {
+func (p *PccClient) GetAuthProfileById(id uint64) (authProfile AuthenticationProfile, err error) {
 	var (
 		endpoint string
 		resp     HttpResp
@@ -92,7 +92,7 @@ func (p PccClient) GetAuthProfileById(id uint64) (authProfile AuthenticationProf
 
 }
 
-func (p PccClient) GetAuthProfileByName(name string) (authProfile *AuthenticationProfile, err error) {
+func (p *PccClient) GetAuthProfileByName(name string) (authProfile *AuthenticationProfile, err error) {
 
 	var (
 		resp         HttpResp
@@ -120,7 +120,7 @@ func (p PccClient) GetAuthProfileByName(name string) (authProfile *Authenticatio
 
 }
 
-func (p PccClient) DelAuthProfile(id uint64) (err error) {
+func (p *PccClient) DelAuthProfile(id uint64) (err error) {
 	var (
 		resp     HttpResp
 		endpoint string

@@ -43,7 +43,7 @@ type SecurityKey struct {
 	PublicPath  string `json:"PublicPath"`
 }
 
-func (p PccClient) UploadKey(filePath string, label string, fileType string, description string) (err error) {
+func (p *PccClient) UploadKey(filePath string, label string, fileType string, description string) (err error) {
 
 	if fileType != PRIVATE_KEY && fileType != PUBLIC_KEY {
 		err = fmt.Errorf("Invalid security key type [%v]\n", fileType)
@@ -82,7 +82,7 @@ func (p PccClient) UploadKey(filePath string, label string, fileType string, des
 	return
 }
 
-func (p PccClient) DeleteKey(label string) (err error) {
+func (p *PccClient) DeleteKey(label string) (err error) {
 	var (
 		resp     HttpResp
 		endpoint string
@@ -99,7 +99,7 @@ func (p PccClient) DeleteKey(label string) (err error) {
 	return
 }
 
-func (p PccClient) DeleteKeyById(id uint64) (err error) {
+func (p *PccClient) DeleteKeyById(id uint64) (err error) {
 	var (
 		resp     HttpResp
 		endpoint string
@@ -116,7 +116,7 @@ func (p PccClient) DeleteKeyById(id uint64) (err error) {
 	return
 }
 
-func (p PccClient) GetSecurityKeys() (secKeys []SecurityKey, err error) {
+func (p *PccClient) GetSecurityKeys() (secKeys []SecurityKey, err error) {
 	var (
 		resp     HttpResp
 		endpoint string
@@ -134,7 +134,7 @@ func (p PccClient) GetSecurityKeys() (secKeys []SecurityKey, err error) {
 	return
 }
 
-func (p PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error) {
+func (p *PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error) {
 	var (
 		resp     HttpResp
 		endpoint string
@@ -152,7 +152,7 @@ func (p PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error) 
 	return
 }
 
-func (p PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKey, err error) {
+func (p *PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKey, err error) {
 	var (
 		secKeys []SecurityKey
 	)
@@ -172,7 +172,7 @@ func (p PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKey
 	return
 }
 
-func (p PccClient) UploadCert(filePath string, label string, description string) (err error) {
+func (p *PccClient) UploadCert(filePath string, label string, description string) (err error) {
 
 	url := fmt.Sprintf("https://%s:9999/key-manager/certificates/upload/%v",
 		p.pccIp, label)
@@ -207,7 +207,7 @@ func (p PccClient) UploadCert(filePath string, label string, description string)
 	return
 }
 
-func (p PccClient) FindCertificate(alias string) (exist bool, certificate Certificate, err error) {
+func (p *PccClient) FindCertificate(alias string) (exist bool, certificate Certificate, err error) {
 	var (
 		certificates []Certificate
 		endpoint     string
@@ -235,7 +235,7 @@ func (p PccClient) FindCertificate(alias string) (exist bool, certificate Certif
 	return
 }
 
-func (p PccClient) GetCertificates() (certificates []Certificate, err error) {
+func (p *PccClient) GetCertificates() (certificates []Certificate, err error) {
 	var (
 		endpoint string
 	)
@@ -257,7 +257,7 @@ func (p PccClient) GetCertificates() (certificates []Certificate, err error) {
 	return
 }
 
-func (p PccClient) GetCertificate(id uint64) (certificate Certificate, err error) {
+func (p *PccClient) GetCertificate(id uint64) (certificate Certificate, err error) {
 	var (
 		endpoint string
 	)
@@ -276,7 +276,7 @@ func (p PccClient) GetCertificate(id uint64) (certificate Certificate, err error
 	return
 }
 
-func (p PccClient) DeleteCertificate(id uint64) (err error) {
+func (p *PccClient) DeleteCertificate(id uint64) (err error) {
 	var (
 		endpoint string
 		resp     HttpResp
@@ -295,7 +295,7 @@ func (p PccClient) DeleteCertificate(id uint64) (err error) {
 	return
 }
 
-func (p PccClient) CheckKeyLabelExists(label string) (exists bool, err error) {
+func (p *PccClient) CheckKeyLabelExists(label string) (exists bool, err error) {
 	var secKeys []SecurityKey
 
 	secKeys, err = p.GetSecurityKeys()

@@ -15,7 +15,7 @@ type ProvisionedApp struct {
 	models.ProvisionedApp
 }
 
-func (p PccClient) GetApps(nodeId uint64) (apps []ProvisionedApp, err error) {
+func (p *PccClient) GetApps(nodeId uint64) (apps []ProvisionedApp, err error) {
 
 	var (
 		endpoint string
@@ -38,7 +38,7 @@ func (p PccClient) GetApps(nodeId uint64) (apps []ProvisionedApp, err error) {
 	return
 }
 
-func (p PccClient) IsAppInstalled(nodeId uint64, appId string) (isInstalled bool) {
+func (p *PccClient) IsAppInstalled(nodeId uint64, appId string) (isInstalled bool) {
 	var (
 		apps []ProvisionedApp
 		err  error

@@ -19,7 +19,7 @@ type PortusConfiguration struct {
 	models.PortusConfiguration
 }
 
-func (p PccClient) GetPortusNodes() (portusConfigs []PortusConfiguration, err error) {
+func (p *PccClient) GetPortusNodes() (portusConfigs []PortusConfiguration, err error) {
 	var (
 		data []byte
 		resp HttpResp
@@ -40,7 +40,7 @@ func (p PccClient) GetPortusNodes() (portusConfigs []PortusConfiguration, err er
 	return
 }
 
-func (p PccClient) GetPortusNodeById(id uint64) (portusConfig PortusConfiguration, err error) {
+func (p *PccClient) GetPortusNodeById(id uint64) (portusConfig PortusConfiguration, err error) {
 	var (
 		endpoint string
 		data     []byte
@@ -63,7 +63,7 @@ func (p PccClient) GetPortusNodeById(id uint64) (portusConfig PortusConfiguratio
 	return
 }
 
-func (p PccClient) DelPortusNode(id uint64, removeStorage bool) (err error) {
+func (p *PccClient) DelPortusNode(id uint64, removeStorage bool) (err error) {
 	var (
 		endpoint string
 		resp     HttpResp
@@ -82,7 +82,7 @@ func (p PccClient) DelPortusNode(id uint64, removeStorage bool) (err error) {
 	return
 }
 
-func (p PccClient) InstallPortusNode(portusConfig PortusConfiguration) (err error) {
+func (p *PccClient) InstallPortusNode(portusConfig PortusConfiguration) (err error) {
 
 	var (
 		data []byte
@@ -99,7 +99,7 @@ func (p PccClient) InstallPortusNode(portusConfig PortusConfiguration) (err erro
 		return
 	}
 	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
+		err = fmt.Errorf("%v: %v", resp.Error, resp.Message)
 		return
 	}
 	return

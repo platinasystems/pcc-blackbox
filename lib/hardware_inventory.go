@@ -15,7 +15,7 @@ type HardwareInventory struct {
 	models.HardwareInventory
 }
 
-func (p PccClient) GetHardwareInventory() (hwInventory []HardwareInventory, err error) {
+func (p *PccClient) GetHardwareInventory() (hwInventory []HardwareInventory, err error) {
 	var (
 		endpoint string
 		resp     HttpResp

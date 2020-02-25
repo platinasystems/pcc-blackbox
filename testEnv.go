@@ -7,6 +7,7 @@ type testEnv struct {
 	PccIp                 string
 	Invaders              []invader
 	Servers               []server
+	DockerStats           pcc.DockerStatsConfig
 	AuthenticationProfile pcc.AuthenticationProfile
 	PortusConfiguration   pcc.PortusConfiguration
 }

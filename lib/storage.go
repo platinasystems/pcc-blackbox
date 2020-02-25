@@ -15,7 +15,7 @@ type StorageChildrenTO struct {
 	models.StorageChildrenTO
 }
 
-func (p PccClient) GetStorageNode(id uint64) (storage StorageChildrenTO, err error) {
+func (p *PccClient) GetStorageNode(id uint64) (storage StorageChildrenTO, err error) {
 	var (
 		endpoint string
 		resp     HttpResp

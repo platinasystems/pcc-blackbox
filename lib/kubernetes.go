@@ -38,7 +38,7 @@ type K8sCluster struct {
 	models.KCluster
 }
 
-func (p PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
+func (p *PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
 	var (
 		body []byte
 		data []byte
@@ -60,7 +60,7 @@ func (p PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
 	return
 }
 
-func (p PccClient) GetKubernetes() (clusters []K8sCluster, err error) {
+func (p *PccClient) GetKubernetes() (clusters []K8sCluster, err error) {
 	var (
 		body []byte
 		resp HttpResp
@@ -78,7 +78,7 @@ func (p PccClient) GetKubernetes() (clusters []K8sCluster, err error) {
 	return
 }
 
-func (p PccClient) GetKubernetesId(id uint64) (cluster K8sCluster, err error) {
+func (p *PccClient) GetKubernetesId(id uint64) (cluster K8sCluster, err error) {
 	var (
 		body []byte
 		resp HttpResp
@@ -96,7 +96,7 @@ func (p PccClient) GetKubernetesId(id uint64) (cluster K8sCluster, err error) {
 	return
 }
 
-func (p PccClient) FindKubernetesId(name string) (id uint64, err error) {
+func (p *PccClient) FindKubernetesId(name string) (id uint64, err error) {
 
 	var clusters []K8sCluster
 	if clusters, err = p.GetKubernetes(); err != nil {
@@ -112,7 +112,7 @@ func (p PccClient) FindKubernetesId(name string) (id uint64, err error) {
 	return
 }
 
-func (p PccClient) GetKubernetesDeployStatus(id uint64) (status string,
+func (p *PccClient) GetKubernetesDeployStatus(id uint64) (status string,
 	percent int8, err error) {
 
 	var cluster K8sCluster
@@ -125,7 +125,7 @@ func (p PccClient) GetKubernetesDeployStatus(id uint64) (status string,
 	return
 }
 
-func (p PccClient) GetKubernetesHealth(id uint64) (health string, err error) {
+func (p *PccClient) GetKubernetesHealth(id uint64) (health string, err error) {
 
 	var cluster K8sCluster
 
@@ -136,7 +136,7 @@ func (p PccClient) GetKubernetesHealth(id uint64) (health string, err error) {
 	return
 }
 
-func (p PccClient) DeleteKubernetes(id uint64, force bool) (err error) {
+func (p *PccClient) DeleteKubernetes(id uint64, force bool) (err error) {
 
 	var (
 		data []byte

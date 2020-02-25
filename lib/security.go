@@ -23,7 +23,7 @@ type PccClient struct {
 	bearer string
 }
 
-func Authenticate(PccIp string, cred Credential) (pcc PccClient, err error) {
+func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
 	var (
 		data []byte
 		resp *http.Response
@@ -40,6 +40,11 @@ func Authenticate(PccIp string, cred Credential) (pcc PccClient, err error) {
 		return
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != 200 {
+		err = fmt.Errorf("%v: %v", resp.Header.Get("Message"),
+			resp.Header.Get("Error"))
+		return
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
@@ -50,7 +55,7 @@ func Authenticate(PccIp string, cred Credential) (pcc PccClient, err error) {
 	if err != nil {
 		return
 	}
-	pcc.bearer = "Bearer " + out.Token
-	pcc.pccIp = PccIp
+	bearerToken := "Bearer " + out.Token
+	pcc = &PccClient{pccIp: PccIp, bearer: bearerToken}
 	return
 }
