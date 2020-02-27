@@ -10,6 +10,7 @@ type testEnv struct {
 	DockerStats           pcc.DockerStatsConfig
 	AuthenticationProfile pcc.AuthenticationProfile
 	PortusConfiguration   pcc.PortusConfiguration
+	CephConfiguration     pcc.CephConfiguration
 }
 
 type node struct {

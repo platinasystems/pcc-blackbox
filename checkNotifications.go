@@ -65,7 +65,7 @@ func syncCheckGenericInstallation(id uint64, appTimeout time.Duration, str2Check
 		time.Sleep(FREQUENCY * time.Second)
 	}
 
-	s.msg = fmt.Sprintf("\"%v\" notification not found in events..timeout exceeded", str2Check)
+	s.msg = fmt.Sprint("timeout exceeded")
 	s.isError = true
 	found <- s
 }
