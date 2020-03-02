@@ -23,12 +23,6 @@ type PccClient struct {
 	bearer string
 }
 
-var pccClient *PccClient
-
-func GetPccClient() *PccClient {
-	return pccClient
-}
-
 func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
 	var (
 		data []byte
@@ -63,6 +57,5 @@ func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
 	}
 	bearerToken := "Bearer " + out.Token
 	pcc = &PccClient{pccIp: PccIp, bearer: bearerToken}
-	pccClient = pcc
 	return
 }

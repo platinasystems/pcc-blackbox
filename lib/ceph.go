@@ -41,6 +41,14 @@ const (
 	CEPH_POOL_DATA_2 = "dataPool2"
 
 	CEPH_FS_NAME = CEPH_CLUSTER_NAME_PREFIX + "_fs"
+
+	// For Verification
+	CEPH_CLUSTER_INSTALL_EVENT 	= "cephClusterInstall"
+	CEPH_CLUSTER_UNINSTALL_EVENT 	= "cephClusterUninstall"
+	CEPH_POOL_CREATE_EVENT 		= "cephPoolCreate"
+	CEPH_POOL_DELETE_EVENT 		= "cephPoolDelete"
+	CEPH_FS_CREATE_EVENT 		= "cephFSCreate"
+	CEPH_FS_DELETE_EVENT 		= "cephFSDelete"
 )
 
 var (
@@ -107,26 +115,36 @@ type CephConfiguration struct {
 	IgwPolicy          string	   `json:"igwPolicy"`
 	ControlCIDR        string          `json:"controlCIDR"`
 	Tests 		   map[string]bool `json:"tests"`
+	PccClient          *PccClient
 }
 
-var cephConfig CephConfiguration
+func (config *CephConfiguration) GetCephClusterName() string {
+	return config.ClusterName
+}
 
-func (p *PccClient) SetCephConfig(config CephConfiguration, identifier string) error{
-	cephConfig = config
-	if cephConfig.ClusterName != "" {
-		cluster, err := p.GetCephCluster()
+func (config *CephConfiguration) SetCephClusterName(name string) {
+	config.ClusterName = name
+}
+
+func (config *CephConfiguration) GetCephClusterId() uint64 {
+	return config.ClusterId
+}
+
+func (config *CephConfiguration) SetCephClusterId(id uint64) {
+	config.ClusterId = id
+}
+
+func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier string) error{
+	if config.ClusterName != "" {
+		cluster, err := p.GetCephCluster(config.ClusterName)
 		if err != nil {
 			return err
 		}
-		cephConfig.ClusterId = cluster.Id
+		config.ClusterId = cluster.Id
 	} else {
-		p.SetCephClusterName(fmt.Sprintf("%s_%s", CEPH_CLUSTER_NAME_PREFIX, identifier))
+		config.ClusterName = fmt.Sprintf("%s_%s", CEPH_CLUSTER_NAME_PREFIX, identifier)
 	}
 	return nil
-}
-
-func GetCephConfig() CephConfiguration {
-	return cephConfig
 }
 
 type CreateCephClusterRequest struct {
@@ -142,21 +160,6 @@ type CreateCephClusterRequest struct {
 
 type CephNodes struct {
 	ID uint64
-}
-func (p *PccClient) GetCephClusterName() string {
-	return cephConfig.ClusterName
-}
-
-func (p *PccClient) SetCephClusterName(name string) {
-	cephConfig.ClusterName = name
-}
-
-func (p *PccClient) GetCephClusterId() uint64 {
-	return cephConfig.ClusterId
-}
-
-func (p *PccClient) SetCephClusterId(id uint64) {
-	cephConfig.ClusterId = id
 }
 
 func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint64, err error) {
@@ -176,7 +179,7 @@ func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint
 				err = fmt.Errorf("%v\n", string(body))
 			}
 			time.Sleep(time.Second * 5)
-			cluster, errGet := p.GetCephCluster()
+			cluster, errGet := p.GetCephCluster(request.Name)
 			if errGet == nil {
 				if cluster != nil {
 					id = cluster.Id
@@ -191,20 +194,20 @@ func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint
 	return
 }
 
-func (p *PccClient) GetCephCluster() (cluster *models.CephCluster, err error){
+func (p *PccClient) GetCephCluster(clusterName string) (cluster *models.CephCluster, err error){
 	if clusters, err := p.GetAllCephClusters(); err != nil {
 		return nil, err
 	}else {
 		if len(clusters) > 0 {
 			for _, cluster = range clusters {
-				if cluster.Name != p.GetCephClusterName() {
+				if cluster.Name != clusterName {
 					continue
 				} else {
 					return cluster, nil
 				}
 			}
 		}else {
-			err = fmt.Errorf("Ceph cluster %v not found", p.GetCephClusterName())
+			err = fmt.Errorf("Ceph cluster %v not found", clusterName)
 		}
 	}
 	return nil, err
@@ -262,8 +265,8 @@ type CreateCephPoolRequest struct {
 	FailureDomain int            `json:"failure_domain,omitempty"`
 }
 
-func (p *PccClient) GetCephPool(name string) (cephPool *models.CephPool, err error) {
-	pools, err := p.GetAllCephPools()
+func (p *PccClient) GetCephPool(name string, cephClusterId uint64) (cephPool *models.CephPool, err error) {
+	pools, err := p.GetAllCephPools(cephClusterId)
 	if err == nil {
 		if len(pools) > 0 {
 			for _, pool := range pools {
@@ -279,14 +282,14 @@ func (p *PccClient) GetCephPool(name string) (cephPool *models.CephPool, err err
 	return nil, err
 }
 
-func (p *PccClient) GetAllCephPools() (cephPools []*models.CephPool, err error) {
-	if id := p.GetCephClusterId(); id != 0{
+func (p *PccClient) GetAllCephPools(cephClusterId uint64) (cephPools []*models.CephPool, err error) {
+	if cephClusterId != 0{
 		var (
 			body              []byte
 			data              []byte
 			resp              HttpResp
 		)
-		endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v/pools", id)
+		endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v/pools", cephClusterId)
 		if resp, body, err = p.pccGateway("GET", endpoint, data); err != nil {
 			err = fmt.Errorf("%v\n%v\n", string(body), err)
 		}else if resp.Status != 200 {
@@ -326,7 +329,7 @@ func (p *PccClient) CreateCephPool(request CreateCephPoolRequest) (id uint64, er
 				err = fmt.Errorf("%v\n", string(body))
 			}
 			time.Sleep(time.Second * 5)
-			cephPool, errGet := p.GetCephPool(request.Name)
+			cephPool, errGet := p.GetCephPool(request.Name, request.CephClusterId)
 			if errGet == nil {
 				if cephPool != nil {
 					id = cephPool.Id
@@ -365,8 +368,8 @@ type CreateCephFSRequest struct {
 	MaxMDS        int            `json:"max_mds,omitempty"`
 }
 
-func (p *PccClient) GetCephFS(name string) (cephFS *models.CephFS, err error) {
-	cephFSList, err := p.GetAllCephFS()
+func (p *PccClient) GetCephFS(name string, cephClusterId uint64) (cephFS *models.CephFS, err error) {
+	cephFSList, err := p.GetAllCephFS(cephClusterId)
 	if err == nil {
 		if len(cephFSList) > 0 {
 			for _, fs := range cephFSList {
@@ -382,14 +385,14 @@ func (p *PccClient) GetCephFS(name string) (cephFS *models.CephFS, err error) {
 	return nil, err
 }
 
-func (p *PccClient) GetAllCephFS() (cephFSList []*models.CephFS, err error) {
-	if id := p.GetCephClusterId(); id != 0{
+func (p *PccClient) GetAllCephFS(cephClusterId uint64) (cephFSList []*models.CephFS, err error) {
+	if cephClusterId != 0{
 		var (
 			body              []byte
 			data              []byte
 			resp              HttpResp
 		)
-		endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v/fs", id)
+		endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v/fs", cephClusterId)
 		if resp, body, err = p.pccGateway("GET", endpoint, data); err != nil {
 			err = fmt.Errorf("%v\n%v\n", string(body), err)
 		}else if resp.Status != 200 {
@@ -425,7 +428,7 @@ func (p *PccClient) CreateCephFS(request CreateCephFSRequest) (id uint64, err er
 				err = fmt.Errorf("%v\n", string(body))
 			}
 			time.Sleep(time.Second * 5)
-			cephFS, errGet := p.GetCephFS(request.Name)
+			cephFS, errGet := p.GetCephFS(request.Name, request.CephClusterId)
 			if errGet == nil {
 				if cephFS != nil {
 					id = cephFS.Id
@@ -454,17 +457,117 @@ func (p *PccClient) DeleteCephFS(id uint64) (err error) {
 	return nil
 }
 
-func (p *PccClient) VerifyCeph(startTime time.Time, action string, name string) (s Status, err error){
-	s = Verify(startTime, action, name)
+func (config *CephConfiguration) VerifyCeph(startTime time.Time, action string, name string) (s Status, err error){
+	s = config.PccClient.Verify(startTime, config.getCephVerifier(action, name))
 
 	failed := !( strings.Contains(s.Msg, CEPH_INSTALLATION_SUCCESS_NOTIFICATION) ||
 		strings.Contains(s.Msg, CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION) ||
-		strings.Contains(s.Msg, fmt.Sprintf(CEPH_POOL_CREATION_SUCCESS_NOTIFICATION, name, p.GetCephClusterName())) ||
+		strings.Contains(s.Msg, fmt.Sprintf(CEPH_POOL_CREATION_SUCCESS_NOTIFICATION, name, config.ClusterName)) ||
 		strings.Contains(s.Msg, fmt.Sprintf(CEPH_POOL_DELETION_SUCCESS_NOTIFICATION, name)) ||
-		strings.Contains(s.Msg, fmt.Sprintf(CEPH_FS_CREATION_SUCCESS_NOTIFICATION, name, p.GetCephClusterName())) ||
+		strings.Contains(s.Msg, fmt.Sprintf(CEPH_FS_CREATION_SUCCESS_NOTIFICATION, name, config.ClusterName)) ||
 		strings.Contains(s.Msg, fmt.Sprintf(CEPH_FS_DELETION_SUCCESS_NOTIFICATION, name)) )
 	if s.IsError || failed {
 		err = fmt.Errorf("%v", s.Msg)
+	}
+	return
+}
+
+type CephVerifier struct {
+	timeout time.Duration
+	events EventsToCheck
+	breakLoop chan bool
+}
+
+func (v *CephVerifier) GetTimeout() time.Duration {
+	return v.timeout
+}
+
+func (v *CephVerifier) GetEventsToCheck() EventsToCheck {
+	return v.events
+}
+
+func (v *CephVerifier) GetBreakLoopChan() chan bool {
+	return v.breakLoop
+}
+
+func (config *CephConfiguration) getCephVerifier(action string, name string) (v *CephVerifier){
+	switch action {
+	case CEPH_CLUSTER_INSTALL_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_3_NODE_INSTALLATION_TIMEOUT,
+			events: EventsToCheck{
+				CEPH_INSTALLATION_SUCCESS_NOTIFICATION : true,
+				fmt.Sprintf(CEPH_INSTALLATION_FAILED_NOTIFICATION_1, config.GetCephClusterName()): true,
+				CEPH_INSTALLATION_FAILED_NOTIFICATION_2: true,
+				CEPH_INSTALLATION_FAILED_NOTIFICATION_3: true,
+				fmt.Sprintf(CEPH_INSTALLATION_FAILED_NOTIFICATION_4, config.GetCephClusterName()): true,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_1: false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_2: false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_3: false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_4: false,
+				fmt.Sprintf(CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_5, config.GetCephClusterName()): false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_6: false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_7: false,
+				CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_8: false,
+			},
+			breakLoop: make(chan bool),
+		}
+	case CEPH_CLUSTER_UNINSTALL_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_3_NODE_UNINSTALLATION_TIMEOUT,
+			events: EventsToCheck{
+				CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION: true,
+				fmt.Sprintf(CEPH_UNINSTALLATION_FAILED_NOTIFICATION_1, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_UNINSTALLATION_FAILED_NOTIFICATION_2, config.GetCephClusterName()): true,
+				CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_1: false,
+				CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_2: false,
+				CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_3: false,
+				CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_4: false,
+			},
+			breakLoop: make(chan bool),
+		}
+	case CEPH_POOL_CREATE_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_POOL_CREATION_TIMEOUT,
+			events: EventsToCheck{
+				fmt.Sprintf(CEPH_POOL_CREATION_SUCCESS_NOTIFICATION, name, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_POOL_CREATION_FAILED_NOTIFICATION, name, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_POOL_CREATION_INTERMEDIATE_NOTIFICATION_1, name, config.GetCephClusterName()): false,
+			},
+			breakLoop: make(chan bool),
+		}
+	case CEPH_POOL_DELETE_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_POOL_DELETION_TIMEOUT,
+			events: EventsToCheck{
+				fmt.Sprintf(CEPH_POOL_DELETION_SUCCESS_NOTIFICATION, name): true,
+				fmt.Sprintf(CEPH_POOL_DELETION_FAILED_NOTIFICATION, name): true,
+				fmt.Sprintf(CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1, name, config.GetCephClusterName()): false,
+			},
+			breakLoop: make(chan bool),
+		}
+	case CEPH_FS_CREATE_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_FS_CREATION_TIMEOUT,
+			events: EventsToCheck{
+				fmt.Sprintf(CEPH_FS_CREATION_SUCCESS_NOTIFICATION, name, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_FS_CREATION_FAILED_NOTIFICATION_1, name, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_FS_CREATION_FAILED_NOTIFICATION_2, name, config.GetCephClusterName()): true,
+				fmt.Sprintf(CEPH_FS_CREATION_INTERMEDIATE_NOTIFICATION_1, name, config.GetCephClusterName()): false,
+			},
+			breakLoop: make(chan bool),
+		}
+	case CEPH_FS_DELETE_EVENT:
+		v = &CephVerifier{
+			timeout: CEPH_FS_DELETION_TIMEOUT,
+			events: EventsToCheck{
+				fmt.Sprintf(CEPH_FS_DELETION_SUCCESS_NOTIFICATION, name): true,
+				fmt.Sprintf(CEPH_FS_DELETION_FAILED_NOTIFICATION_1, name): true,
+				fmt.Sprintf(CEPH_FS_DELETION_FAILED_NOTIFICATION_2, name): true,
+				fmt.Sprintf(CEPH_FS_DELETION_INTERMEDIATE_NOTIFICATION_1, name): false,
+			},
+			breakLoop: make(chan bool),
+		}
 	}
 	return
 }
