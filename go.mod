@@ -5,6 +5,7 @@ go 1.13
 require (
 	github.com/KyleBanks/dockerstats v0.0.0-20180213183355-b5fec062e953
 	github.com/go-playground/universal-translator v0.17.0 // indirect
+	github.com/gorilla/websocket v1.4.1
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.3.0
 	github.com/mitchellh/mapstructure v1.1.2

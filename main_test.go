@@ -94,6 +94,7 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
+		mayRun(t, "monitorWebsocket", monitorWebsocketTest)
 	})
 }
 
@@ -226,6 +227,7 @@ func TestClean(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		mayRun(t, "monitorRestTest", monitorRestTest)
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
 		mayRun(t, "delAllPortus", delAllPortus)
 		mayRun(t, "delAllNodes", delAllNodes)
@@ -242,6 +244,16 @@ func TestGen(t *testing.T) {
 	// testEnv.json file from existing PCC setup.
 	genEnv()
 	os.Exit(0)
+}
+
+func TestMonitor(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "monitor", func(t *testing.T) {
+		mayRun(t, "getNodesList", getNodes)
+		mayRun(t, "WebSocketTest", monitorTest)
+	})
 }
 
 func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
