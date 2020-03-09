@@ -6,9 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/websocket"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"net/url"
 	"strings"
 	"time"
@@ -16,57 +14,36 @@ import (
 
 // Rest
 
-type Monitor struct {
-	Token    string
-	Url      string
-	Insecure bool
+func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeIds []uint64, fields []string) (result string, err error) {
 
-	Ws Ws
-}
+	var (
+		body []byte
+		data []byte
+		resp HttpResp
+	)
 
-func (m *Monitor) GetHistorical(topic string, from int64, to int64, nodeIds []uint64, fields []string) (string, error) {
-
-	client := m.getTLSClient()
 	endpoint := fmt.Sprintf("monitor/topic/%s/historical", topic)
 
-	// Prepare body content
-	content := getHistorical(from, to, nodeIds, fields)
-
-	// Prepare post
-	req, err := http.NewRequest("POST", fmt.Sprintf("https://%s/%s", m.Url, endpoint), strings.NewReader(content))
+	data = toHistoricalData(from, to, nodeIds, fields)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	req.Header.Add("Authorization", m.Token)
-	req.Header.Set("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	defer resp.Body.Close()
+	resp, body, err = p.pccGateway("POST", endpoint, data)
 	if err != nil {
-		return "", err
+		return
 	}
 
-	body, _ := ioutil.ReadAll(resp.Body)
-	return string(body), nil
+	if resp.Status != 200 && resp.Status != 0 {
+		err = fmt.Errorf("%v: %v", resp.Error, resp.Message)
+		return
+	}
+
+	result = string(body)
+	return
 }
 
-func (m *Monitor) getTLSClient() *http.Client {
-
-	// Get the SystemCertPool, continue with an empty pool on error
-	rootCAs, _ := x509.SystemCertPool()
-	if rootCAs == nil {
-		rootCAs = x509.NewCertPool()
-	}
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: m.Insecure, RootCAs: rootCAs},
-	}
-
-	return &http.Client{Transport: tr}
-}
-
-func getHistorical(from int64, to int64, nodeIds []uint64, fields []string) string {
+func toHistoricalData(from int64, to int64, nodeIds []uint64, fields []string) []byte {
 
 	type TimeRange struct {
 		From int64 `json:"from"`
@@ -80,12 +57,10 @@ func getHistorical(from int64, to int64, nodeIds []uint64, fields []string) stri
 	}
 	h := Historical{TimeRange: TimeRange{From: from, To: to}, NodeIds: nodeIds, Fields: fields}
 	b, err := json.Marshal(h)
-
 	if err != nil {
-		return ""
-	} else {
-		return string(b)
+		return nil
 	}
+	return b
 }
 
 // Websocket
@@ -115,13 +90,10 @@ type WsStatistics struct {
 	ActiveNodeMap map[uint64]uint64
 }
 
-func NewMonitor(token string, url string, insecure bool) *Monitor {
-	m := &Monitor{Token: token, Url: url, Insecure: insecure, Ws: Ws{Statistics: &WsStatistics{ActiveNodeMap: make(map[uint64]uint64)}}}
-	return m
-}
+func (p *PccClient) WsLiveDataConnect() (ws *Ws) {
 
-func (m *Monitor) WSConnect() bool {
-	u := url.URL{Scheme: "wss", Host: m.Url, Path: "/monitor/data/live", RawQuery: fmt.Sprintf("Authorization=%s", strings.Replace(m.Token, "Bearer ", "", 1))}
+	ws = &Ws{Statistics: &WsStatistics{ActiveNodeMap: make(map[uint64]uint64)}}
+	u := url.URL{Scheme: "wss", Host: p.pccIp + ":9999", Path: "/monitor/data/live", RawQuery: fmt.Sprintf("Authorization=%s", strings.Replace(p.bearer, "Bearer ", "", 1))}
 
 	// Get the SystemCertPool, continue with an empty pool on error
 	rootCAs, _ := x509.SystemCertPool()
@@ -130,45 +102,45 @@ func (m *Monitor) WSConnect() bool {
 	}
 
 	dialer := websocket.DefaultDialer
-	dialer.TLSClientConfig = &tls.Config{RootCAs: rootCAs, InsecureSkipVerify: m.Insecure}
+	dialer.TLSClientConfig = &tls.Config{RootCAs: rootCAs, InsecureSkipVerify: true}
 
-	m.Ws.Connection, _, m.Ws.Error = dialer.Dial(u.String(), nil)
-	if m.Ws.Error != nil {
-		return false
+	ws.Connection, _, ws.Error = dialer.Dial(u.String(), nil)
+	if ws.Error != nil {
+		return
 	}
 
-	m.Ws.Done = make(chan struct{})
-	return true
+	ws.Done = make(chan struct{})
+	return
 }
 
-func (m *Monitor) WsSendingMetrics(metrics []string) {
-	if m.Ws.Connection != nil {
-		x := NewMetrics()
+func (ws *Ws) WsSendingMetrics(metrics []string) {
+	if ws.Connection != nil {
+		x := newMetrics()
 		for _, metric := range metrics {
-			x.AddMetrics(metric)
+			x.addMetrics(metric)
 		}
-		m.Ws.Connection.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%s", x.metricsToJson())))
+		ws.Connection.WriteMessage(websocket.TextMessage, []byte(fmt.Sprintf("%s", x.metricsToJson())))
 	}
 }
 
-func (m *Monitor) WsListeningLoop() {
-	if m.Ws.Connection != nil {
+func (ws *Ws) WsListen() {
+	if ws.Connection != nil {
 		go func() {
-			defer close(m.Ws.Done)
+			defer close(ws.Done)
 			for {
-				_, message, err := m.Ws.Connection.ReadMessage()
+				_, message, err := ws.Connection.ReadMessage()
 				if err != nil {
 					return
 				}
-				m.wsParseMessage(message)
+				ws.wsParseMessage(message)
 			}
 		}()
 	}
 }
 
-func (m *Monitor) WsReadTimeout(timeout time.Duration) {
+func (ws *Ws) WsListenTimeout(timeout time.Duration) {
 	select {
-	case <-m.Ws.Done:
+	case <-ws.Done:
 		return
 	case <-time.After(timeout):
 		log.Println("interrupt")
@@ -176,7 +148,7 @@ func (m *Monitor) WsReadTimeout(timeout time.Duration) {
 	}
 }
 
-func (m *Monitor) wsParseMessage(jsonMessage []byte) bool {
+func (ws *Ws) wsParseMessage(jsonMessage []byte) bool {
 	d := &WsData{}
 	err := json.Unmarshal(jsonMessage, d)
 	if err != nil {
@@ -196,7 +168,7 @@ func (m *Monitor) wsParseMessage(jsonMessage []byte) bool {
 	}
 	//topic := d.Message[s:e]
 
-	m.Ws.Statistics.ActiveNodeMap[d.Content.NodeId] += 1
+	ws.Statistics.ActiveNodeMap[d.Content.NodeId] += 1
 
 	return true
 }
@@ -211,11 +183,11 @@ type Metrics struct {
 	Metrics []Resource `json:"metrics"`
 }
 
-func NewMetrics() *Metrics {
+func newMetrics() *Metrics {
 	return &Metrics{Metrics: []Resource{}}
 }
 
-func (m *Metrics) AddMetrics(r string) *Metrics {
+func (m *Metrics) addMetrics(r string) *Metrics {
 	m.Metrics = append(m.Metrics, Resource{Resource: r})
 	return m
 }

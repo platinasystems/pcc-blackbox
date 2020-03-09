@@ -26,6 +26,7 @@ Available Test Suites:
 -test.run TestMaaS
 -test.run TestK8s
 -test.run TestPortus
+-test.run TestMonitor
 ```
 
 Example:

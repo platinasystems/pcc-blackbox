@@ -35,6 +35,7 @@ func (p *PccClient) pccGateway(op string, endPoint string, data []byte) (
 	url := fmt.Sprintf("https://%s:9999/%v", p.pccIp, endPoint)
 	req, _ := http.NewRequest(op, url, bytes.NewBuffer(data))
 	req.Header.Add("Authorization", p.bearer)
+	req.Header.Set("Content-Type", "application/json")
 	r, _ := client.Do(req)
 	defer r.Body.Close()
 	body, _ = ioutil.ReadAll(r.Body)

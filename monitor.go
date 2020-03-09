@@ -18,23 +18,25 @@ func monitorWebsocketTest(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
-	// Get token
-	token := Pcc.GetBearer()
-
 	// Monitor WS
-	m := pcc.NewMonitor(token, fmt.Sprintf("%s:9999", Env.PccIp), true)
-	if !m.WSConnect() {
-		assert.Fatalf("Connection failed: %+v\n", m.Ws.Error)
+	var ws *pcc.Ws = Pcc.WsLiveDataConnect()
+	if ws.Error != nil {
+		assert.Fatalf("Websocket connection failed: %+v\n", ws.Error)
 	}
-	defer m.Ws.Connection.Close()
+	defer ws.Connection.Close()
 
-	m.WsListeningLoop()
-	m.WsSendingMetrics([]string{"cpu", "memory", "memory", "sensor", "network", "nodeDetails-2", "podDetails-2", "svcDetails-2", "storage"})
-	m.WsReadTimeout(30 * time.Second)
+	// Start go routine in order to listen live data
+	ws.WsListen()
+
+	// Send command
+	ws.WsSendingMetrics([]string{"cpu", "memory", "memory", "sensor", "network", "nodeDetails-2", "podDetails-2", "svcDetails-2", "storage"})
+
+	// Wait listen timeout
+	ws.WsListenTimeout(30 * time.Second)
 
 	for id, node := range Nodes {
 		if Pcc.IsNodeOnline(node) {
-			n, ok := m.Ws.Statistics.ActiveNodeMap[id]
+			n, ok := ws.Statistics.ActiveNodeMap[id]
 			if !ok {
 				assert.Fatalf("Unable to get data from node %d", id)
 			} else {
@@ -47,11 +49,6 @@ func monitorWebsocketTest(t *testing.T) {
 func monitorRestTest(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-
-	// Get token
-	token := Pcc.GetBearer()
-
-	m := pcc.NewMonitor(token, fmt.Sprintf("%s:9999", Env.PccIp), true)
 
 	from := time.Now().Add(-time.Hour).Unix() * 1000
 	to := time.Now().Unix() * 1000
@@ -66,7 +63,7 @@ func monitorRestTest(t *testing.T) {
 
 			// CPU
 			fmt.Printf("Executing CPU REST on node [%d] ", id)
-			resultCpu, err := m.GetHistorical("cpu", from, to, []uint64{id}, []string{"us", "sy", "id"})
+			resultCpu, err := Pcc.GetHistoricalData("cpu", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
 				assert.Fatalf("Unable to get historical data from node [%d]: Error is %s", id, err)
 			} else if resultCpu == "" {
@@ -77,7 +74,7 @@ func monitorRestTest(t *testing.T) {
 
 			// MEMORY
 			fmt.Printf("Execute MEMORY REST on node [%d] ", id)
-			resultMemory, err := m.GetHistorical("memory", from, to, []uint64{id}, []string{"us", "sy", "id"})
+			resultMemory, err := Pcc.GetHistoricalData("memory", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
 			} else if resultMemory == "" {
 				assert.Fatalf("No MEMORY data has been collected from '%s'to '%s'", fromT, toT)
@@ -87,7 +84,7 @@ func monitorRestTest(t *testing.T) {
 
 			// DISK
 			fmt.Printf("Execute DISK REST on node [%d] ", id)
-			resultDisk, err := m.GetHistorical("disk", from, to, []uint64{id}, []string{"us", "sy", "id"})
+			resultDisk, err := Pcc.GetHistoricalData("disk", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
 			} else if resultDisk == "" {
 				assert.Fatalf("No DISK data has been collected from '%s'to '%s'", fromT, toT)

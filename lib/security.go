@@ -23,10 +23,6 @@ type PccClient struct {
 	bearer string
 }
 
-func (pcc *PccClient) GetBearer() string {
-	return pcc.bearer
-}
-
 func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
 	var (
 		data []byte
