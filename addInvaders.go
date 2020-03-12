@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"strings"
-	"testing"
-	"time"
-
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
+	"strings"
+	"sync"
+	"testing"
+	"time"
 )
 
 func addClusterHeads(t *testing.T) {
@@ -15,139 +15,119 @@ func addClusterHeads(t *testing.T) {
 }
 
 func addInvaders(t *testing.T) {
+	var nodes []node
+	for i := range Env.Invaders {
+		nodes = append(nodes, Env.Invaders[i].node)
+	}
+
+	fmt.Printf("adding %d invaders\n", len(nodes))
+	addNodesAndCheckStatus(t, nodes)
+}
+
+// add nodes fom list
+func addNodesAndCheckStatus(t *testing.T, nodes []node) {
+	var err error
 	test.SkipIfDryRun(t)
-	assert := test.Assert{t}
-	var (
-		err   error
-		check bool
-	)
-	nodesToCheck := make([]uint64, 0)
-	for _, i := range Env.Invaders {
-		if Nodes[NodebyHostIP[i.HostIp]] != nil {
-			continue
-		}
-		var node pcc.NodeWithKubernetes
 
-		node, err := Pcc.AddNode(i.HostIp, true)
-		if err != nil {
-			assert.Fatalf("Error adding node %v: %v\n", i.HostIp,
-				err)
-			return
-		}
-		if node.Id != 0 {
-			node.Invader = true
-			nodesToCheck = append(nodesToCheck, node.Id)
-			Nodes[node.Id] = &node
-			fmt.Printf("Add Cluster Head id %v to Nodes\n", node.Id)
-			NodebyHostIP[node.Host] = node.Id
-			fmt.Printf("Mapping hostIP %v to id %v\n",
-				node.Host, node.Id)
-		}
-	}
-
-	// early check for add fail
-	time.Sleep(10 * time.Second)
-	for id := range Nodes {
-		if status, err := Pcc.GetProvisionStatus(id); err == nil {
-			if strings.Contains(status, "Add node failed") {
-				assert.Fatalf("%v for %v\n", status, id)
-			}
-		}
-	}
-
-	from := time.Now()
-	//Check Agent installation
-	//SERIAL - to be improved
-	for i := 0; i < len(nodesToCheck); i++ {
-		check = false
-		fmt.Printf("Checking Agent installation for nodeId:%v\n",
-			nodesToCheck[i])
-		check, err = checkGenericInstallation(nodesToCheck[i],
-			AGENT_TIMEOUT, AGENT_NOTIFICATION, from)
-		if err != nil {
-			fmt.Printf("%v\n", err)
+	//Check Agent and collector installation function. FIXME add a channel for stopping on error
+	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from time.Time) {
+		fmt.Printf("Checking %s installation for nodeId:%v\n", app, nodeId)
+		check, waitErr := checkGenericInstallation(nodeId, timeout, app)
+		if waitErr != nil {
+			fmt.Printf("\n%v\n", waitErr)
+			err = waitErr
 		}
 		if check {
-			fmt.Printf("AGENT correctly installed on nodeId:%v\n",
-				nodesToCheck[i])
+			fmt.Printf("%s correctly installed on nodeId:%v\n", app, nodeId)
 		}
 	}
 
-	from = time.Now()
-	//Check Collector installation
-	for i := 0; i < len(nodesToCheck); i++ {
-		fmt.Printf("Checking Collector installation for nodeId:%v\n",
-			nodesToCheck[i])
-		check, err = checkGenericInstallation(nodesToCheck[i],
-			COLLECTOR_TIMEOUT, COLLECTOR_NOTIFICATION, from)
-		if err != nil {
-			fmt.Printf("%v\n", err)
-		}
-		if check {
-			fmt.Printf("COLLECTOR correctly installed on nodeId:"+
-				":%v\n", nodesToCheck[i])
-		}
-	}
+	var wg sync.WaitGroup
+	wg.Add(len(nodes))
 
-	// waiting for node becomes online
-	start := time.Now()
-	done := false
-	timeout := 180 * time.Second
-	for !done {
-		done = true
-		for id, node := range Nodes {
-			var connection string
-			status := node.NodeAvailabilityStatus
-			if status != nil {
-				connection, _ = Pcc.GetNodeConnectionStatus(node)
-				if connection == "online" {
-					continue
+	addNodeAndWait := func(n node) { // add the node and wait for the services. FIXME add a channel for stopping on error
+		defer wg.Done()
+		var (
+			node         pcc.NodeWithKubernetes
+			routineError error
+		)
+		node.Host = n.HostIp
+		node.Managed = new(bool)
+
+		if Nodes[NodebyHostIP[node.Host]] == nil { // add the node
+			fmt.Printf("adding the node %s\n", node.Host)
+			eventsFrom := time.Now() // FIXME a do better notification check
+			if routineError = Pcc.AddNode(&node); routineError == nil {
+				n.Id = node.Id
+				node.Invader = true
+				Nodes[node.Id] = &node
+				NodebyHostIP[node.Host] = node.Id
+				fmt.Printf("Add id %d to Nodes. Mapping hostIP %v to id %d\n", node.Id, node.Host, node.Id)
+
+				waitInstallation(AGENT_TIMEOUT, AGENT_NOTIFICATION, node.Id, eventsFrom)
+				waitInstallation(COLLECTOR_TIMEOUT, COLLECTOR_NOTIFICATION, node.Id, eventsFrom)
+				start := time.Now()
+				timeout := time.Duration(180*len(nodes)) * time.Second
+				var (
+					connection         string
+					previousConnection string
+					ignore             error
+					status             string
+				)
+				for true {
+					time.Sleep(10 * time.Second)
+					if status, ignore = Pcc.GetProvisionStatus(node.Id); ignore == nil { // early check for add fail
+						if strings.Contains(status, "Add node failed") {
+							err = fmt.Errorf("%s for node %d", status, node.Id)
+							t.Fatal(err)
+						}
+					}
+					if connection, ignore = Pcc.GetNodeConnectionStatus(node.Id); ignore == nil {
+						switch connection { // FIXME use models
+						case "online":
+							fmt.Printf("the node %d:%s is online\n", node.Id, node.Host)
+							return
+						case "", "NoRunningService": // wait for the next cycle
+						default:
+							err = fmt.Errorf(fmt.Sprintf("Unable to add the node %s", connection))
+							t.Fatal(err)
+						}
+						if previousConnection != "" && previousConnection != connection {
+							fmt.Printf("the node %d:%s connection status switched from %s to %s\n", node.Id, node.Host, previousConnection, connection)
+						}
+
+						previousConnection = connection
+					} else {
+						fmt.Printf("error getting the connection status for node %d:%s %v\n", node.Id, node.Host, err)
+					}
+
+					if time.Since(start) > timeout {
+						err = fmt.Errorf("timeout for node addition %d", node.Id)
+						t.Fatal(err)
+					}
+
+					if err != nil {
+						return
+					}
 				}
-			}
-			done = false
-			err = Pcc.GetNodeSummary(id, node)
-			if err != nil {
-				fmt.Printf("node %v, error: %v\n", id, err)
-				continue
-			}
-			name := fmt.Sprintf("node:%v", id)
-			if node.Name != "" {
-				name = node.Name
-			}
-			fmt.Printf("%v is %v provisionStatus = %v \n", name,
-				connection, node.ProvisionStatus)
-			if node.ProvisionStatus == "Add node failed" {
-				assert.Fatalf("%v for %v\n",
-					node.ProvisionStatus, name)
-			}
-			done = connection == "online"
-			Nodes[id] = node
-		}
-
-		if !done {
-			time.Sleep(10 * time.Second)
-		}
-		if time.Since(start) > timeout {
-			assert.Fatalf("timeout")
-			break
-		}
-	}
-
-	if !done {
-		for _, node := range Nodes {
-			if node.NodeAvailabilityStatus == nil {
-				assert.Fatalf("node %v did not come online; "+
-					"provisionStatus = %v\n",
-					node.Name, node.ProvisionStatus)
 			} else {
-				connection, _ := Pcc.GetNodeConnectionStatus(node)
-				if connection != "online" {
-					assert.Fatalf("node %v did not come "+
-						"online; provisionStatus = "+
-						"%v\n", node.Name,
-						node.ProvisionStatus)
-				}
+				err = fmt.Errorf("add node %s failed\n%v\n", node.Host, routineError)
+				t.Fatal(err)
 			}
+		} else {
+			fmt.Printf("the node %s was already added\n", node.Host)
 		}
 	}
+
+	for i := range nodes { // add nodes in parallel
+		go addNodeAndWait(nodes[i])
+	}
+
+	wg.Wait() // wait for all addition
+
+	if err != nil {
+		fmt.Println(fmt.Sprintf("Error adding nodes %v", err))
+		t.Fatal(err)
+	}
+
 }

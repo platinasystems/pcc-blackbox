@@ -5,14 +5,38 @@
 package pcc
 
 import (
-	"encoding/json"
 	"fmt"
-
 	"github.com/platinasystems/tiles/pccserver/security/model"
 )
 
+// FIXME move in a common module
 type Tenant struct {
 	model.Tenant
+	Protect bool `json:"protect"`
+}
+
+// FIXME move in a common module
+type GenericModel struct {
+	Id          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Owner       uint64 `json:"owner"`
+}
+
+func (gm *GenericModel) GetName() string {
+	return gm.Name
+}
+
+func (gm *GenericModel) GetDescription() string {
+	return gm.Description
+}
+
+func (gm *GenericModel) GetId() uint64 {
+	return gm.Id
+}
+
+func (gm *GenericModel) GetOwner() uint64 {
+	return gm.Owner
 }
 
 type ChangeTenant struct {
@@ -29,23 +53,17 @@ type Profile struct {
 }
 
 type Role struct {
-	model.Role
+	GenericModel
+	Protect bool `json:"protect"`
 }
 
-// tried re-using model.User, but not sure about
-// unmarshal in to type interface
+type Operation struct {
+	GenericModel
+	GroupId bool `json:"groupID"`
+}
+
 type User struct {
-	Id       uint64 `json:"id"`
-	UserName string `json:"username"`
-	Active   bool   `json:"active"`
-	Owner    uint64 `json:"owner"`
-	Tenant   Tenant `json:"tenant"`
-	Protect  bool   `json:"protect"`
-	Role     Role   `json:"role"`
-	Profile  `json:"profile"`
-}
-
-type AddUser struct {
+	Id        uint64 `json:"id"`
 	UserName  string `json:"username"`
 	FirstName string `json:"firstname"`
 	LastName  string `json:"lastname"`
@@ -56,127 +74,191 @@ type AddUser struct {
 	Source    string `json:"source"`
 	Active    bool   `json:"active"`
 	Protect   bool   `json:"protect"`
+	Role      *Role  `json:"role"`
+	Tenant    Tenant `json:"tenant"`
 }
 
-type DelUser struct {
-	UserName string `json:"username"`
-}
-
-func (p *PccClient) AddTenant(addReq Tenant) (err error) {
-	var data []byte
-
+func (pcc *PccClient) AddTenant(tenant Tenant) (t *Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/register")
-	if data, err = json.Marshal(addReq); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+	err = pcc.Post(endpoint, &tenant, &tenant)
+	t = &tenant
 	return
 }
 
-func (p *PccClient) DelTenant(tenantId uint64) (err error) {
-	var (
-		data   []byte
-		delReq Tenant
-	)
-
-	endpoint := fmt.Sprintf("user-management/tenant/delete")
-	delReq.ID = tenantId
-	if data, err = json.Marshal(delReq); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+func (pcc *PccClient) DelTenant(tenantId uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/tenant/%d", tenantId)
+	err = pcc.Delete(endpoint, nil)
 	return
 }
 
-func (p *PccClient) GetTenants() (tenants []Tenant, err error) {
-	var body []byte
-
+func (pcc *PccClient) GetTenants() (tenants []Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/list")
-	body, err = p.pccUserManagement("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(body, &tenants)
+	err = pcc.Get(endpoint, &tenants)
 	return
 }
 
-func (p *PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (
-	err error) {
+func (pcc *PccClient) GetTenant(id uint64) (tenant *Tenant, err error) {
+	endpoint := fmt.Sprintf("user-management/tenant/%d", id)
+	var t Tenant
+	err = pcc.Get(endpoint, &t)
+	tenant = &t
+	return
+}
 
-	var data []byte
+func (pcc *PccClient) GetOperation(id uint64) (result *Operation, err error) {
+	var r Operation
+	endpoint := fmt.Sprintf("user-management/operation/%d", id)
+	err = pcc.Get(endpoint, &r)
+	result = &r
+	return
+}
 
+func (pcc *PccClient) GetGroupOperation(id uint64) (result *Operation, err error) {
+	var r Operation
+	endpoint := fmt.Sprintf("user-management/groupoperation/%d", id)
+	err = pcc.Get(endpoint, &r)
+	result = &r
+	return
+}
+
+func (pcc *PccClient) GetOperations() (operations []Operation, err error) {
+	endpoint := fmt.Sprintf("user-management/operation/describe")
+	err = pcc.Get(endpoint, &operations)
+	return
+}
+
+func (pcc *PccClient) GetGroupOperations() (operations []Operation, err error) {
+	endpoint := fmt.Sprintf("user-management/groupoperation/describe")
+	err = pcc.Get(endpoint, &operations)
+	return
+}
+
+func (pcc *PccClient) DeleteOperation(id uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/operation/%d", id)
+	err = pcc.Delete(endpoint, nil)
+	return
+}
+
+func (pcc *PccClient) DeleteGroupOperation(id uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/groupoperation/%d", id)
+	err = pcc.Delete(endpoint, nil)
+	return
+}
+
+func (pcc *PccClient) AddRole(name string, description string) (role *GenericModel, err error) {
+	endpoint := fmt.Sprintf("user-management/role")
+	role = &GenericModel{Name: name, Description: description}
+	err = pcc.Post(endpoint, role, role)
+	return
+}
+
+func (pcc *PccClient) GetRole(id uint64) (role *GenericModel, err error) {
+	var r GenericModel
+	endpoint := fmt.Sprintf("user-management/role/%d", id)
+	err = pcc.Get(endpoint, &r)
+	role = &r
+	return
+}
+
+func (pcc *PccClient) DeleteRole(id uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/role/%d", id)
+	err = pcc.Delete(endpoint, nil)
+	return
+}
+
+func (pcc *PccClient) GetRoles() (roles []GenericModel, err error) {
+	endpoint := fmt.Sprintf("user-management/role")
+	err = pcc.Get(endpoint, &roles)
+	return
+}
+
+func (pcc *PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/nodes/update")
-	Req := ChangeTenant{
+	req := ChangeTenant{
 		TenantId: tenantId,
 		NodeIds:  nodes,
 	}
-	if data, err = json.Marshal(Req); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+	err = pcc.Post(endpoint, &req, nil)
 	return
 }
 
-func (p *PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
+func (pcc *PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
 	var tenants []Tenant
 
-	tenants, err = p.GetTenants()
-	if err != nil {
-		return
-	}
-
-	for _, t := range tenants {
-		if t.Name == tenantName {
-			tenant = t
-			return
+	if tenants, err = pcc.GetTenants(); err == nil {
+		for _, t := range tenants {
+			if t.Name == tenantName {
+				tenant = t
+				return
+			}
 		}
+		err = fmt.Errorf("Couldn't find tenant %v", tenantName)
 	}
-	err = fmt.Errorf("Couldn't find tenant %v", tenantName)
 	return
 }
 
-func (p *PccClient) GetUsers() (users []User, err error) {
-	var body []byte
-
+func (pcc *PccClient) GetUsers() (users []User, err error) {
 	endpoint := fmt.Sprintf("user-management/user/list")
-	body, err = p.pccUserManagement("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(body, &users)
+	err = pcc.Get(endpoint, &users)
 	return
 }
 
-func (p *PccClient) AddUser(addUser AddUser) (err error) {
-	var data []byte
-
+func (pcc *PccClient) AddUser(user User) (added *User, err error) {
 	endpoint := fmt.Sprintf("user-management/user/register")
-	if data, err = json.Marshal(addUser); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+	err = pcc.Post(endpoint, &user, &user)
+	added = &user
 	return
 }
 
-func (p *PccClient) UpdateUser(addUser AddUser) (err error) {
-	var data []byte
-
+func (pcc *PccClient) UpdateUser(user User) (err error) {
 	endpoint := fmt.Sprintf("user-management/user/update")
-	if data, err = json.Marshal(addUser); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+	err = pcc.Post(endpoint, &user, &user)
 	return
 }
 
-func (p *PccClient) DelUser(user string) (err error) {
-	var data []byte
-
+func (pcc *PccClient) DelUser(user string) (err error) {
 	endpoint := fmt.Sprintf("user-management/user/delete")
-	delUser := DelUser{UserName: user}
-	if data, err = json.Marshal(delUser); err != nil {
-		return
-	}
-	_, err = p.pccUserManagement("POST", endpoint, data)
+	delUser := User{UserName: user}
+	err = pcc.Post(endpoint, &delUser, nil)
+	return
+}
+
+func (pcc *PccClient) SetUserSpace(scope string, content string) (err error) {
+	endpoint := fmt.Sprintf("user-management/userspace/%s", scope)
+	err = pcc.Post(endpoint, &content, nil)
+	return
+}
+
+func (pcc *PccClient) GetUserSpace(scope string) (content string, err error) {
+	endpoint := fmt.Sprintf("user-management/userspace/%s", scope)
+	err = pcc.Get(endpoint, &content)
+	return
+}
+
+func (pcc *PccClient) DeleteUserSpace(scope string) (err error) {
+	endpoint := fmt.Sprintf("user-management/userspace/%s", scope)
+	err = pcc.Delete(endpoint, nil)
+	return
+}
+
+func (pcc *PccClient) AddEntity(name string, description string) (entity *GenericModel, err error) {
+	endpoint := fmt.Sprintf("user-management/entity/register")
+	gm := GenericModel{Name: name, Description: description}
+	err = pcc.Post(endpoint, &gm, &gm)
+	entity = &gm
+	return
+}
+
+func (pcc *PccClient) GetEntities() (entities []GenericModel, err error) {
+	endpoint := fmt.Sprintf("user-management/entity/list")
+	err = pcc.Get(endpoint, &entities)
+	return
+}
+
+func (pcc *PccClient) GetEntity(id uint64) (role *GenericModel, err error) {
+	var r GenericModel
+	endpoint := fmt.Sprintf("user-management/entity/%d", id)
+	err = pcc.Get(endpoint, &r)
+	role = &r
 	return
 }

@@ -35,13 +35,15 @@ func getSecKeys(t *testing.T) {
 }
 
 func getFirstKey() (sKey pcc.SecurityKey, err error) {
-
 	var secKeys []pcc.SecurityKey
+	if secKeys, err = Pcc.GetSecurityKeys(); err == nil {
+		if len(secKeys) == 0 {
+			err = fmt.Errorf("key not found")
+		} else {
+			sKey = secKeys[0]
+		}
 
-	secKeys, err = Pcc.GetSecurityKeys()
-	if err != nil {
-		return
 	}
 
-	return secKeys[0], err
+	return
 }

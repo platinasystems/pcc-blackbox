@@ -1,169 +1,202 @@
 {
-	"PccIp": "172.17.2.238",
-	"Invaders": [{
-		"HostIp": "172.17.2.60",
-		"BMCIp": "172.17.3.60",
-		"BMCUser": "ADMIN",
-		"BMCUsers": ["ADMIN"],
-		"BMCPass": "ADMIN",
-		"NetInterfaces": [{
-			"Gateway": "172.17.2.1",
-			"Cidrs": [
-				"172.17.2.60/23"
-			],
-			"MacAddr": "",
-			"IsManagement": true,
-			"ManagedByPcc": false,
-			"Speed": "1000",
-			"Autoneg": "off",
-			"Mtu": "1500"
-		},
-		{
-        					"MacAddr": "50:18:4c:00:30:6c",
-        					"Cidrs": [
-        						"10.15.15.0/31"
-        					],
-        					"IsManagement": false,
-        					"ManagedByPcc": true,
-        					"Speed": "10000",
-        					"Autoneg": "off",
-        					"Mtu": "1500"
-        				},
-        				{
-        					"MacAddr": "50:18:4c:00:30:6d",
-        					"Cidrs": [
-        						"10.15.15.2/31"
-        					],
-        					"IsManagement": false,
-        					"ManagedByPcc": true,
-        					"Speed": "10000",
-        					"Autoneg": "off",
-        					"Mtu": "1500"
-        				}]
-	}],
-	"Servers": [{
-			"HostIp": "172.17.2.115",
-			"BMCIp": "172.17.3.115",
-			"BMCUser": "ADMIN",
-			"BMCUsers": ["ADMIN"],
-			"BMCPass": "ADMIN",
-			"KeyId": [3],
-			"KeyAlias": ["test"],
-			"NetInterfaces": [{
-					"MacAddr": "00:25:90:f2:5c:ee",
-					"Gateway": "172.17.2.1",
-					"Cidrs": [
-						"172.17.2.115/23"
-					],
-					"IsManagement": true,
-					"ManagedByPcc": true,
-					"Speed": "1000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				},
-				{
-					"MacAddr": "00:02:c9:e8:b5:c0",
-					"Cidrs": [
-						"10.15.15.3/31"
-					],
-					"IsManagement": false,
-					"ManagedByPcc": true,
-					"Speed": "10000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				},
-				{
-					"MacAddr": "00:02:c9:e8:b5:c1",
-					"Cidrs": [
-						"10.15.16.3/31"
-					],
-					"IsManagement": false,
-					"ManagedByPcc": true,
-					"Speed": "10000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				}
-			]
-		},
-		{
-			"HostIp": "172.17.2.114",
-			"BMCIp": "172.17.3.114",
-			"BMCUser": "ADMIN",
-			"BMCUsers": ["ADMIN"],
-			"BMCPass": "ADMIN",
-			"KeyId": [3],
-			"KeyAlias": ["test"],
-			"NetInterfaces": [{
-					"MacAddr": "00:25:90:f2:48:b6",
-					"Gateway": "172.17.2.1",
-					"Cidrs": [
-						"172.17.2.114/23"
-					],
-					"IsManagement": true,
-					"ManagedByPcc": true,
-					"Speed": "1000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				},
-				{
-					"MacAddr": "00:02:c9:21:db:90",
-					"Cidrs": [
-						"10.15.15.1/31"
-					],
-					"IsManagement": false,
-					"ManagedByPcc": true,
-					"Speed": "10000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				},
-				{
-					"MacAddr": "00:02:c9:21:db:91",
-					"Cidrs": [
-						"10.15.16.1/31"
-					],
-					"IsManagement": false,
-					"ManagedByPcc": true,
-					"Speed": "10000",
-					"Autoneg": "off",
-					"Mtu": "1500"
-				}
-			]
-		}
-	],
-	"AuthenticationProfile": {
-        "type": "LDAP",
-        "name": "portus_ldap",
-        "profile": {
-          "domain": "ldap1.lab.platinasystems.com",
-          "userIDAttribute": "cn",
-          "userBaseDN": "ou=QA,dc=platinasystems,dc=com",
-          "anonymousBind": false,
-          "bindDN": "cn=qa-ldap,ou=Service Accounts,ou=People,dc=platinasystems,dc=com",
-          "bindPassword": "49d46fbb55fe",
-          "encryptionPolicy": "simple_tls"
-        }
+   "PccIp":"172.17.2.238",
+   "DBConfiguration":{
+      "address":"127.0.0.1",
+      "port":5432,
+      "user":"pcc",
+      "pwd":"plat1na",
+      "name":"pccdb"
+   },
+   "SshConfiguration":{
+      "key":"/home/pcc/installation/product/docker/platina/conf/keys/system/key",
+      "port":22,
+      "user":"pcc"
+   },
+   "Invaders":[
+      {
+         "HostIp":"172.17.2.60",
+         "BMCIp":"172.17.3.60",
+         "BMCUser":"ADMIN",
+         "BMCUsers":[
+            "ADMIN"
+         ],
+         "BMCPass":"ADMIN",
+         "NetInterfaces":[
+            {
+               "Gateway":"172.17.2.1",
+               "Cidrs":[
+                  "172.17.2.60/23"
+               ],
+               "MacAddr":"",
+               "IsManagement":true,
+               "ManagedByPcc":false,
+               "Speed":"1000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"50:18:4c:00:30:6c",
+               "Cidrs":[
+                  "10.15.15.0/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"50:18:4c:00:30:6d",
+               "Cidrs":[
+                  "10.15.15.2/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            }
+         ]
+      }
+   ],
+   "Servers":[
+      {
+         "HostIp":"172.17.2.115",
+         "BMCIp":"172.17.3.115",
+         "BMCUser":"ADMIN",
+         "BMCUsers":[
+            "ADMIN"
+         ],
+         "BMCPass":"ADMIN",
+         "KeyId":[
+            3
+         ],
+         "KeyAlias":[
+            "test"
+         ],
+         "NetInterfaces":[
+            {
+               "MacAddr":"00:25:90:f2:5c:ee",
+               "Gateway":"172.17.2.1",
+               "Cidrs":[
+                  "172.17.2.115/23"
+               ],
+               "IsManagement":true,
+               "ManagedByPcc":true,
+               "Speed":"1000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"00:02:c9:e8:b5:c0",
+               "Cidrs":[
+                  "10.15.15.3/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"00:02:c9:e8:b5:c1",
+               "Cidrs":[
+                  "10.15.16.3/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            }
+         ]
       },
-      "PortusConfiguration": {
-        "fullyQualifiedDomainName": "portus.platinasystem.local",
-        "password": "12341234",
-        "secretKeyBase": "test123",
-        "adminState": "Enabled"
-      },
-    "CephConfiguration": {
-        "clusterName": "",
-        "highAvailability": false,
-        "numberOfNodes": 3,
-        "publicNetwork": "192.168.20.0/30",
-        "clusterNetwork": "192.168.22.0/30",
-        "controlCIDR": "",
-        "igwPolicy": "",
-        "tests": {
-            "createCluster": true,
-            "createPools": true,
-            "createFS": true,
-            "deleteFS": true,
-            "deletePools": true,
-            "deleteCluster": true
-        }
-    }
+      {
+         "HostIp":"172.17.2.114",
+         "BMCIp":"172.17.3.114",
+         "BMCUser":"ADMIN",
+         "BMCUsers":[
+            "ADMIN"
+         ],
+         "BMCPass":"ADMIN",
+         "KeyId":[
+            3
+         ],
+         "KeyAlias":[
+            "test"
+         ],
+         "NetInterfaces":[
+            {
+               "MacAddr":"00:25:90:f2:48:b6",
+               "Gateway":"172.17.2.1",
+               "Cidrs":[
+                  "172.17.2.114/23"
+               ],
+               "IsManagement":true,
+               "ManagedByPcc":true,
+               "Speed":"1000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"00:02:c9:21:db:90",
+               "Cidrs":[
+                  "10.15.15.1/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            },
+            {
+               "MacAddr":"00:02:c9:21:db:91",
+               "Cidrs":[
+                  "10.15.16.1/31"
+               ],
+               "IsManagement":false,
+               "ManagedByPcc":true,
+               "Speed":"10000",
+               "Autoneg":"off",
+               "Mtu":"1500"
+            }
+         ]
+      }
+   ],
+   "AuthenticationProfile":{
+      "type":"LDAP",
+      "name":"portus_ldap",
+      "profile":{
+         "domain":"ldap1.lab.platinasystems.com",
+         "userIDAttribute":"cn",
+         "userBaseDN":"ou=QA,dc=platinasystems,dc=com",
+         "anonymousBind":false,
+         "bindDN":"cn=qa-ldap,ou=Service Accounts,ou=People,dc=platinasystems,dc=com",
+         "bindPassword":"49d46fbb55fe",
+         "encryptionPolicy":"simple_tls"
+      }
+   },
+   "PortusConfiguration":{
+      "fullyQualifiedDomainName":"portus.platinasystem.local",
+      "password":"12341234",
+      "secretKeyBase":"test123",
+      "adminState":"Enabled"
+   },
+   "CephConfiguration":{
+      "clusterName":"",
+      "highAvailability":false,
+      "numberOfNodes":3,
+      "publicNetwork":"192.168.20.0/30",
+      "clusterNetwork":"192.168.22.0/30",
+      "controlCIDR":"",
+      "igwPolicy":"",
+      "tests":{
+         "createCluster":true,
+         "createPools":true,
+         "createFS":true,
+         "deleteFS":true,
+         "deletePools":true,
+         "deleteCluster":true
+      }
+   }
 }

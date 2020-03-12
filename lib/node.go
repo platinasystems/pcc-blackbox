@@ -5,8 +5,9 @@
 package pcc
 
 import (
-	"encoding/json"
 	"fmt"
+	"sync"
+	"time"
 
 	"github.com/platinasystems/tiles/pccserver/models"
 )
@@ -38,70 +39,25 @@ type NodeDetail struct {
 }
 
 func (p *PccClient) GetNodesDetail() (nodes []*NodeDetail, err error) {
-	var resp HttpResp
-
-	endpoint := fmt.Sprintf("pccserver/node")
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	if err = json.Unmarshal(resp.Data, &nodes); err != nil {
-		return
-	}
-	return
-}
-
-func (p *PccClient) GetNodesWithKubernetes() (nodes []*NodeWithKubernetes,
-	err error) {
-
-	var resp HttpResp
-
-	endpoint := fmt.Sprintf("pccserver/node")
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	if err = json.Unmarshal(resp.Data, &nodes); err != nil {
-		return
-	}
+	err = p.Get("pccserver/node", &nodes)
 	return
 }
 
 func (p *PccClient) GetNodesId(id uint64) (node NodeDetail, err error) {
-	var resp HttpResp
-
 	endpoint := fmt.Sprintf("pccserver/node/%v", id)
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	if err = json.Unmarshal(resp.Data, &node); err != nil {
-		return
-	}
+	err = p.Get(endpoint, &node)
 	return
 }
 
 func (p *PccClient) FindNodeId(name string) (id uint64, err error) {
+	var nodes *[]NodeWithKubernetes
 
-	var nodes []*NodeWithKubernetes
-
-	if nodes, err = p.GetNodesWithKubernetes(); err != nil {
-		return
-	}
-
-	for _, n := range nodes {
-		if n.Name == name {
-			id = n.Id
-			return
+	if nodes, err = p.GetNodes(); err == nil {
+		for _, n := range *nodes {
+			if n.Name == name {
+				id = n.Id
+				return
+			}
 		}
 	}
 	err = fmt.Errorf("node [%v] not found", name)
@@ -109,135 +65,292 @@ func (p *PccClient) FindNodeId(name string) (id uint64, err error) {
 }
 
 func (p *PccClient) GetProvisionStatus(id uint64) (status string, err error) {
-
-	var resp HttpResp
-
-	endpoint := fmt.Sprintf("pccserver/node/%v/provisionStatus", id)
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
+	var node *NodeWithKubernetes
+	if node, err = p.GetNode(id); err == nil {
+		status = node.ProvisionStatus
 	}
-	if resp.Status == 200 {
-		status = string(resp.Data) // status has double quotes
-		return
-	}
-	err = fmt.Errorf("%v", resp.Error)
 	return
 }
 
 func (p *PccClient) GetNodeSummary(id uint64, node *NodeWithKubernetes) (err error) {
-
-	var resp HttpResp
-
 	endpoint := fmt.Sprintf("pccserver/node/summary/%v", id)
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, node)
-		if err != nil {
-			return
+	err = p.Get(endpoint, node)
+	return
+}
+
+func (p *PccClient) GetNodeConnectionStatus(nodeId uint64) (status string, err error) {
+	var node *NodeWithKubernetes
+	if node, err = p.GetNode(nodeId); err == nil {
+		if node.NodeAvailabilityStatus != nil {
+			status = node.NodeAvailabilityStatus.ConnectionStatus
 		}
-		return
 	}
-	err = fmt.Errorf("%v", resp.Message)
 	return
 }
 
-func (p *PccClient) GetNodeConnectionStatus(node *NodeWithKubernetes) (status string, err error) {
-	if node.NodeAvailabilityStatus != nil {
-		status = node.NodeAvailabilityStatus.ConnectionStatus
-		return
-	}
-	err = fmt.Errorf("No NodeAvailablityStatus\n")
-	return
-}
-
-func (p *PccClient) IsNodeOnline(node *NodeWithKubernetes) bool {
-	status, err := p.GetNodeConnectionStatus(node)
-	if err != nil {
+func (p *PccClient) IsNodeOnline(nodeId uint64) bool {
+	if status, err := p.GetNodeConnectionStatus(nodeId); err == nil {
+		return status == "online"
+	} else {
 		return false
 	}
-	if status == "online" {
-		return true
-	}
-	return false
 }
 
-func (p *PccClient) AddNode(hostIp string, pccManaged bool) (node NodeWithKubernetes, err error) {
-
-	var (
-		addReq   NodeWithKubernetes
-		data     []byte
-		endpoint string
-		resp     HttpResp
-	)
-
-	endpoint = fmt.Sprintf("pccserver/node/add/")
-	addReq.Host = hostIp
-	pBool := new(bool)
-	*pBool = pccManaged
-	addReq.Managed = pBool
-	if data, err = json.Marshal(addReq); err != nil {
-		return
+// List of all nodes
+func (pcc *PccClient) GetNodes() (nodes *[]NodeWithKubernetes, err error) {
+	var n []NodeWithKubernetes
+	if err = pcc.Get("pccserver/node", &n); err == nil {
+		nodes = &n
 	}
-
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &node)
-		if err != nil {
-			return
-		}
-		return
-	}
-	err = fmt.Errorf("%v", resp.Message)
 	return
 }
 
-func (p *PccClient) UpdateNode(addReq NodeWithKubernetes) (node NodeWithKubernetes, err error) {
-
-	var (
-		data     []byte
-		endpoint string
-		resp     HttpResp
-	)
-
-	endpoint = fmt.Sprintf("pccserver/node/update")
-	if data, err = json.Marshal(addReq); err != nil {
-		return
+// List of all nodes
+func (pcc *PccClient) GetNode(id uint64) (node *NodeWithKubernetes, err error) {
+	var n NodeWithKubernetes
+	if err = pcc.Get(fmt.Sprintf("pccserver/node/%d", id), &n); err == nil {
+		node = &n
 	}
-
-	resp, _, err = p.pccGateway("PUT", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &node)
-		if err != nil {
-			return
-		}
-		return
-	}
-	err = fmt.Errorf("%v", resp.Message)
 	return
 }
 
-func (p *PccClient) DelNode(id uint64) (err error) {
-	var (
-		endpoint string
-		resp     HttpResp
-	)
+// List of all invaders
+func (pcc *PccClient) GetInvaders() (nodes *[]NodeWithKubernetes, err error) {
+	return pcc.filterNodes(true)
+}
 
-	endpoint = fmt.Sprintf("pccserver/node/%v", id)
-	resp, _, err = p.pccGateway("DELETE", endpoint, nil)
-	if err != nil {
-		return
+// List of all invaders
+func (pcc *PccClient) GetNodeIds() (nodes []uint64, err error) {
+	var n *[]NodeWithKubernetes
+	if n, err = pcc.GetNodes(); err == nil {
+		for i := range *n {
+			nodes = append(nodes, (*n)[i].Id)
+		}
 	}
-	if resp.Status == 200 {
-		return
+
+	return
+}
+
+// List of all invaders
+func (pcc *PccClient) GetInvaderIds() (nodes []uint64, err error) {
+	var n *[]NodeWithKubernetes
+	if n, err = pcc.GetInvaders(); err == nil {
+		for i := range *n {
+			nodes = append(nodes, (*n)[i].Id)
+		}
 	}
-	err = fmt.Errorf("%v", resp.Message)
+
+	return
+}
+
+// List of all servers
+func (pcc *PccClient) GetServers() (nodes *[]NodeWithKubernetes, err error) {
+	return pcc.filterNodes(false)
+}
+
+func (pcc *PccClient) filterNodes(invader bool) (nodes *[]NodeWithKubernetes, err error) {
+	if nodes, err = pcc.GetNodes(); err == nil {
+		var inv []NodeWithKubernetes
+
+		for i := range *nodes {
+			if (*nodes)[i].Invader == invader {
+				inv = append(inv, (*nodes)[i])
+			}
+		}
+
+		nodes = &inv
+	}
+	return
+}
+
+func (pcc *PccClient) GetEnvironment(nodeID *uint64) (env map[string]interface{}, err error) {
+
+	env = make(map[string]interface{})
+	nodeStr := ""
+	if nodeID != nil && *nodeID > 0 {
+		nodeStr = fmt.Sprintf("%d", *nodeID)
+	}
+	err = pcc.Get(fmt.Sprintf("pccserver/environment/%s", nodeStr), &env)
+	return
+}
+
+// Fetch the node from the DB
+func (pcc *PccClient) GetNodeFromDB(nodeId uint64) (node *NodeWithKubernetes, err error) {
+	var n NodeWithKubernetes
+	if err = DB.Where("id = ?", fmt.Sprintf("%d", nodeId)).First(&n).Error; err == nil {
+		node = &n
+	} else {
+		fmt.Println("Not able to fetch the node", err)
+	}
+	return
+}
+
+// Fetch the nodes from the DB
+func (pcc *PccClient) GetNodesFromDB() (nodes *[]NodeWithKubernetes, err error) {
+	var n []NodeWithKubernetes
+	if err = DB.Find(&n).Error; err == nil {
+		nodes = &n
+	} else {
+		fmt.Println("Not able to fetch the nodes", err)
+	}
+	return
+}
+
+// Fetch the invaders from the DB
+func (pcc *PccClient) GetInvadersFromDB() (nodes *[]NodeWithKubernetes, err error) {
+	var n []NodeWithKubernetes
+	if err = DB.Where("invader = true").Find(&n).Error; err == nil {
+		nodes = &n
+	} else {
+		fmt.Println("Not able to fetch the invader nodes", err)
+	}
+	return
+}
+
+// Fetch the servers from the DB
+func (pcc *PccClient) GetServersFromDB() (nodes *[]NodeWithKubernetes, err error) {
+	var n []NodeWithKubernetes
+	if err = DB.Where("invader = false").Find(&n).Error; err == nil {
+		nodes = &n
+	} else {
+		fmt.Println("Not able to fetch the invader nodes", err)
+	}
+	return
+}
+
+// Delete all the nodes (servers and invaders). Returns the deleted node
+func (pcc *PccClient) DeleteNodes(wait bool) (nodes *[]NodeWithKubernetes, err error) {
+	if nodes, err = pcc.GetNodes(); err == nil {
+		err = pcc.deleteNodes(nodes, wait)
+	}
+
+	return
+}
+
+// Delete the invaders
+func (pcc *PccClient) DeleteInvaders(wait bool) (err error) {
+	var nodes *[]NodeWithKubernetes
+	if nodes, err = pcc.GetInvaders(); err == nil {
+		err = pcc.deleteNodes(nodes, wait)
+	}
+	return
+}
+
+// Delete the servers
+func (pcc *PccClient) DeleteServers(wait bool) (err error) {
+	var nodes *[]NodeWithKubernetes
+	if nodes, err = pcc.GetServers(); err == nil {
+		err = pcc.deleteNodes(nodes, wait)
+	}
+
+	return
+}
+
+// Delete all the nodes
+func (pcc *PccClient) deleteNodes(nodes *[]NodeWithKubernetes, wait bool) (err error) {
+	var ids []uint64
+	for i := range *nodes {
+		node := (*nodes)[i]
+		ids = append(ids, node.Id)
+	}
+
+	for _, nodeId := range ids {
+		if err = pcc.DeleteNode(nodeId); err != nil {
+			return
+		}
+	}
+
+	if len(ids) > 0 && wait {
+		var running []uint64
+	sleep:
+		for i := 1; i <= 20; i++ { // FIXME add the notification
+			toDelete := ids
+			time.Sleep(time.Second * time.Duration(15))
+			if running, err = pcc.GetNodeIds(); err == nil {
+				ids = make([]uint64, 0)
+
+				for _, nodeId := range toDelete {
+					for _, id := range running {
+						if id == nodeId {
+							ids = append(ids, nodeId) // node still running
+							continue sleep
+						}
+					}
+					fmt.Println(fmt.Sprintf("Node %d has been deleted", nodeId))
+				}
+				return
+			}
+		}
+
+		err = fmt.Errorf("an error occurs deleting the servers")
+	}
+
+	return
+}
+
+// Add a node
+func (pcc *PccClient) AddNode(node *NodeWithKubernetes) (err error) {
+	err = pcc.Post("pccserver/node/add", node, node)
+	return
+}
+
+// Delete a node
+func (pcc *PccClient) DeleteNode(id uint64) (err error) {
+	fmt.Println(fmt.Sprintf("deleting the node %d", id))
+	err = pcc.Delete(fmt.Sprintf("pccserver/node/%d", id), nil)
+	return
+}
+
+// Delete a node
+func (pcc *PccClient) UpdateNode(node *NodeWithKubernetes) (err error) {
+	fmt.Println(fmt.Sprintf("updating the node %d", node.Id))
+	err = pcc.Put("pccserver/node/update", node, node)
+	return
+}
+
+// Install in parallel on nodes. Keep previous roles
+// TODO wait for the installation
+func (pcc *PccClient) AddRolesToNodes(nodes []uint64, roles []uint64) (installed []uint64, installing []uint64, err error) {
+	var (
+		lock sync.Mutex
+		wg   sync.WaitGroup
+	)
+	wg.Add(len(nodes))
+
+	addRoles := func(nodeId uint64) {
+		defer wg.Done()
+		var (
+			errNode          error
+			alreadyInstalled bool
+			node             *NodeWithKubernetes
+		)
+		if node, errNode = pcc.GetNode(nodeId); err == nil {
+			node.RoleIds = append(node.RoleIds, roles...) // keep other roles
+			if alreadyInstalled, errNode = pcc.AreRoleInstalled(nodeId, roles); errNode == nil {
+				if alreadyInstalled {
+					lock.Lock()
+					installed = append(installed, node.Id)
+					lock.Unlock()
+					fmt.Printf("roles %v already set on node:%v\n", roles, nodeId)
+				} else {
+					fmt.Printf("setting roles %v on node %d\n", roles, nodeId)
+					lock.Lock()
+					installing = append(installing, nodeId)
+					lock.Unlock()
+					errNode = pcc.UpdateNode(node)
+				}
+			} else {
+				err = errNode
+			}
+		} else {
+			err = errNode
+		}
+	}
+
+	for _, id := range nodes {
+		go addRoles(id)
+	}
+
+	wg.Wait()
 	return
 }

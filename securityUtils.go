@@ -36,7 +36,7 @@ func CreateFileAndUpload(fileName string, key string, fileType string) (err erro
 			Pcc.DeleteKey(fileName)
 		}
 
-		err = Pcc.UploadKey(filePath, fileName, fileType, "")
+		_, err = Pcc.UploadKey(filePath, fileName, fileType, "")
 		if err != nil {
 			return
 		}
@@ -50,7 +50,7 @@ func CreateFileAndUpload(fileName string, key string, fileType string) (err erro
 			Pcc.DeleteCertificate(cert.Id)
 		}
 
-		err = Pcc.UploadCert(filePath, fileName, "")
+		_, err = Pcc.UploadCert(filePath, fileName, "")
 		if err != nil {
 			return
 		}

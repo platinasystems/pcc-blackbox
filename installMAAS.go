@@ -2,78 +2,53 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/test"
 	"testing"
 	"time"
-
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
 )
 
 func updateNodes_installMAAS(t *testing.T) {
 	t.Run("installMAAS", installMAAS)
-	t.Run("verifyMAAS", verifyMAAS)
 }
-
-var nodesToCheck []uint64
-var from time.Time
 
 func installMAAS(t *testing.T) {
 	test.SkipIfDryRun(t)
-	assert := test.Assert{t}
 
-	from = time.Now()
-	var isMAASInNodes = make(map[uint64]bool)
-	for _, i := range Env.Invaders {
-		var (
-			addReq pcc.NodeWithKubernetes
-			maas   []uint64 = []uint64{2, 6}
-			err    error
-		)
-
-		id := NodebyHostIP[i.HostIp]
-		addReq.Host = i.HostIp
-		addReq.Id = id
-		addReq.RoleIds = maas
-
-		isMAASInNodes[id] = Pcc.IsAppInstalled(id, "maas")
-		if !isMAASInNodes[id] {
-			_, err = Pcc.UpdateNode(addReq)
-			if err != nil {
-				assert.Fatalf("Failed to install MaaS on id "+
-					"%v : %v", id, err)
-				return
-			}
-			nodesToCheck = append(nodesToCheck, id)
-		} else {
-			fmt.Printf("MAAS already installed in nodeId:%v\n",
-				addReq.Id)
+	if nodes, err := Pcc.GetInvaderIds(); err == nil {
+		if err = setRolesToNodesAndCheck([]uint64{2, 6}, "MAAS", nodes, MAAS_INSTALL_TIMEOUT); err != nil {
+			t.Fatal(err)
 		}
+	} else {
+		t.Fatal(err)
 	}
 }
 
-func verifyMAAS(t *testing.T) {
-	test.SkipIfDryRun(t)
-	assert := test.Assert{t}
-
+// FIXME move the wait to PccClient
+func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout time.Duration) (err error) {
 	var (
-		err   error
-		check bool
+		installed    []uint64
+		nodesToCheck []uint64
+		check        bool
 	)
 
-	//Check MAAS installation
-	for i := 0; i < len(nodesToCheck); i++ {
-		id := nodesToCheck[i]
-		fmt.Printf("Checking MAAS installation for nodeId:%v\n", id)
-
-		check, err = checkMAASInstallation(id, from)
-		if err != nil {
-			assert.Fatalf("Failed checking MaaS on %v"+
-				": %v", id, err)
-			return
+	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
+	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
+		if len(installed) > 0 {
+			fmt.Printf("%s already installed on nodes %d", app, installed)
 		}
-		if check {
-			fmt.Printf("MAAS correctly installed on nodeId:%v\n",
-				id)
+		//Check APP installation
+		for i := 0; i < len(nodesToCheck); i++ {
+			id := nodesToCheck[i]
+			fmt.Printf("Checking %s installation for node:%v\n", app, id)
+
+			if check, err = checkGenericInstallation(id, timeout, app); err != nil {
+				err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
+				return
+			} else if check {
+				fmt.Printf("%s correctly installed on nodeId:%v\n", app, id)
+			}
 		}
 	}
+
+	return
 }

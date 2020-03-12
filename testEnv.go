@@ -10,10 +10,13 @@ type testEnv struct {
 	DockerStats           pcc.DockerStatsConfig
 	AuthenticationProfile pcc.AuthenticationProfile
 	PortusConfiguration   pcc.PortusConfiguration
+	DBConfiguration       *pcc.DBConfiguration
+	SshConfiguration      *pcc.SshConfiguration
 	CephConfiguration     pcc.CephConfiguration
 }
 
 type node struct {
+	Id            uint64
 	HostIp        string
 	BMCIp         string
 	BMCUser       string
@@ -64,4 +67,49 @@ var exampleEnv = testEnv{
 			},
 		},
 	},
+}
+
+func (te *testEnv) setNodeId(host string, id uint64) (found bool) {
+	found = false
+
+	for i := range te.Invaders {
+		if te.Invaders[i].HostIp == host {
+			te.Invaders[i].Id = id
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		for i := range te.Servers {
+			if te.Servers[i].HostIp == host {
+				te.Servers[i].Id = id
+				break
+			}
+		}
+	}
+	return
+}
+
+func (te *testEnv) GetNodeByHost(host string) *node {
+	for i := range te.Invaders {
+		if te.Invaders[i].HostIp == host {
+			return &te.Invaders[i].node
+		}
+	}
+
+	for i := range te.Servers {
+		if te.Servers[i].HostIp == host {
+			return &te.Servers[i].node
+		}
+	}
+	return nil
+}
+
+func (te *testEnv) IsNodeAlreadyAdded(host string) bool {
+	if n := te.GetNodeByHost(host); n != nil {
+		return n.Id > 0
+	}
+
+	return false
 }

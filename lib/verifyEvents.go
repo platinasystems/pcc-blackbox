@@ -1,17 +1,17 @@
 package pcc
 
 import (
-	"time"
 	"fmt"
 	"strings"
+	"time"
 )
 
 const (
-	FREQUENCY            = 10
+	FREQUENCY = 10
 )
 
 type Status struct {
-	Msg string
+	Msg     string
 	IsError bool
 }
 
@@ -25,10 +25,10 @@ type Verifier interface {
 	GetBreakLoopChan() chan bool
 }
 
-func (p *PccClient) Verify(startTime time.Time, v Verifier) (s Status){
+func (p *PccClient) Verify(startTime time.Time, v Verifier) (s Status) {
 	done := make(chan Status)
 	go p.syncCheckGenericInstallation(0, v, startTime, done)
-	s = <- done
+	s = <-done
 	go func() {
 		if v.GetBreakLoopChan() != nil {
 			v.GetBreakLoopChan() <- true
@@ -44,20 +44,20 @@ func (p *PccClient) syncCheckGenericInstallation(id uint64, v Verifier, from tim
 	timeout := v.GetTimeout() * time.Second
 	for time.Since(from) < timeout {
 		select {
-		case <- v.GetBreakLoopChan():
+		case <-v.GetBreakLoopChan():
 			return
 		default:
 			var (
-				events    []Notification
-				err       error
+				events []Notification
+				err    error
 			)
 			events, err = p.GetNotifications()
 			if err != nil {
 				s.Msg = fmt.Sprintf("failed to get notifications ERROR: %v", err)
 				s.IsError = true
 				found <- s
-			}else {
-				eventsLoop:
+			} else {
+			eventsLoop:
 				for i := 0; i < len(events); i++ {
 					if events[i].CreatedAt < ConvertToMillis(from) {
 						continue
@@ -71,7 +71,7 @@ func (p *PccClient) syncCheckGenericInstallation(id uint64, v Verifier, from tim
 								s.IsError = false
 								found <- s
 								break eventsLoop
-							}else {
+							} else {
 								fmt.Println("notification: ", eventMsg)
 								delete(eventsToCheck, msg)
 							}

@@ -27,3 +27,21 @@ func idInSlice(idToFind uint64, list []uint64) bool {
 	}
 	return false
 }
+
+func getNodeFromEnv(id uint64) *node {
+	for i := range Env.Invaders {
+		node := Env.Invaders[i].node
+		if node.Id == id {
+			return &node
+		}
+	}
+
+	for i := range Env.Servers {
+		node := Env.Servers[i].node
+		if node.Id == id {
+			return &node
+		}
+	}
+
+	return nil
+}

@@ -5,7 +5,6 @@
 package pcc
 
 import (
-	"encoding/json"
 	"fmt"
 
 	"github.com/platinasystems/tiles/pccserver/models"
@@ -30,111 +29,39 @@ type LDAPConfiguration struct {
 }
 
 func (p *PccClient) AddAuthProfile(authProfile AuthenticationProfile) (err error) {
-	var (
-		data []byte
-		resp HttpResp
-	)
-
-	data, err = json.Marshal(authProfile)
-	if err != nil {
-		return
-	}
-
-	resp, _, err = p.pccGateway("POST", PROFILE_ENDPOINT, data)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("add Authenticatiom Profile %v failed: %v\n",
-			authProfile.Name, resp.Error)
-		return
-	}
+	err = p.Post(PROFILE_ENDPOINT, &authProfile, nil)
 	return
 }
 
 func (p *PccClient) GetAuthProfiles() (authProfiles []AuthenticationProfile, err error) {
-	var (
-		resp HttpResp
-	)
-
-	resp, _, err = p.pccGateway("GET", PROFILE_ENDPOINT, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &authProfiles)
-		return
-	}
-
-	err = fmt.Errorf("%v", resp.Error)
+	err = p.Get(PROFILE_ENDPOINT, &authProfiles)
 	return
 }
 
 func (p *PccClient) GetAuthProfileById(id uint64) (authProfile AuthenticationProfile, err error) {
-	var (
-		endpoint string
-		resp     HttpResp
-	)
-
-	endpoint = fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
-
-	resp, _, err = p.pccGateway("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &authProfile)
-		return
-	}
-
-	err = fmt.Errorf("%v", resp.Error)
+	endpoint := fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
+	err = p.Get(endpoint, &authProfile)
 	return
 
 }
 
 func (p *PccClient) GetAuthProfileByName(name string) (authProfile *AuthenticationProfile, err error) {
-
-	var (
-		resp         HttpResp
-		authProfiles []AuthenticationProfile
-	)
-	resp, _, err = p.pccGateway("GET", PROFILE_ENDPOINT, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		if err = json.Unmarshal(resp.Data, &authProfiles); err == nil {
-			for i := range authProfiles {
-				if authProfiles[i].Name == name {
-					authProfile = &authProfiles[i]
-					return
-				}
+	var authProfiles []AuthenticationProfile
+	if err = p.Get(PROFILE_ENDPOINT, &authProfiles); err == nil {
+		for i := range authProfiles {
+			if authProfiles[i].Name == name {
+				authProfile = &authProfiles[i]
+				return
 			}
-		} else {
-			return
 		}
-	}
 
-	err = fmt.Errorf("%v", resp.Error)
+	}
 	return
 
 }
 
 func (p *PccClient) DelAuthProfile(id uint64) (err error) {
-	var (
-		resp     HttpResp
-		endpoint string
-	)
-
-	endpoint = fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
-
-	resp, _, err = p.pccGateway("DELETE", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
+	endpoint := fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
+	err = p.Delete(endpoint, nil)
 	return
 }

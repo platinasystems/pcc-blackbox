@@ -60,7 +60,7 @@ func installPortus(t *testing.T) {
 	)
 
 	for id, node := range Nodes {
-		if Pcc.IsNodeOnline(node) {
+		if Pcc.IsNodeOnline(node.Id) {
 			portusConfiguration = Env.PortusConfiguration
 			portusConfiguration.NodeID = id
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
@@ -112,11 +112,9 @@ func checkPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
-	from := time.Now()
-
 	for id, node := range Nodes {
 		if idInSlice(node.Id, PortusSelectedNodeIds) {
-			check, err := checkGenericInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, from)
+			check, err := checkGenericInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION)
 			if err != nil {
 				assert.Fatalf("Portus installation has failed\n%v\n", err)
 			}

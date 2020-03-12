@@ -36,11 +36,11 @@ type Interface struct {
 }
 
 type InterfaceDetail struct {
-	Interface          *Interface        `json:"interface"`
-	RemoteLinksDetails []*avro.Interface `json:"remoteLinksDetails"`
+	Interface          Interface        `json:"interface"`
+	RemoteLinksDetails []avro.Interface `json:"remoteLinksDetails"`
 }
 
-type InterfaceRequest struct {
+type InterfaceRequest struct { // FIXME use the common models module
 	//models.InterfaceRequest
 	Id            uint64         `json:"-" gorm:"id"`
 	InterfaceId   int64          `json:"interfaceId" gorm:"interface_id"`
@@ -70,45 +70,26 @@ type InterfaceRequest struct {
 	Restore    bool   `json:"-" gorm:"restore"`
 }
 
-func (p *PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail,
-	err error) {
-
-	var (
-		resp     HttpResp
-		endpoint string
-		node     NodeDetail
-	)
-	endpoint = fmt.Sprintf("pccserver/node/%v", nodeId)
-	resp, _, err = p.pccGateway("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &node)
-		if err != nil {
-			return
-		}
+func (p *PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail, err error) {
+	var node NodeDetail
+	endpoint := fmt.Sprintf("pccserver/node/%v", nodeId)
+	if err = p.Get(endpoint, &node); err == nil {
 		ifaces = node.Interfaces
-		return
 	}
-	err = fmt.Errorf("GetIfaceByNodeId failed: %v", resp.Error)
 	return
 }
 
 func (p *PccClient) GetIfaceById(nodeId uint64, ifaceId int64) (iface *InterfaceDetail, err error) {
-
-	ifaces, err := p.GetIfacesByNodeId(nodeId)
-	if err != nil {
-		return
-	}
-	for _, i := range ifaces {
-		if i.Interface.Id == ifaceId {
-			iface = i
-			return
+	var ifaces []*InterfaceDetail
+	if ifaces, err = p.GetIfacesByNodeId(nodeId); err == nil {
+		for _, i := range ifaces {
+			if i.Interface.Id == ifaceId {
+				iface = i
+				return
+			}
 		}
+		err = fmt.Errorf("error getting interface %v on node %v", ifaceId, nodeId)
 	}
-	err = fmt.Errorf("error getting interface %v on node %v",
-		ifaceId, nodeId)
 	return
 }
 
@@ -128,89 +109,26 @@ func (p *PccClient) GetIfaceByMacAddress(mAddr string, ifaces []*InterfaceDetail
 }
 
 func (p *PccClient) SetIfaceApply(iface InterfaceRequest) (err error) {
-	var (
-		data     []byte
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("pccserver/interface")
-	data, err = json.Marshal(iface)
-	if err != nil {
-		return fmt.Errorf("Iface format not valid")
-	}
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		return nil
-	}
-	endpoint = fmt.Sprintf("pccserver/interface/apply")
-	var jsonData = map[string]string{"nodeId": string(iface.NodeId)}
-	data, err = json.Marshal(jsonData)
-	if err != nil {
-		return
-	}
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		return nil
-	}
-	return fmt.Errorf(resp.Message)
-}
-
-func (p *PccClient) SetIface(iface InterfaceRequest) (err error) {
-	var (
-		data     []byte
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("pccserver/interface")
-	data, err = json.Marshal(iface)
-	if err != nil {
-		err = fmt.Errorf("Iface format not valid")
-		return
-	}
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		return
+	if err = p.SetIface(iface); err == nil {
+		err = p.ApplyIface(iface.NodeId)
 	}
 	return
 }
 
+func (p *PccClient) SetIface(iface InterfaceRequest) (err error) {
+	err = p.Post("pccserver/interface", &iface, nil)
+	return
+}
+
 func (p *PccClient) ApplyIface(nodeId uint64) (err error) {
-	var (
-		data     []byte
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("pccserver/interface/apply")
-	var jsonData = map[string]uint64{"nodeId": nodeId}
-	data, err = json.Marshal(jsonData)
-	if err != nil {
-		return
-	}
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		return
-	}
-	err = fmt.Errorf(resp.Error)
+	ir := InterfaceRequest{NodeId: nodeId}
+	err = p.Post("pccserver/interface/apply", &ir, nil)
 	return
 }
 
 func (p *PccClient) SetIfaceAdmin(nodeId uint64, ifaceId int64, upDown string) (err error) {
 	var (
 		ir       InterfaceRequest
-		data     []byte
-		resp     HttpResp
 		endpoint string
 	)
 
@@ -224,17 +142,6 @@ func (p *PccClient) SetIfaceAdmin(nodeId uint64, ifaceId int64, upDown string) (
 		endpoint = fmt.Sprintf("pccserver/interface/down")
 	}
 
-	data, err = json.Marshal(ir)
-	if err != nil {
-		return
-	}
-	resp, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		return
-	}
-	err = fmt.Errorf(resp.Error)
+	err = p.Post(endpoint, &ir, nil)
 	return
 }

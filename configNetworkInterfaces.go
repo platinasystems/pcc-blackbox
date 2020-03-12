@@ -29,34 +29,36 @@ func configNetworkInterfaces(t *testing.T) {
 		err    error
 		ifaces []*pcc.InterfaceDetail
 	)
-	for _, i := range Env.Invaders {
-		id := NodebyHostIP[i.HostIp]
-		ifaces, err = Pcc.GetIfacesByNodeId(id)
-		if err != nil {
-			assert.Fatalf("Error retrieving node %v id[%v] "+
-				"interfaces", i.HostIp, NodebyHostIP[i.HostIp])
-			return
-		}
-		var nodeIntfs []int64
-		for _, intf := range ifaces {
-			nodeIntfs = append(nodeIntfs, intf.Interface.Id)
-		}
-		configNodeInterfaces(t, i.HostIp, i.NetInterfaces, ifaces)
-		nodeIntfMap[id] = nodeIntfs
+
+	var nodes []node
+	for i := range Env.Invaders {
+		nodes = append(nodes, Env.Invaders[i].node)
 	}
-	for _, i := range Env.Servers {
-		id := NodebyHostIP[i.HostIp]
-		ifaces, err = Pcc.GetIfacesByNodeId(id)
-		if err != nil {
-			assert.Fatalf("Error retrieving node %v id[%v] "+
-				"interfaces", i.HostIp, id)
+	for i := range Env.Servers {
+		nodes = append(nodes, Env.Servers[i].node)
+	}
+
+	fmt.Printf("configuring interfaces for %d nodes\n", len(nodes))
+
+	for i := range nodes {
+		node := nodes[i]
+		id := NodebyHostIP[node.HostIp]
+		if ifaces, err = Pcc.GetIfacesByNodeId(id); err != nil {
+			assert.Fatalf("Error retrieving node %s id[%d] interfaces\n %v", node.HostIp, id, err)
 			return
 		}
 		var nodeIntfs []int64
-		for _, intf := range ifaces {
-			nodeIntfs = append(nodeIntfs, intf.Interface.Id)
+	l2:
+		for j := range node.NetInterfaces { // skip the check of the interfaces are not declared in Env
+			iface := node.NetInterfaces[j]
+			for _, intf := range ifaces {
+				if iface.Name == intf.Interface.Name {
+					nodeIntfs = append(nodeIntfs, intf.Interface.Id)
+					continue l2
+				}
+			}
 		}
-		configNodeInterfaces(t, i.HostIp, i.NetInterfaces, ifaces)
+		configNodeInterfaces(t, node.HostIp, node.NetInterfaces, ifaces)
 		nodeIntfMap[id] = nodeIntfs
 	}
 }
@@ -255,8 +257,7 @@ func serverConfigLoop(id uint64, serverIntfs []netInterface) (done bool, err err
 	var ifaces []*pcc.InterfaceDetail
 
 	done = false
-	ifaces, err = Pcc.GetIfacesByNodeId(id)
-	if err != nil {
+	if ifaces, err = Pcc.GetIfacesByNodeId(id); err != nil {
 		return
 	}
 

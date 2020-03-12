@@ -5,14 +5,7 @@
 package pcc
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
-	"io"
-	"mime/multipart"
-	"net/http"
-	"os"
-	"path/filepath"
 )
 
 const (
@@ -43,269 +36,124 @@ type SecurityKey struct {
 	PublicPath  string `json:"PublicPath"`
 }
 
-func (p *PccClient) UploadKey(filePath string, label string, fileType string, description string) (err error) {
-
+func (p *PccClient) checkKeyType(fileType string) (err error) {
 	if fileType != PRIVATE_KEY && fileType != PUBLIC_KEY {
 		err = fmt.Errorf("Invalid security key type [%v]\n", fileType)
-		return
-	}
-	url := fmt.Sprintf("https://%v:9999/key-manager/keys/upload/%v/%v",
-		p.pccIp, fileType, label)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	writer.WriteField("description", description)
-	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
-	if err != nil {
-		return
-	}
-
-	_, err = io.Copy(part, file)
-	if err != nil {
-		return
-	}
-	err = writer.Close()
-	if err != nil {
-		return
-	}
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", url, body)
-	req.Header.Add("Authorization", p.bearer)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	r, err := client.Do(req)
-	defer r.Body.Close()
-	return
-}
-
-func (p *PccClient) DeleteKey(label string) (err error) {
-	var (
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("key-manager/keys/%v", label)
-	resp, _, err = p.pccSecurity("DELETE", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
 	}
 	return
 }
 
-func (p *PccClient) DeleteKeyById(id uint64) (err error) {
-	var (
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("key-manager/keys/%v", id)
-	resp, _, err = p.pccSecurity("DELETE", endpoint, nil)
-	if err != nil {
-		return
+// Upload a key to the KM
+func (p *PccClient) UploadKey(filePath string, label string, fileType string, description string) (key SecurityKey, err error) {
+	if err = p.checkKeyType(fileType); err == nil {
+		endPoint := fmt.Sprintf("key-manager/keys/upload/%s/%s", fileType, label)
+		m := map[string]string{"description": description}
+		err = p.PutFile(endPoint, filePath, m, &key)
 	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
+	return
+}
+
+// Download a key from the KM
+func (p *PccClient) DownloadKey(id interface{}, fileType string) (content string, err error) {
+	if err = p.checkKeyType(fileType); err == nil {
+		endPoint := fmt.Sprintf("key-manager/keys/download/%s/%v", fileType, id)
+		content, err = p.GetFile(endPoint)
 	}
+	return
+}
+
+func (p *PccClient) DeleteKey(id interface{}) (err error) { // THe KM accepts the deletion by ID or alias
+	endpoint := fmt.Sprintf("key-manager/keys/%v", id)
+	err = p.Delete(endpoint, nil)
 	return
 }
 
 func (p *PccClient) GetSecurityKeys() (secKeys []SecurityKey, err error) {
-	var (
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("key-manager/keys/describe")
-	resp, _, err = p.pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	err = json.Unmarshal(resp.Data, &secKeys)
+	endpoint := fmt.Sprintf("key-manager/keys/describe")
+	err = p.Get(endpoint, &secKeys)
 	return
 }
 
 func (p *PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error) {
-	var (
-		resp     HttpResp
-		endpoint string
-	)
-	endpoint = fmt.Sprintf("key-manager/keys/describe/%v", alias)
-	resp, _, err = p.pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	err = json.Unmarshal(resp.Data, &secKey)
+	endpoint := fmt.Sprintf("key-manager/keys/describe/%v", alias)
+	err = p.Get(endpoint, &secKey)
+	return
+}
+
+func (p *PccClient) UpdateSecurityKey(secKey SecurityKey) (err error) {
+	err = p.Post("key-manager/keys/update", &secKey, &secKey)
 	return
 }
 
 func (p *PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKey, err error) {
-	var (
-		secKeys []SecurityKey
-	)
+	var secKeys []SecurityKey
 	exist = false
-	secKeys, err = p.GetSecurityKeys()
-	if err != nil {
-		return
-	}
-
-	for _, k := range secKeys {
-		if k.Alias == alias {
-			secKey = k
-			exist = true
-			return
+	if secKeys, err = p.GetSecurityKeys(); err == nil {
+		for _, k := range secKeys {
+			if k.Alias == alias {
+				secKey = k
+				exist = true
+				break
+			}
 		}
 	}
 	return
 }
 
-func (p *PccClient) UploadCert(filePath string, label string, description string) (err error) {
+func (p *PccClient) UploadCert(filePath string, label string, description string) (certificate Certificate, err error) {
+	endPoint := fmt.Sprintf("key-manager/certificates/upload/%s", label)
+	m := map[string]string{"description": description}
+	err = p.PutFile(endPoint, filePath, m, &certificate)
+	return
+}
 
-	url := fmt.Sprintf("https://%s:9999/key-manager/certificates/upload/%v",
-		p.pccIp, label)
-
-	file, err := os.Open(filePath)
-	if err != nil {
-		return
-	}
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	writer.WriteField("description", description)
-	part, err := writer.CreateFormFile("file", filepath.Base(filePath))
-	if err != nil {
-		return
-	}
-
-	_, err = io.Copy(part, file)
-	if err != nil {
-		return
-	}
-	err = writer.Close()
-	if err != nil {
-		return
-	}
-	client := &http.Client{}
-	req, _ := http.NewRequest("POST", url, body)
-	req.Header.Add("Authorization", p.bearer)
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	r, err := client.Do(req)
-	defer r.Body.Close()
+// Download a certificate from the KM
+func (p *PccClient) DownloadCertificate(id uint64) (content string, err error) {
+	endPoint := fmt.Sprintf("key-manager/certificates/%d", id)
+	content, err = p.GetFile(endPoint)
 	return
 }
 
 func (p *PccClient) FindCertificate(alias string) (exist bool, certificate Certificate, err error) {
-	var (
-		certificates []Certificate
-		endpoint     string
-	)
-
-	exist = false
-	endpoint = fmt.Sprintf("key-manager/certificates/describe")
-	resp, _, err := p.pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(resp.Data, &certificates)
-	if err == nil {
-		for i := 0; i < len(certificates); i++ {
+	var certificates []Certificate
+	if certificates, err = p.GetCertificates(); err == nil {
+		for i := range certificates {
 			if certificates[i].Alias == alias {
 				exist = true
 				certificate = certificates[i]
 				return
 			}
 		}
-	} else {
-		err = fmt.Errorf("%v", resp.Error)
 	}
-
 	return
 }
 
 func (p *PccClient) GetCertificates() (certificates []Certificate, err error) {
-	var (
-		endpoint string
-	)
-
-	endpoint = fmt.Sprintf("key-manager/certificates/describe")
-	resp, _, err := p.pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status == 200 {
-		err = json.Unmarshal(resp.Data, &certificates)
-		if err != nil {
-			return
-		}
-	} else {
-		err = fmt.Errorf("%v", resp.Error)
-	}
-
+	endpoint := fmt.Sprintf("key-manager/certificates/describe")
+	err = p.Get(endpoint, &certificates)
 	return
 }
 
 func (p *PccClient) GetCertificate(id uint64) (certificate Certificate, err error) {
-	var (
-		endpoint string
-	)
-
-	endpoint = fmt.Sprintf("key-manager/certificates/describe/%v", id)
-	resp, _, err := p.pccSecurity("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(resp.Data, &certificate)
-	if err != nil {
-		err = fmt.Errorf("Unmarshal certificate %v failed\n%v\n",
-			id, err)
-	}
-
+	endpoint := fmt.Sprintf("key-manager/certificates/describe/%v", id)
+	err = p.Get(endpoint, &certificate)
 	return
 }
 
 func (p *PccClient) DeleteCertificate(id uint64) (err error) {
-	var (
-		endpoint string
-		resp     HttpResp
-	)
-
-	endpoint = fmt.Sprintf("key-manager/certificates/%v", id)
-	resp, _, err = p.pccSecurity("DELETE", endpoint, nil)
-	if err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-
+	endpoint := fmt.Sprintf("key-manager/certificates/%v", id)
+	err = p.Delete(endpoint, nil)
 	return
 }
 
 func (p *PccClient) CheckKeyLabelExists(label string) (exists bool, err error) {
 	var secKeys []SecurityKey
 
-	secKeys, err = p.GetSecurityKeys()
-	if err != nil {
-		return
-	}
-
-	for i := 0; i < len(secKeys); i++ {
-		if secKeys[i].Alias == label {
-			exists = true
+	if secKeys, err = p.GetSecurityKeys(); err == nil {
+		for i := 0; i < len(secKeys); i++ {
+			if secKeys[i].Alias == label {
+				exists = true
+			}
 		}
 	}
 	return

@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime/debug"
 	"testing"
 	"time"
 
@@ -23,7 +24,7 @@ var Pcc *pcc.PccClient
 
 var Nodes = make(map[uint64]*pcc.NodeWithKubernetes)
 var SecurityKeys = make(map[string]*pcc.SecurityKey)
-var NodebyHostIP = make(map[string]uint64)
+var NodebyHostIP = make(map[string]uint64) // deprecated use Env
 
 var dockerStats *pcc.DockerStats
 
@@ -36,6 +37,7 @@ func TestMain(m *testing.M) {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, r)
 			ecode = 1
+			fmt.Println(string(debug.Stack()))
 		}
 		if ecode != 0 {
 			os.Exit(ecode)
@@ -52,12 +54,14 @@ func TestMain(m *testing.M) {
 			envFile, err.Error()))
 	}
 
-	credential := pcc.Credential{
+	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
+	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
+
+	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
 		Password: "admin",
 	}
-	Pcc, err = pcc.Authenticate(Env.PccIp, credential)
-	if err != nil {
+	if Pcc, err = pcc.Authenticate(Env.PccIp, credential); err != nil {
 		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
 
@@ -234,6 +238,90 @@ func TestClean(t *testing.T) {
 		mayRun(t, "delAllKeys", delAllKeys)
 		mayRun(t, "delAllProfiles", delAllProfiles)
 		mayRun(t, "delAllCerts", delAllCerts)
+	})
+}
+
+func TestTunnel(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "TUNNEL", func(t *testing.T) {
+		//mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		//mayRun(t, "installLLDP", updateNodes_installLLDP)
+		//mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
+		mayRun(t, "checkInvaderTunnels", checkInvaderTunnels)
+		mayRun(t, "checkServerTunnels", checkServerTunnels)
+		mayRun(t, "checkTunnelConnection", checkTunnelConnection)
+		mayRun(t, "checkTunnelForwardConnection", checkTunnelForwardingRules)
+		mayRun(t, "checkTunnelRestoreConnection", checkTunnelRestore)
+	})
+}
+
+func TestAvailability(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "AVAILABILITY", func(t *testing.T) {
+		mayRun(t, "checkAddUnreachableNode", addUnreachableNode)
+		mayRun(t, "checkAddInaccessibleNode", addInaccessibleNode)
+		mayRun(t, "checkAgentAndCollectorRestore", checkAgentAndCollectorRestore)
+	})
+}
+
+func TestGreenfield(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "GREENFIELD", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "installLLDPOnInvaders", installLLDPOnInvaders)
+		mayRun(t, "installMAAS", installMAAS)
+		mayRun(t, "addGreenfieldNodes", addGreenfieldServers)
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
+		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
+	})
+}
+
+func TestMonitor(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "MONITOR", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "testGetTopic", testGetTopic)
+		mayRun(t, "testGetTopicSchema", testGetTopicSchema)
+		mayRun(t, "testMonitorSample", testMonitorSample)
+		mayRun(t, "testMonitorHistory", testMonitorHistory)
+	})
+}
+
+func TestUserManagement(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "USER-MANAGEMENT", func(t *testing.T) {
+		mayRun(t, "testUMRole", testUMRole)
+		mayRun(t, "testUMTenant", testUMTenant)
+		mayRun(t, "testUMUser", testUMUser)
+		mayRun(t, "testUMOperation", testUMOperation)
+		mayRun(t, "testUMEntity", testUMEntity)
+		mayRun(t, "testUMUserSpace", testUMUserSpace)
+	})
+}
+
+func TestKeyManager(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "KEY-MANAGER", func(t *testing.T) {
+		mayRun(t, "testKMKeys", testKMKeys)
+		mayRun(t, "testKMCertificates", testKMCertificates)
 	})
 }
 

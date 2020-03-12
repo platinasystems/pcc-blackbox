@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/pcc-blackbox/lib"
 	"testing"
 
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
 
