@@ -28,10 +28,6 @@ type Profile struct {
 	Source    string `json:"source"`
 }
 
-type Role struct {
-	model.Role
-}
-
 // tried re-using model.User, but not sure about
 // unmarshal in to type interface
 type User struct {
