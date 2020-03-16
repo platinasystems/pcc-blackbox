@@ -32,6 +32,9 @@ func installLLDPOnInvaders(t *testing.T) {
 
 // Install LLDP on nodes
 func installLLDPOnNodes(nodes []uint64) (err error) {
-	err = setRolesToNodesAndCheck([]uint64{2}, LLDP_NOTIFICATION, nodes, LLDP_TIMEOUT)
+	var roleId uint64
+	if roleId, err = Pcc.FindRoleId(pcc.ROLE_LLDP); err == nil {
+		err = setRolesToNodesAndCheck([]uint64{roleId}, LLDP_NOTIFICATION, nodes, LLDP_TIMEOUT)
+	}
 	return
 }

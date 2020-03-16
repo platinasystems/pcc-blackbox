@@ -62,6 +62,8 @@ type Operation struct {
 	GroupId bool `json:"groupID"`
 }
 
+// tried re-using model.User, but not sure about
+// unmarshal in to type interface
 type User struct {
 	Id        uint64 `json:"id"`
 	UserName  string `json:"username"`
