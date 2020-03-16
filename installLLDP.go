@@ -1,6 +1,7 @@
 package main
 
 import (
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 	"testing"
 )
@@ -34,7 +35,7 @@ func installLLDPOnInvaders(t *testing.T) {
 func installLLDPOnNodes(nodes []uint64) (err error) {
 	var roleId uint64
 	if roleId, err = Pcc.FindRoleId(pcc.ROLE_LLDP); err == nil {
-		err = setRolesToNodesAndCheck([]uint64{roleId}, LLDP_NOTIFICATION, nodes, LLDP_TIMEOUT)
+		err = setRolesToNodesAndCheck([]uint64{roleId}, pcc.ROLE_LLDP, nodes, LLDP_TIMEOUT)
 	}
 	return
 }

@@ -52,7 +52,7 @@ type Profile struct {
 	Source    string `json:"source"`
 }
 
-type Role struct {
+type SecurityRole struct {
 	GenericModel
 	Protect bool `json:"protect"`
 }
@@ -65,19 +65,19 @@ type Operation struct {
 // tried re-using model.User, but not sure about
 // unmarshal in to type interface
 type User struct {
-	Id        uint64 `json:"id"`
-	UserName  string `json:"username"`
-	FirstName string `json:"firstname"`
-	LastName  string `json:"lastname"`
-	Email     string `json:"email"`
-	Password  string `json:"password,omitempty"`
-	TenantId  uint64 `json:"tenant"`
-	RoleId    uint64 `json:"roleID"`
-	Source    string `json:"source"`
-	Active    bool   `json:"active"`
-	Protect   bool   `json:"protect"`
-	Role      *Role  `json:"role"`
-	Tenant    Tenant `json:"tenant"`
+	Id        uint64        `json:"id"`
+	UserName  string        `json:"username"`
+	FirstName string        `json:"firstname"`
+	LastName  string        `json:"lastname"`
+	Email     string        `json:"email"`
+	Password  string        `json:"password,omitempty"`
+	TenantId  uint64        `json:"tenant"`
+	RoleId    uint64        `json:"roleID"`
+	Source    string        `json:"source"`
+	Active    bool          `json:"active"`
+	Protect   bool          `json:"protect"`
+	Role      *SecurityRole `json:"role"`
+	Tenant    Tenant        `json:"tenant"`
 }
 
 func (pcc *PccClient) AddTenant(tenant Tenant) (t *Tenant, err error) {
@@ -154,7 +154,7 @@ func (pcc *PccClient) AddRole(name string, description string) (role *GenericMod
 	return
 }
 
-func (pcc *PccClient) GetRole(id uint64) (role *GenericModel, err error) {
+func (pcc *PccClient) GetSecurityRole(id uint64) (role *GenericModel, err error) {
 	var r GenericModel
 	endpoint := fmt.Sprintf("user-management/role/%d", id)
 	err = pcc.Get(endpoint, &r)
@@ -168,7 +168,7 @@ func (pcc *PccClient) DeleteRole(id uint64) (err error) {
 	return
 }
 
-func (pcc *PccClient) GetRoles() (roles []GenericModel, err error) {
+func (pcc *PccClient) GetSecurityRoles() (roles []GenericModel, err error) {
 	endpoint := fmt.Sprintf("user-management/role")
 	err = pcc.Get(endpoint, &roles)
 	return

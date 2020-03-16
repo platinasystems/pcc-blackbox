@@ -93,12 +93,12 @@ func testUMRole(t *testing.T) {
 			return Pcc.AddRole(name, description)
 		},
 		func(id uint64) (genericModel *pcc.GenericModel, err error) {
-			return Pcc.GetRole(id)
+			return Pcc.GetSecurityRole(id)
 		},
 		func(id uint64) error {
 			return Pcc.DeleteRole(id)
 		}, func() (models []pcc.GenericModel, err error) {
-			return Pcc.GetRoles()
+			return Pcc.GetSecurityRoles()
 		},
 	)
 
@@ -152,7 +152,7 @@ func addTestUser() (user *pcc.User, err error) {
 
 	var roles []pcc.GenericModel
 
-	if roles, err = Pcc.GetRoles(); err == nil {
+	if roles, err = Pcc.GetSecurityRoles(); err == nil {
 		u.RoleId = roles[0].Id
 	} else {
 		return

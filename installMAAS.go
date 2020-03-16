@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 	"testing"
 	"time"
@@ -15,14 +16,13 @@ func installMAAS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	var (
-		err error
+		err    error
 		maasId uint64
 		lldpId uint64
 	)
 
 	if maasId, err = Pcc.FindRoleId(pcc.ROLE_MAAS); err == nil {
 		if lldpId, err = Pcc.FindRoleId(pcc.ROLE_LLDP); err == nil {
-
 			if nodes, err := Pcc.GetInvaderIds(); err == nil {
 				if err = setRolesToNodesAndCheck([]uint64{lldpId, maasId}, "MAAS", nodes, MAAS_INSTALL_TIMEOUT); err != nil {
 					t.Fatal(err)

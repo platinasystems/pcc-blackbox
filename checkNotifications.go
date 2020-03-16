@@ -19,7 +19,6 @@ const (
 	PORTUS_NOTIFICATION                  = "PORTUS"
 	COLLECTOR_NOTIFICATION               = "COLLECTOR"
 	AGENT_NOTIFICATION                   = "AGENT"
-	LLDP_NOTIFICATION                    = "LLDPD"
 	PXEBOOT_NODE_ADD_NOTIFICATION        = "new node added successfully"
 	PXEBOOT_NODE_ADD_FAILED_NOTIFICATION = "add node at failed"
 )
