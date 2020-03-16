@@ -9,9 +9,10 @@ import (
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
-const (
-	ROLE_LLDP = "LLDP"
-	ROLE_MAAS = "MaaS"
+const ( // FIXME unify role and notification type
+	ROLE_LLDP  = "LLDP"
+	ROLE_LLDPD = "LLDPD"
+	ROLE_MAAS  = "MaaS"
 )
 
 type Role struct {
