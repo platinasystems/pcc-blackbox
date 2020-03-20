@@ -66,9 +66,17 @@ func monitorRestTest(t *testing.T) {
 			resultCpu, err := Pcc.GetHistoricalData("cpu", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
 				assert.Fatalf("Unable to get historical data from node [%d]: Error is %s", id, err)
-			} else if resultCpu == "" {
+			} else if resultCpu == nil || len(resultCpu) == 0 {
 				assert.Fatalf("No CPU data has been collected from '%s'to '%s'", fromT, toT)
+			} else if len(resultCpu) > 1 {
+				assert.Fatalf("You request data for node [%d] but you are receiving data for more than one node", id)
 			} else {
+				historicalDataList := resultCpu[fmt.Sprintf("%d", id)]
+				for _, historicalData := range historicalDataList {
+					if historicalData.NodeId != id {
+						assert.Fatalf("You are receiving data inconsistent with the request. Data: %+v", historicalData)
+					}
+				}
 				fmt.Printf("OK\n")
 			}
 
@@ -76,9 +84,18 @@ func monitorRestTest(t *testing.T) {
 			fmt.Printf("Execute MEMORY REST on node [%d] ", id)
 			resultMemory, err := Pcc.GetHistoricalData("memory", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
-			} else if resultMemory == "" {
+				assert.Fatalf("Unable to get historical data from node [%d]: Error is %s", id, err)
+			} else if resultMemory == nil || len(resultCpu) == 0 {
 				assert.Fatalf("No MEMORY data has been collected from '%s'to '%s'", fromT, toT)
+			} else if len(resultCpu) > 1 {
+				assert.Fatalf("You request data for node [%d] but you are receiving data for more than one node", id)
 			} else {
+				historicalDataList := resultCpu[fmt.Sprintf("%d", id)]
+				for _, historicalData := range historicalDataList {
+					if historicalData.NodeId != id {
+						assert.Fatalf("You are receiving data inconsistent with the request. Data: %+v", historicalData)
+					}
+				}
 				fmt.Printf("OK\n")
 			}
 
@@ -86,9 +103,18 @@ func monitorRestTest(t *testing.T) {
 			fmt.Printf("Execute DISK REST on node [%d] ", id)
 			resultDisk, err := Pcc.GetHistoricalData("disk", from, to, []uint64{id}, []string{"us", "sy", "id"})
 			if err != nil {
-			} else if resultDisk == "" {
+				assert.Fatalf("Unable to get historical data from node [%d]: Error is %s", id, err)
+			} else if resultDisk == nil || len(resultCpu) == 0 {
 				assert.Fatalf("No DISK data has been collected from '%s'to '%s'", fromT, toT)
+			} else if len(resultCpu) > 1 {
+				assert.Fatalf("You request data for node [%d] but you are receiving data for more than one node", id)
 			} else {
+				historicalDataList := resultCpu[fmt.Sprintf("%d", id)]
+				for _, historicalData := range historicalDataList {
+					if historicalData.NodeId != id {
+						assert.Fatalf("You are receiving data inconsistent with the request. Data: %+v", historicalData)
+					}
+				}
 				fmt.Printf("OK\n")
 			}
 		}

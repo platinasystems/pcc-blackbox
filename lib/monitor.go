@@ -14,7 +14,17 @@ import (
 
 // Rest
 
-func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeIDs []uint64, fields []string) (result string, err error) {
+type HistoricalData struct {
+	Resource                 string               `json:"resource"`
+	Timestamp                string               `json:"timestamp"`
+	NodeId                   uint64               `json:"nodeId"`
+	NodeUuid                 string               `json:"nodeUuid"`
+	Node                     string               `json:"node"`
+	CompensatedFromTimestamp interface{}          `json:"compensatedFromTimestamp"`
+	Metrics                  []map[string]float32 `json:"metrics"`
+}
+
+func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeIDs []uint64, fields []string) (result map[string][]HistoricalData, err error) {
 
 	var (
 		body []byte
@@ -24,7 +34,7 @@ func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeID
 
 	endpoint := fmt.Sprintf("monitor/topic/%s/historical", topic)
 
-	data = toHistoricalData(from, to, nodeIDs, fields)
+	data = toHistoricalDataRequest(from, to, nodeIDs, fields)
 	if err != nil {
 		return
 	}
@@ -39,11 +49,11 @@ func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeID
 		return
 	}
 
-	result = string(body)
+	result = toHistoricalDataResponse(body)
 	return
 }
 
-func toHistoricalData(from int64, to int64, nodeIDs []uint64, fields []string) []byte {
+func toHistoricalDataRequest(from int64, to int64, nodeIDs []uint64, fields []string) []byte {
 
 	type TimeRange struct {
 		From int64 `json:"from"`
@@ -61,6 +71,12 @@ func toHistoricalData(from int64, to int64, nodeIDs []uint64, fields []string) [
 		return nil
 	}
 	return b
+}
+
+func toHistoricalDataResponse(response []byte) map[string][]HistoricalData {
+	data := make(map[string][]HistoricalData)
+	json.Unmarshal(response, &data)
+	return data
 }
 
 // Websocket
