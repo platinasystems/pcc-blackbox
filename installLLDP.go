@@ -17,15 +17,22 @@ func installLLDP(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		err   error
-		check bool
+		err    error
+		check  bool
+		roleId uint64
 	)
+
+	roleId, err = Pcc.FindRoleId(pcc.ROLE_LLDP)
+	if err != nil {
+		assert.Fatalf("Failed to find LLDP role: %v\n", err)
+		return
+	}
 
 	var isLLDPInNodes = make(map[uint64]bool)
 	for id := range Nodes {
 		var (
 			addReq pcc.NodeWithKubernetes
-			lldp   []uint64 = []uint64{2}
+			lldp   []uint64 = []uint64{roleId}
 		)
 
 		addReq.Host = Nodes[id].Host

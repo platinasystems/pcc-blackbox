@@ -22,11 +22,28 @@ func installMAAS(t *testing.T) {
 	assert := test.Assert{t}
 
 	from = time.Now()
-	var isMAASInNodes = make(map[uint64]bool)
+	var (
+		lldpId        uint64
+		maasId        uint64
+		isMAASInNodes = make(map[uint64]bool)
+		err           error
+	)
+
+	lldpId, err = Pcc.FindRoleId(pcc.ROLE_LLDP)
+	if err != nil {
+		assert.Fatalf("Failed to find LLDP role: %v\n", err)
+		return
+	}
+	maasId, err = Pcc.FindRoleId(pcc.ROLE_MAAS)
+	if err != nil {
+		assert.Fatalf("Failed to find MaaS role: %v\n", err)
+		return
+	}
+
 	for _, i := range Env.Invaders {
 		var (
 			addReq pcc.NodeWithKubernetes
-			maas   []uint64 = []uint64{2, 6}
+			maas   []uint64 = []uint64{lldpId, maasId}
 			err    error
 		)
 
