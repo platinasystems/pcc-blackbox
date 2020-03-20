@@ -14,7 +14,7 @@ import (
 
 // Rest
 
-func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeIds []uint64, fields []string) (result string, err error) {
+func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeIDs []uint64, fields []string) (result string, err error) {
 
 	var (
 		body []byte
@@ -24,7 +24,7 @@ func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeId
 
 	endpoint := fmt.Sprintf("monitor/topic/%s/historical", topic)
 
-	data = toHistoricalData(from, to, nodeIds, fields)
+	data = toHistoricalData(from, to, nodeIDs, fields)
 	if err != nil {
 		return
 	}
@@ -43,7 +43,7 @@ func (p *PccClient) GetHistoricalData(topic string, from int64, to int64, nodeId
 	return
 }
 
-func toHistoricalData(from int64, to int64, nodeIds []uint64, fields []string) []byte {
+func toHistoricalData(from int64, to int64, nodeIDs []uint64, fields []string) []byte {
 
 	type TimeRange struct {
 		From int64 `json:"from"`
@@ -52,10 +52,10 @@ func toHistoricalData(from int64, to int64, nodeIds []uint64, fields []string) [
 
 	type Historical struct {
 		TimeRange TimeRange `json:"timeRange"`
-		NodeIds   []uint64  `json:"nodeIds"`
+		NodeIds   []uint64  `json:"nodeIDs"`
 		Fields    []string  `json:"fields"`
 	}
-	h := Historical{TimeRange: TimeRange{From: from, To: to}, NodeIds: nodeIds, Fields: fields}
+	h := Historical{TimeRange: TimeRange{From: from, To: to}, NodeIds: nodeIDs, Fields: fields}
 	b, err := json.Marshal(h)
 	if err != nil {
 		return nil
