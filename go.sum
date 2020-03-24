@@ -215,8 +215,12 @@ github.com/platinasystems/go-common v0.0.0-20200214151715-e37c563c4b22/go.mod h1
 github.com/platinasystems/go-kafka-avro v0.0.0-20191101100918-1f3ebf85ffe6/go.mod h1:zDNpq58feMRf0AqhjoqEChZ/JLWl74HbR1jIFTkIUwA=
 github.com/platinasystems/test v1.5.0 h1:KTEarJEXeACMr4ezoy0VeTAO5r4SQnvprv0V69yhFkQ=
 github.com/platinasystems/test v1.5.0/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
+github.com/platinasystems/test v1.6.0 h1:0yCsiOc+rGnWa8bb2BX8naVJ6JUI5PIkBhCX7HUqxlk=
+github.com/platinasystems/test v1.6.0/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/tiles v1.3.0-rc2 h1:U+7ezKtpcf+uZaaJK2fp98OIslvavocaqjwSOKM3W88=
 github.com/platinasystems/tiles v1.3.0-rc2/go.mod h1:SKwxOq44nnXiepU1aZQiypP4JzA4X+/eCQ03w5FWL88=
+github.com/platinasystems/tiles v1.3.1 h1:vefbxJ4TbclbhPNL9yrv1XEFNYXXXiMtXChn/HJIxLY=
+github.com/platinasystems/tiles v1.3.1/go.mod h1:SKwxOq44nnXiepU1aZQiypP4JzA4X+/eCQ03w5FWL88=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/prometheus/client_golang v0.9.1/go.mod h1:7SWBe2y4D6OKWSNQJUaRYU/AaXPKyh/dDVn+NZz0KFw=

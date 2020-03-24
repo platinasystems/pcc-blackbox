@@ -9,8 +9,8 @@ require (
 	github.com/lib/pq v1.3.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/platinasystems/test v1.5.0
-	github.com/platinasystems/tiles v1.3.0-rc2
+	github.com/platinasystems/test v1.6.0
+	github.com/platinasystems/tiles v1.3.1
 	github.com/shirou/gopsutil v2.19.11+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.1 // indirect
