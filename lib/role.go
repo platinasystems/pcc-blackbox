@@ -5,15 +5,14 @@
 package pcc
 
 import (
-	"encoding/json"
 	"fmt"
-
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
-const (
-	ROLE_LLDP = "LLDP"
-	ROLE_MAAS = "MaaS"
+const ( // FIXME unify role and notification type
+	ROLE_LLDP  = "LLDP"
+	ROLE_LLDPD = "LLDPD"
+	ROLE_MAAS  = "MaaS"
 )
 
 type Role struct {
@@ -21,19 +20,8 @@ type Role struct {
 }
 
 func (p *PccClient) GetRoles() (roles []*Role, err error) {
-	var resp HttpResp
-
 	endpoint := fmt.Sprintf("pccserver/roles")
-	if resp, _, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
-	if err = json.Unmarshal(resp.Data, &roles); err != nil {
-		return
-	}
+	err = p.Get(endpoint, &roles)
 	return
 }
 
@@ -42,16 +30,16 @@ func (p *PccClient) FindRoleId(role string) (id uint64, err error) {
 		roles []*Role
 	)
 
-	roles, err = p.GetRoles()
-	if err != nil {
-		return
-	}
-	for _, r := range roles {
-		if r.Name == role {
-			id = r.ID
-			return
+	if roles, err = p.GetRoles(); err == nil {
+		for _, r := range roles {
+			if r.Name == role {
+				id = r.ID
+				goto end
+			}
 		}
+		err = fmt.Errorf("Error: role [%v] not found", role)
 	}
-	err = fmt.Errorf("Error: role [%v] not found", role)
+
+end:
 	return
 }

@@ -5,9 +5,6 @@
 package pcc
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/platinasystems/tiles/pccserver/maas/models"
 )
 
@@ -16,22 +13,6 @@ type MaasRequest struct {
 }
 
 func (p *PccClient) MaasDeploy(maasReq MaasRequest) (err error) {
-	var (
-		data []byte
-		resp HttpResp
-	)
-
-	endpoint := fmt.Sprintf("maas/deployments")
-	if data, err = json.Marshal(maasReq); err != nil {
-		return
-	}
-
-	if resp, _, err = p.pccGateway("POST", endpoint, data); err != nil {
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("%v", resp.Error)
-		return
-	}
+	err = p.Post("maas/deployments", &maasReq, nil)
 	return
 }

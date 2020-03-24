@@ -20,13 +20,18 @@ func createK8sCluster(t *testing.T) {
 func createK8s_3nodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	const DIM = 4
+	const DIM = 3
 	var (
 		err               error
 		k8sRequest        pcc.K8sClusterRequest
 		k8sNodes               = make([]pcc.K8sNodes, DIM)
 		nodesSetCompleted bool = false
 	)
+
+	if (len(Env.Invaders) + len(Env.Servers)) < DIM {
+		assert.Fatalf("Needed at least %d nodes for creating a cluster", DIM)
+	}
+
 	var j = 0
 	for _, i := range Env.Invaders {
 		k8sNodes[j] = pcc.K8sNodes{ID: NodebyHostIP[i.HostIp]}

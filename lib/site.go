@@ -5,9 +5,6 @@
 package pcc
 
 import (
-	"encoding/json"
-	"fmt"
-
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -16,60 +13,30 @@ type Site struct {
 }
 
 func (p *PccClient) AddSite(siteReq Site) (err error) {
-	var data []byte
-
-	endpoint := fmt.Sprintf("pccserver/site/add")
-	if data, err = json.Marshal(siteReq); err != nil {
-		return
-	}
-	_, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
+	err = p.Post("pccserver/site/add", &siteReq, nil)
 	return
 }
 
 func (p *PccClient) DelSite(siteReq Site) (err error) {
-	var data []byte
-
-	val := []uint64{siteReq.Id}
-
-	endpoint := fmt.Sprintf("pccserver/site/delete")
-	if data, err = json.Marshal(val); err != nil {
-		return
-	}
-	_, _, err = p.pccGateway("POST", endpoint, data)
-	if err != nil {
-		return
-	}
+	err = p.Post("pccserver/site/delete", &siteReq, nil)
 	return
 }
 
 func (p *PccClient) GetSites() (sites []Site, err error) {
-	var resp HttpResp
-
-	endpoint := fmt.Sprintf("pccserver/site")
-	resp, _, err = p.pccGateway("GET", endpoint, nil)
-	if err != nil {
-		return
-	}
-	err = json.Unmarshal(resp.Data, &sites)
+	err = p.Get("pccserver/site", &sites)
 	return
 }
 
 func (p *PccClient) FindSite(name string) (site Site, err error) {
 	var sites []Site
 
-	sites, err = p.GetSites()
-	if err != nil {
-		return
-	}
-	for _, s := range sites {
-		if s.Name == name {
-			site = s
-			return
+	if sites, err = p.GetSites(); err == nil {
+		for _, s := range sites {
+			if s.Name == name {
+				site = s
+				break
+			}
 		}
 	}
-	err = fmt.Errorf("unable to find site [%v]\n", site)
 	return
 }

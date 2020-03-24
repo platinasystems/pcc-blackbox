@@ -5,9 +5,7 @@
 package pcc
 
 import (
-	"encoding/json"
 	"fmt"
-
 	"github.com/platinasystems/tiles/pccserver/kubernetes"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
@@ -39,60 +37,18 @@ type K8sCluster struct {
 }
 
 func (p *PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
-	var (
-		body []byte
-		data []byte
-		resp HttpResp
-	)
-	endpoint := fmt.Sprintf("pccserver/kubernetes")
-	if data, err = json.Marshal(k8sReq); err != nil {
-		err = fmt.Errorf("invalid struct for K8s creation")
-		return
-	}
-	if resp, body, err = p.pccGateway("POST", endpoint, data); err != nil {
-		err = fmt.Errorf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("K8s creation failed:\n%v\n", string(body))
-		return
-	}
+	err = p.Post("pccserver/kubernetes", &k8sReq, nil)
 	return
 }
 
 func (p *PccClient) GetKubernetes() (clusters []K8sCluster, err error) {
-	var (
-		body []byte
-		resp HttpResp
-	)
-	endpoint := fmt.Sprintf("pccserver/kubernetes")
-	if resp, body, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		err = fmt.Errorf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("K8s get failed:\n%v\n", string(body))
-		return
-	}
-	err = json.Unmarshal(resp.Data, &clusters)
+	err = p.Get("pccserver/kubernetes", &clusters)
 	return
 }
 
 func (p *PccClient) GetKubernetesId(id uint64) (cluster K8sCluster, err error) {
-	var (
-		body []byte
-		resp HttpResp
-	)
 	endpoint := fmt.Sprintf("pccserver/kubernetes/%v", id)
-	if resp, body, err = p.pccGateway("GET", endpoint, nil); err != nil {
-		err = fmt.Errorf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("K8s get failed:\n%v\n", string(body))
-		return
-	}
-	err = json.Unmarshal(resp.Data, &cluster)
+	err = p.Get(endpoint, &cluster)
 	return
 }
 
@@ -137,30 +93,12 @@ func (p *PccClient) GetKubernetesHealth(id uint64) (health string, err error) {
 }
 
 func (p *PccClient) DeleteKubernetes(id uint64, force bool) (err error) {
-
-	var (
-		data []byte
-		body []byte
-		resp HttpResp
-	)
 	type delK8Req struct {
 		forceRemove bool
 	}
 
-	req := delK8Req{forceRemove: force}
-	if data, err = json.Marshal(req); err != nil {
-		return
-	}
-
 	endpoint := fmt.Sprintf("pccserver/kubernetes/%v", id)
-	resp, body, err = p.pccGateway("DELETE", endpoint, data)
-	if err != nil {
-		err = fmt.Errorf("%v\n%v\n", string(body), err)
-		return
-	}
-	if resp.Status != 200 {
-		err = fmt.Errorf("K8s delete failed:\n%v\n", string(body))
-		return
-	}
+	req := delK8Req{forceRemove: force}
+	err = p.Delete(endpoint, &req)
 	return
 }

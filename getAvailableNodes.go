@@ -1,10 +1,8 @@
 package main
 
 import (
-	"testing"
-
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
+	"testing"
 )
 
 func getNodes(t *testing.T) {
@@ -14,19 +12,15 @@ func getNodes(t *testing.T) {
 func getAvailableNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	var (
-		err   error
-		nodes []*pcc.NodeWithKubernetes
-	)
-
-	nodes, err = Pcc.GetNodesWithKubernetes()
-	if err != nil {
-		assert.Fatalf("Error geting nodes: %v\n", err)
-		return
-	}
-
-	for i := 0; i < len(nodes); i++ {
-		Nodes[nodes[i].Id] = nodes[i]
-		NodebyHostIP[nodes[i].Host] = nodes[i].Id
+	if nodes, err := Pcc.GetNodes(); err == nil {
+		for i := 0; i < len(*nodes); i++ {
+			node := (*nodes)[i]
+			id := node.Id
+			Nodes[id] = &node
+			NodebyHostIP[node.Host] = id
+			Env.setNodeId(node.Host, id)
+		}
+	} else {
+		assert.Fatalf("Error getting nodes: %v\n", err)
 	}
 }
