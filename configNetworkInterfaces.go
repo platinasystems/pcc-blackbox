@@ -22,44 +22,44 @@ func configServerInterfaces(t *testing.T) {
 	})
 }
 
+// FIXME lump the functions in an single one
 func configNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	var (
-		err    error
-		ifaces []*pcc.InterfaceDetail
-	)
 
-	var nodes []node
-	for i := range Env.Invaders {
-		nodes = append(nodes, Env.Invaders[i].node)
-	}
-	for i := range Env.Servers {
-		nodes = append(nodes, Env.Servers[i].node)
-	}
+	configureNode := func(node node, sever bool) {
+		var (
+			err       error
+			ifaces    []*pcc.InterfaceDetail
+			nodeIntfs []int64
+		)
 
-	fmt.Printf("configuring interfaces for %d nodes\n", len(nodes))
-
-	for i := range nodes {
-		node := nodes[i]
 		id := NodebyHostIP[node.HostIp]
 		if ifaces, err = Pcc.GetIfacesByNodeId(id); err != nil {
 			assert.Fatalf("Error retrieving node %s id[%d] interfaces\n %v", node.HostIp, id, err)
 			return
 		}
-		var nodeIntfs []int64
 	l2:
 		for j := range node.NetInterfaces { // skip the check of the interfaces are not declared in Env
 			iface := node.NetInterfaces[j]
 			for _, intf := range ifaces {
-				if iface.Name == intf.Interface.Name {
+				if iface.Name == intf.Interface.Name || iface.MacAddr == intf.Interface.MacAddress {
 					nodeIntfs = append(nodeIntfs, intf.Interface.Id)
 					continue l2
 				}
 			}
+
+			fmt.Printf("SKIP interface %v for node %d\n", iface, id)
 		}
-		configNodeInterfaces(t, node.HostIp, node.NetInterfaces, ifaces)
 		nodeIntfMap[id] = nodeIntfs
+		configNodeInterfaces(t, sever, id, node.HostIp, node.NetInterfaces, ifaces)
+	}
+
+	for i := range Env.Invaders {
+		configureNode(Env.Invaders[i].node, false)
+	}
+	for i := range Env.Servers {
+		configureNode(Env.Servers[i].node, true)
 	}
 }
 
@@ -89,25 +89,19 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	return
 }
 
-func configNodeInterfaces(t *testing.T, HostIp string,
+func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, HostIp string,
 	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
 
 	assert := test.Assert{t}
 	var (
 		iface        *pcc.InterfaceDetail
 		ifaceRequest pcc.InterfaceRequest
-		nodeId       uint64
 		err          error
-		ok           bool
 	)
 
-	if nodeId, ok = NodebyHostIP[HostIp]; !ok {
-		assert.Fatalf("Failed to get nodeid for %v\n", HostIp)
-		return
-	}
 	for j := 0; j < len(serverInterfaces); j++ {
 		mac := serverInterfaces[j].MacAddr
-		if serverInterfaces[j].IsManagement {
+		if serverInterfaces[j].IsManagement && !skipManagement {
 			continue // don't mess with management
 		}
 		iface, err = Pcc.GetIfaceByMacAddress(mac, ifaces)

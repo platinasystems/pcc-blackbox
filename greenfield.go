@@ -11,7 +11,10 @@ import (
 // Delete servers and pxeboot (in parallel)
 func addGreenfieldServers(t *testing.T) {
 	fmt.Println("\nGREENFIELD: executing the pxeboot for the servers")
-	var wg sync.WaitGroup
+	var (
+		wg        sync.WaitGroup
+		mainError error
+	)
 
 	if err := Pcc.DeleteServers(true); err != nil { // wait for the deletion
 		t.Fatal(err)
@@ -28,28 +31,28 @@ func addGreenfieldServers(t *testing.T) {
 		if err := cmd.Run(); err == nil {
 			cmd = exec.Command("ipmitool", "-I", "lanplus", "-H", bmc, "-U", "ADMIN", "-P", "ADMIN", "chassis", "power", "cycle")
 			if err = cmd.Run(); err == nil {
-
-				for i := 1; i <= 20; i++ { //wait for the node
+				for i := 1; i <= 30; i++ { //wait for the node
 					time.Sleep(time.Second * 15)
 					if nodes, err := Pcc.GetNodes(); err == nil {
 						for _, node := range *nodes {
 							if node.Bmc == bmc {
-								fmt.Println(fmt.Sprintf("the pxeboot for the server [%s] was completed. node added with id [%d]", bmc, node.Id))
+								fmt.Println(fmt.Sprintf("the pxeboot for the server [%s]ql node added with id [%d]", bmc, node.Id))
 								node.Host = host
 								server.Id = node.Id
 								if err = Pcc.UpdateNode(&node); err != nil { // Set the host address for the greenfield server
-									t.Fatal(err)
+									mainError = err
 								}
 								return
 							}
 						}
 					}
 				}
+				mainError = fmt.Errorf("the timeout for node %s expired", host)
 			} else {
-				t.Fatal(err)
+				mainError = err
 			}
 		} else {
-			t.Fatal(err)
+			mainError = err
 		}
 	}
 
@@ -57,8 +60,10 @@ func addGreenfieldServers(t *testing.T) {
 		go pxeboot(server.node)
 	}
 
-	fmt.Println("PXEBOOT: wait for the servers")
-
 	wg.Wait()
+
+	if mainError != nil {
+		t.Fatal(mainError)
+	}
 
 }
