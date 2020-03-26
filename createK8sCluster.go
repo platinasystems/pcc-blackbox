@@ -15,7 +15,11 @@ var k8sname string = "k8stest"
 func createK8sCluster(t *testing.T) {
 	t.Run("CreateK8sCluster", createK8s_3nodes)
 	t.Run("ValidateK8sCluster", validateK8sCluster)
+	t.Run("AddNodeK8sCluster", addNodeK8sCluster)
+	t.Run("ValidateK8sCluster", validateK8sCluster)
 }
+
+var k8sAddDelNodes []pcc.K8sNodes
 
 func createK8s_3nodes(t *testing.T) {
 	test.SkipIfDryRun(t)
@@ -43,7 +47,11 @@ func createK8s_3nodes(t *testing.T) {
 	}
 	for _, i := range Env.Servers {
 		if nodesSetCompleted {
-			continue
+			extraNode := pcc.K8sNodes{
+				ID: NodebyHostIP[i.HostIp],
+			}
+			k8sAddDelNodes = append(k8sAddDelNodes, extraNode)
+			break
 		}
 		k8sNodes[j] = pcc.K8sNodes{ID: NodebyHostIP[i.HostIp]}
 		j++
@@ -52,6 +60,7 @@ func createK8s_3nodes(t *testing.T) {
 			continue
 		}
 	}
+
 	k8sRequest = pcc.K8sClusterRequest{
 		ID:         0,         //todo dynamic counter
 		Name:       k8sname,   //todo dynamic
@@ -143,6 +152,35 @@ func validateK8sCluster(t *testing.T) {
 			}
 
 		}
+	}
+}
+
+func addNodeK8sCluster(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	var (
+		id        uint64
+		err       error
+		updateReq pcc.KClusterUpdateRequest
+		delNodes  []pcc.K8sNodes
+	)
+
+	id, err = Pcc.FindKubernetesId(k8sname)
+	if err != nil {
+		assert.Fatalf("Failed to find cluster %v: %v", k8sname, err)
+		return
+	}
+
+	updateReq = pcc.KClusterUpdateRequest{
+		RolePolicy: "auto",
+		ToAdd:      k8sAddDelNodes,
+		ToRemove:   delNodes,
+	}
+	err = Pcc.UpdateKubernetes(id, updateReq)
+	if err != nil {
+		assert.Fatalf("Failed to update cluster %v: %v", k8sname, err)
+		return
 	}
 }
 

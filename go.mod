@@ -24,3 +24,5 @@ require (
 	gopkg.in/ini.v1 v1.51.1 // indirect
 	gopkg.in/yaml.v2 v2.2.7 // indirect
 )
+
+replace github.com/platinasystems/tiles => ../tiles
