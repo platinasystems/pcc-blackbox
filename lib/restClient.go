@@ -76,7 +76,7 @@ func (rc *RestClient) restByService(operation string, endPoint string, input int
 		}
 	}
 
-	url := fmt.Sprintf("https://%s:9999/%v", rc.address, endPoint) // FIXME move the port in json
+	url := fmt.Sprintf("https://%s:9999/%v", rc.address, endPoint) // FIXME move the port to json config file
 	if req, err = http.NewRequest(operation, url, bytes.NewBuffer(data)); err == nil {
 		req.Header.Add("Authorization", rc.token)
 		req.Header.Add("Content-Type", "application/json")
@@ -91,11 +91,11 @@ func (rc *RestClient) restByService(operation string, endPoint string, input int
 					)
 					if err = json.Unmarshal(body, &rg); err == nil {
 						if dataJson, err = json.Marshal(rg.Data); err != nil {
-							fmt.Printf("Marshalling Error:\n%v\n", rg.Data)
+							fmt.Printf("Unarshalling errror in response payload parsing:\n%v\n%v\n", err, rg.Data)
 							return
 						}
 					} else {
-						fmt.Printf("Unmarshalling Error: %s\n%s\n%v\n", url, string(debug.Stack()), string(body))
+						fmt.Printf("Unarshalling errror in response : %s\n%s\n%v\n%v\n", url, string(debug.Stack()), err, string(body))
 						return
 					}
 					resp = HttpResp{
