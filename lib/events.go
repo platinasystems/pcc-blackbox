@@ -25,10 +25,14 @@ func (client *PccClient) GetEvents() (events []models.Notification, err error) {
 	return
 }
 
-func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, str2check string, requestId string) (found bool, err error) {
+func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, str2check string, requestId string, start *time.Time) (found bool, err error) {
 	fmt.Printf("Looking for event [%s] %d\n", str2check, targetId)
-	start := time.Now()
-	for time.Since(start) < timeout {
+	if start == nil {
+		n := time.Now()
+		start = &n
+	}
+	startMs := ConvertToMillis(time.Now())
+	for time.Since(*start) < timeout {
 		if events, err := client.GetEvents(); err == nil {
 			for i := 0; i < len(events); i++ {
 				event := events[i]
@@ -43,7 +47,7 @@ func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, st
 						}
 						return found, err
 					}
-				} else if event.CreatedAt < ConvertToMillis(start) {
+				} else if event.CreatedAt < startMs {
 					continue
 				} else if event.TargetId == targetId && strings.Contains(strings.ToLower(events[i].Message), strings.ToLower(str2check)) {
 					return true, nil
@@ -54,15 +58,15 @@ func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, st
 			return false, err
 		}
 	}
-	return false, fmt.Errorf("timeout error [%s] for id %d and contnet %s", timeout.String(), targetId, str2check)
+	return false, fmt.Errorf("timeout error [%s] for id %d and content %s", timeout.String(), targetId, str2check)
 }
 
-func (client *PccClient) WaitForInstallation(id uint64, appTimeout time.Duration, app string, requestId string) (found bool, err error) {
+func (client *PccClient) WaitForInstallation(id uint64, appTimeout time.Duration, app string, requestId string, start *time.Time) (found bool, err error) {
 	var (
 		timeout = appTimeout * time.Second
 	)
 	str2Check := fmt.Sprintf("[%s] has been installed", app)
-	return client.WaitForEvent(timeout, id, str2Check, requestId)
+	return client.WaitForEvent(timeout, id, str2Check, requestId, start)
 }
 
 type Verifier interface {

@@ -4,7 +4,10 @@
 
 package pcc
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/platinasystems/go-common/http"
+)
 
 type Credential struct {
 	UserName string `json:"username"`
@@ -12,53 +15,66 @@ type Credential struct {
 }
 
 type PccClient struct {
-	pccIp  string
-	bearer string
+	pccIp      string
+	bearer     string
+	RestClient *http.PlatinaRestService
+}
+
+func (pcc *PccClient) getClient() (rc *http.PlatinaRestService) {
+	if pcc.RestClient == nil {
+		var prs http.PlatinaRestService
+		prc := http.PlatinaRestClient{Address: pcc.pccIp, Token: pcc.bearer, Port: 9999}
+		prs = &prc
+		rc = &prs
+	} else {
+		rc = pcc.RestClient
+	}
+
+	return
 }
 
 // GET
 func (pcc *PccClient) Get(endPoint string, out interface{}) (err error) {
-	err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).Get(endPoint, out)
+	err = (*pcc.getClient()).Get(endPoint, out)
 	return
 }
 
 // DELETE
 func (pcc *PccClient) Delete(endPoint string, out interface{}) (err error) {
-	err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).Delete(endPoint, out)
+	err = (*pcc.getClient()).Delete(endPoint, out)
 	return
 }
 
 // POST
 func (pcc *PccClient) Post(endPoint string, data interface{}, out interface{}) (err error) {
-	err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).Post(endPoint, data, out)
+	err = (*pcc.getClient()).Post(endPoint, data, out)
 	return
 }
 
 // PUT
 func (pcc *PccClient) Put(endPoint string, data interface{}, out interface{}) (err error) {
-	err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).Put(endPoint, data, out)
+	err = (*pcc.getClient()).Put(endPoint, data, out)
 	return
 }
 
 // PUT
 func (pcc *PccClient) PutFile(endPoint string, filePath string, fields map[string]string, out interface{}) (err error) { // FIXME all services should share the same structure
-	err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).PutFile(endPoint, filePath, fields, out)
+	err = (*pcc.getClient()).PutFile(endPoint, filePath, fields, out)
 	return
 }
 
 func (pcc *PccClient) GetFile(endPoint string) (content string, err error) {
-	content, err = (&RestClient{address: pcc.pccIp, token: pcc.bearer}).GetFile(endPoint)
+	content, err = (*pcc.getClient()).GetFile(endPoint)
 	return
 }
 
 func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
 	var out struct{ Token string }
-	rc := RestClient{address: PccIp}
+	rc := http.PlatinaRestClient{Address: PccIp, Port: 9999}
 	client := PccClient{pccIp: PccIp}
 	if err = rc.Post("security/auth", cred, &out); err == nil {
 		client.bearer = fmt.Sprintf("Bearer %s", out.Token)
 	}
-
 	pcc = &client
 	return
 }

@@ -114,7 +114,7 @@ func checkPortus(t *testing.T) {
 
 	for id, node := range Nodes {
 		if idInSlice(node.Id, PortusSelectedNodeIds) {
-			check, err := Pcc.WaitForInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, "")
+			check, err := Pcc.WaitForInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, "", nil)
 			if err != nil {
 				assert.Fatalf("Portus installation has failed\n%v\n", err)
 			}

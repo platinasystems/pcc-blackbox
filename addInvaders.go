@@ -32,7 +32,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from time.Time) {
 		fmt.Printf("Checking %s installation for nodeId:%v\n", app, nodeId)
-		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout, app, "")
+		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout, app, "", &from)
 		if waitErr != nil {
 			fmt.Printf("\n%v\n", waitErr)
 			err = waitErr
