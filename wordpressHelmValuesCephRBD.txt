@@ -1,0 +1,4 @@
+STORAGE_CLASS_NAME: sc-22-p4-rbd-provisioner
+REPLICAS: 2
+EXTERNAL_IP: 3.3.3.3
+ACCESS_MODE: ReadWriteOne

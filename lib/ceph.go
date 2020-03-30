@@ -16,8 +16,8 @@ type cephPoolMeta struct {
 }
 
 const (
-	CEPH_CLUSTER_NAME_PREFIX           = "cephtest"
-	CEPH_3_NODE_INSTALLATION_TIMEOUT   = 1000
+	CEPH_CLUSTER_NAME_PREFIX = "cephtest"
+	CEPH_3_NODE_INSTALLATION_TIMEOUT = 1000
 	CEPH_3_NODE_UNINSTALLATION_TIMEOUT = 300
 
 	CEPH_POOL_CREATION_TIMEOUT = 300
@@ -26,36 +26,36 @@ const (
 	CEPH_FS_CREATION_TIMEOUT = 300
 	CEPH_FS_DELETION_TIMEOUT = 300
 
-	CEPH_POOL_FOR_K8S_TEST    cephPoolTypes = "k8sTest"
-	CEPH_POOL_FOR_RBD_TEST    cephPoolTypes = "rbdTest"
+	CEPH_POOL_FOR_K8S_TEST cephPoolTypes = "k8sTest"
+	CEPH_POOL_FOR_RBD_TEST cephPoolTypes = "rbdTest"
 	CEPH_POOL_FOR_CEPHFS_TEST cephPoolTypes = "cephFSTest"
 
-	CEPH_POOL_K8S_1    = "k8sPool1"
-	CEPH_POOL_K8S_2    = "k8sPool2"
-	CEPH_POOL_RBD_1    = "rbdPool1"
-	CEPH_POOL_RBD_2    = "rbdPool2"
-	CEPH_POOL_METADATA = "metadataPool"
-	CEPH_POOL_DEFAULT  = "defaultPool"
-	CEPH_POOL_DATA_1   = "dataPool1"
-	CEPH_POOL_DATA_2   = "dataPool2"
+	CEPH_POOL_K8S_1 = "k8spool1"
+	CEPH_POOL_K8S_2 = "k8spool2"
+	CEPH_POOL_RBD_1 = "rbdpool1"
+	CEPH_POOL_RBD_2 = "rbdpool2"
+	CEPH_POOL_METADATA = "metadatapool"
+	CEPH_POOL_DEFAULT = "defaultpool"
+	CEPH_POOL_DATA_1 = "datapool1"
+	CEPH_POOL_DATA_2 = "datapool2"
 
-	CEPH_FS_NAME = CEPH_CLUSTER_NAME_PREFIX + "_fs"
+	CEPH_FS_NAME = CEPH_CLUSTER_NAME_PREFIX + "-fs"
 
 	// For Verification
-	CEPH_CLUSTER_INSTALL_EVENT   = "cephClusterInstall"
+	CEPH_CLUSTER_INSTALL_EVENT = "cephClusterInstall"
 	CEPH_CLUSTER_UNINSTALL_EVENT = "cephClusterUninstall"
-	CEPH_POOL_CREATE_EVENT       = "cephPoolCreate"
-	CEPH_POOL_DELETE_EVENT       = "cephPoolDelete"
-	CEPH_FS_CREATE_EVENT         = "cephFSCreate"
-	CEPH_FS_DELETE_EVENT         = "cephFSDelete"
+	CEPH_POOL_CREATE_EVENT = "cephPoolCreate"
+	CEPH_POOL_DELETE_EVENT = "cephPoolDelete"
+	CEPH_FS_CREATE_EVENT = "cephFSCreate"
+	CEPH_FS_DELETE_EVENT = "cephFSDelete"
 )
 
 var (
-	CEPH_INSTALLATION_SUCCESS_NOTIFICATION        = "Ceph cluster has been deployed"
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster [%+v] installation failed"
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_2       = "Unable to create ceph cluster "
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_3       = "Unable to store ceph cluster "
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_4       = "Unable to deploy ceph  cluster [%s] as there are no OSD nodes available"
+	CEPH_INSTALLATION_SUCCESS_NOTIFICATION = "Ceph cluster has been deployed"
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_1 = "Ceph cluster [%+v] installation failed"
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_2 = "Unable to create ceph cluster "
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_3 = "Unable to store ceph cluster "
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_4 = "Unable to deploy ceph  cluster [%s] as there are no OSD nodes available"
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_1 = "Ceph cluster installation begins"
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_2 = "Successfully created network for ceph cluster"
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_3 = "Create network failed for ceph cluster"
@@ -65,28 +65,28 @@ var (
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_7 = "Creating network for ceph cluster"
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_8 = "Drive provisionig is finished"
 
-	CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION        = "Successfully deleted network for ceph cluster"
-	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster [%+v] uninstallation failed"
-	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_2       = "Unable to remove ceph cluster [%+v]"
+	CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION = "Successfully deleted network for ceph cluster"
+	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_1 = "Ceph cluster [%+v] uninstallation failed"
+	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_2 = "Unable to remove ceph cluster [%+v]"
 	CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_1 = "Ceph un-installation started"
 	CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_2 = "Deleting network for ceph cluster"
 	CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_3 = "ceph cluster has been removed from DB"
 	CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_4 = "Ceph cluster has been uninstalled but unable to remove it from database"
 
-	CEPH_POOL_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_COMPLETED)
-	CEPH_POOL_CREATION_FAILED_NOTIFICATION         = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_FAILED)
+	CEPH_POOL_CREATION_SUCCESS_NOTIFICATION = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_COMPLETED)
+	CEPH_POOL_CREATION_FAILED_NOTIFICATION = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_FAILED)
 	CEPH_POOL_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating Pool : [%s] for cluster [%s]"
-	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from DB"
-	CEPH_POOL_DELETION_FAILED_NOTIFICATION         = "Unable to remove pool [%s]"
+	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION = "Pool [%s] has been removed from DB"
+	CEPH_POOL_DELETION_FAILED_NOTIFICATION = "Unable to remove pool [%s]"
 	CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing Pool : [%s] from cluster [%s]"
 
-	CEPH_FS_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_COMPLETED)
+	CEPH_FS_CREATION_SUCCESS_NOTIFICATION = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_COMPLETED)
 	CEPH_FS_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating FS : [%s] for cluster [%s]"
-	CEPH_FS_CREATION_FAILED_NOTIFICATION_1       = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_FAILED)
-	CEPH_FS_CREATION_FAILED_NOTIFICATION_2       = "Unable to Create FS : [%s] for cluster [%s]"
-	CEPH_FS_DELETION_SUCCESS_NOTIFICATION        = "Ceph FS [%s] has been removed from DB"
-	CEPH_FS_DELETION_FAILED_NOTIFICATION_1       = "Unable to remove ceph FS [%s]"
-	CEPH_FS_DELETION_FAILED_NOTIFICATION_2       = "Unable to uninstall FS : [%s]"
+	CEPH_FS_CREATION_FAILED_NOTIFICATION_1 = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_FAILED)
+	CEPH_FS_CREATION_FAILED_NOTIFICATION_2 = "Unable to Create FS : [%s] for cluster [%s]"
+	CEPH_FS_DELETION_SUCCESS_NOTIFICATION = "Ceph FS [%s] has been removed from DB"
+	CEPH_FS_DELETION_FAILED_NOTIFICATION_1 = "Unable to remove ceph FS [%s]"
+	CEPH_FS_DELETION_FAILED_NOTIFICATION_2 = "Unable to uninstall FS : [%s]"
 	CEPH_FS_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing FS : [%s]"
 
 	CephPools = map[cephPoolTypes]map[string]uint64{
@@ -94,15 +94,17 @@ var (
 		CEPH_POOL_FOR_RBD_TEST:    map[string]uint64{CEPH_POOL_RBD_1: 0, CEPH_POOL_RBD_2: 0},
 		CEPH_POOL_FOR_CEPHFS_TEST: map[string]uint64{CEPH_POOL_METADATA: 0, CEPH_POOL_DEFAULT: 0, CEPH_POOL_DATA_1: 0, CEPH_POOL_DATA_2: 0},
 	}
+
+	CEPH_CLUSTER_NOT_FOUND_ERROR = "Ceph cluster[%v] not found"
 )
 
 const (
 	TestCreateCephCluster = "createCluster"
 	TestDeleteCephCluster = "deleteCluster"
-	TestCreateCephPools   = "createPools"
-	TestDeleteCephPools   = "deletePools"
-	TestCreateCephFS      = "createFS"
-	TestDeleteCephFS      = "deleteFS"
+	TestCreateCephPools = "createPools"
+	TestDeleteCephPools = "deletePools"
+	TestCreateCephFS = "createFS"
+	TestDeleteCephFS = "deleteFS"
 )
 
 type CephConfiguration struct {
@@ -134,17 +136,21 @@ func (config *CephConfiguration) SetCephClusterId(id uint64) {
 	config.ClusterId = id
 }
 
-func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier string) error {
+func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier string) (err error) {
+	var cluster *models.CephCluster
 	if config.ClusterName != "" {
-		cluster, err := p.GetCephCluster(config.ClusterName)
-		if err != nil {
-			return err
+		cluster, err = p.GetCephCluster(config.ClusterName)
+		if err == nil {
+			config.ClusterId = cluster.Id
+		} else if err.Error() == fmt.Sprintf(CEPH_CLUSTER_NOT_FOUND_ERROR, config.ClusterName) {
+			if run, ok := config.Tests[TestCreateCephCluster]; ok && run {
+				err = nil
+			}
 		}
-		config.ClusterId = cluster.Id
 	} else {
 		config.ClusterName = fmt.Sprintf("%s_%s", CEPH_CLUSTER_NAME_PREFIX, identifier)
 	}
-	return nil
+	return
 }
 
 type CreateCephClusterRequest struct {
@@ -182,22 +188,18 @@ func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint
 }
 
 func (p *PccClient) GetCephCluster(clusterName string) (cluster *models.CephCluster, err error) {
-	if clusters, err := p.GetAllCephClusters(); err != nil {
-		return nil, err
-	} else {
-		if len(clusters) > 0 {
-			for _, cluster = range clusters {
-				if cluster.Name != clusterName {
-					continue
-				} else {
-					return cluster, nil
-				}
+	var clusterList []*models.CephCluster
+	if clusterList, err = p.GetAllCephClusters(); err == nil {
+		for _, cluster = range clusterList {
+			if cluster.Name == clusterName {
+				return
 			}
-		} else {
-			err = fmt.Errorf("Ceph cluster %v not found", clusterName)
+		}
+		if cluster == nil {
+			err = fmt.Errorf(CEPH_CLUSTER_NOT_FOUND_ERROR, clusterName)
 		}
 	}
-	return nil, err
+	return
 }
 
 func (p *PccClient) GetAllCephClusters() (clusterList []*models.CephCluster, err error) {
@@ -207,7 +209,7 @@ func (p *PccClient) GetAllCephClusters() (clusterList []*models.CephCluster, err
 
 func (p *PccClient) DeleteCephCluster(id uint64) (err error) {
 	endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v", id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -215,7 +217,7 @@ type CreateCephPoolRequest struct {
 	Name          string         `json:"name,omitempty"`
 	PoolType      string         `json:"pool_type,omitempty"`
 	Size          uint64         `json:"size,omitempty"`
-	Quota         uint64         `json:"quota,omitempty"`
+	Quota         string         `json:"quota,omitempty"`
 	QuotaUnit     string         `json:"quota_unit,omitempty"`
 	Tags          pq.StringArray `json:"tags,omitempty"`
 	CephClusterId uint64         `json:"ceph_cluster_id,omitempty"`
@@ -223,20 +225,21 @@ type CreateCephPoolRequest struct {
 }
 
 func (p *PccClient) GetCephPool(name string, cephClusterId uint64) (cephPool *models.CephPool, err error) {
-	pools, err := p.GetAllCephPools(cephClusterId)
+	var pools []*models.CephPool
+	pools, err = p.GetAllCephPools(cephClusterId)
 	if err == nil {
 		if len(pools) > 0 {
-			for _, pool := range pools {
-				if pool.Name != name {
+			for _, cephPool = range pools {
+				if cephPool.Name != name {
 					continue
 				}
-				return pool, nil
+				return
 			}
 		} else {
 			err = fmt.Errorf("No ceph pool found")
 		}
 	}
-	return nil, err
+	return
 }
 
 func (p *PccClient) GetAllCephPools(id uint64) (cephPools []*models.CephPool, err error) {
@@ -271,7 +274,7 @@ func (p *PccClient) CreateCephPool(request CreateCephPoolRequest) (id uint64, er
 
 func (p *PccClient) DeleteCephPool(id uint64) (err error) {
 	endpoint := fmt.Sprintf("pccserver/storage/ceph/pool/%v", id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -286,20 +289,21 @@ type CreateCephFSRequest struct {
 }
 
 func (p *PccClient) GetCephFS(name string, cephClusterId uint64) (cephFS *models.CephFS, err error) {
-	cephFSList, err := p.GetAllCephFS(cephClusterId)
+	var cephFSList []*models.CephFS
+	cephFSList, err = p.GetAllCephFS(cephClusterId)
 	if err == nil {
 		if len(cephFSList) > 0 {
-			for _, fs := range cephFSList {
-				if fs.Name != name {
+			for _, cephFS = range cephFSList {
+				if cephFS.Name != name {
 					continue
 				}
-				return fs, nil
+				return
 			}
 		} else {
 			err = fmt.Errorf("No ceph pool found")
 		}
 	}
-	return nil, err
+	return
 }
 
 func (p *PccClient) GetAllCephFS(id uint64) (cephFSList []*models.CephFS, err error) {
@@ -329,7 +333,7 @@ func (p *PccClient) CreateCephFS(request CreateCephFSRequest) (id uint64, err er
 
 func (p *PccClient) DeleteCephFS(id uint64) (err error) {
 	endpoint := fmt.Sprintf("pccserver/storage/ceph/fs/%v", id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 

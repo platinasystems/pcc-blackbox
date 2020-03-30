@@ -1,0 +1,4 @@
+STORAGE_CLASS_NAME: sc-22-p4-cephfs-provisioner
+REPLICAS: 2
+EXTERNAL_IP: 2.2.2.2
+ACCESS_MODE: ReadWriteMany

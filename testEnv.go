@@ -13,6 +13,7 @@ type testEnv struct {
 	DBConfiguration       *pcc.DBConfiguration
 	SshConfiguration      *pcc.SshConfiguration
 	CephConfiguration     pcc.CephConfiguration
+	K8sAppConfiguration      pcc.K8sAppConfiguration
 }
 
 type node struct {

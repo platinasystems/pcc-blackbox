@@ -64,7 +64,7 @@ func (p *PccClient) DownloadKey(id interface{}, fileType string) (content string
 
 func (p *PccClient) DeleteKey(id interface{}) (err error) { // THe KM accepts the deletion by ID or alias
 	endpoint := fmt.Sprintf("key-manager/keys/%v", id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -142,7 +142,7 @@ func (p *PccClient) GetCertificate(id uint64) (certificate Certificate, err erro
 
 func (p *PccClient) DeleteCertificate(id uint64) (err error) {
 	endpoint := fmt.Sprintf("key-manager/certificates/%v", id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 

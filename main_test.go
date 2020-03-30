@@ -174,6 +174,16 @@ func TestCeph(t *testing.T) {
 	})
 }
 
+func TestK8sApp(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	mayRun(t, "K8sApp", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "testK8sApp", testK8sApp)
+	})
+}
+
 func TestPortus(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)

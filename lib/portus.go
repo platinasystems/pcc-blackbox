@@ -31,7 +31,7 @@ func (p *PccClient) GetPortusNodeById(id uint64) (portusConfig PortusConfigurati
 func (p *PccClient) DelPortusNode(id uint64, removeStorage bool) (err error) {
 	endpoint := fmt.Sprintf("%v/%v?removeStorage=%v", PORTUS_ENDPOINT, id,
 		removeStorage)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }
 

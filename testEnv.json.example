@@ -198,5 +198,57 @@
          "deletePools":true,
          "deleteCluster":true
       }
+   },
+   "K8sAppConfiguration": {
+       "k8sClusterName": "",
+       "cephStorageRequired": true,
+       "apps": [
+           {
+                "appName": "nginxapp",
+                "appNamespace": "nginx",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "nginx"
+           },
+           {
+                "appName": "wordpress-mysql-stateful",
+                "appNamespace": "wordpress-cephfs",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "wordpress-cephfs",
+                "storageClassHelmConfig": [
+                    {
+                        "type": "cephfs",
+                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
+                    }
+                ],
+                "helmFilePath": "wordpressHelmValuesCephFS.txt"
+           },
+           {
+                "appName": "wordpress-mysql-stateful",
+                "appNamespace": "wordpress-cephrbd",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "wordpress-cephrbd",
+                "storageClassHelmConfig": [
+                    {
+                        "type": "rbd",
+                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
+                    }
+                ],
+                "helmFilePath": "wordpressHelmValuesCephRBD.txt"
+            }
+        ],
+        "tests": {
+               "createK8sCluster": true,
+               "createK8sStorageClass": true,
+               "deployApp": true,
+               "undeployApp": true,
+               "deleteK8sStorageClass": true,
+               "deleteK8sCluster": false
+        }
    }
 }

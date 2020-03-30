@@ -40,8 +40,8 @@ func (pcc *PccClient) Get(endPoint string, out interface{}) (err error) {
 }
 
 // DELETE
-func (pcc *PccClient) Delete(endPoint string, out interface{}) (err error) {
-	err = (*pcc.getClient()).Delete(endPoint, out)
+func (pcc *PccClient) Delete(endPoint string, data interface{}, out interface{}) (err error) {
+	err = (*pcc.getClient()).Delete(endPoint, data, out)
 	return
 }
 

@@ -298,7 +298,7 @@ func (pcc *PccClient) AddNode(node *NodeWithKubernetes) (err error) {
 // Delete a node
 func (pcc *PccClient) DeleteNode(id uint64) (err error) {
 	fmt.Println(fmt.Sprintf("deleting the node %d", id))
-	err = pcc.Delete(fmt.Sprintf("pccserver/node/%d", id), nil)
+	err = pcc.Delete(fmt.Sprintf("pccserver/node/%d", id), nil, nil)
 	return
 }
 

@@ -114,9 +114,9 @@ func (p *PccClient) SyncCheckGenericInstallation(id uint64, v Verifier, from tim
 					if events[i].CreatedAt < ConvertToMillis(from) {
 						continue
 					}
+					eventMsg := events[i].Message
 					eventsToCheck := v.GetEventsToCheck()
 					for msg, terminate := range eventsToCheck {
-						eventMsg := events[i].Message
 						if strings.Contains(eventMsg, msg) {
 							if terminate {
 								s.Msg = fmt.Sprintf("\"%v\" notification found in events", eventMsg)

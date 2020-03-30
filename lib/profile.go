@@ -62,6 +62,6 @@ func (p *PccClient) GetAuthProfileByName(name string) (authProfile *Authenticati
 
 func (p *PccClient) DelAuthProfile(id uint64) (err error) {
 	endpoint := fmt.Sprintf("%v/%v", PROFILE_ENDPOINT, id)
-	err = p.Delete(endpoint, nil)
+	err = p.Delete(endpoint, nil, nil)
 	return
 }

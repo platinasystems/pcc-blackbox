@@ -89,7 +89,7 @@ func (pcc *PccClient) AddTenant(tenant Tenant) (t *Tenant, err error) {
 
 func (pcc *PccClient) DelTenant(tenantId uint64) (err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/%d", tenantId)
-	err = pcc.Delete(endpoint, nil)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -137,13 +137,13 @@ func (pcc *PccClient) GetGroupOperations() (operations []Operation, err error) {
 
 func (pcc *PccClient) DeleteOperation(id uint64) (err error) {
 	endpoint := fmt.Sprintf("user-management/operation/%d", id)
-	err = pcc.Delete(endpoint, nil)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }
 
 func (pcc *PccClient) DeleteGroupOperation(id uint64) (err error) {
 	endpoint := fmt.Sprintf("user-management/groupoperation/%d", id)
-	err = pcc.Delete(endpoint, nil)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -164,7 +164,7 @@ func (pcc *PccClient) GetSecurityRole(id uint64) (role *GenericModel, err error)
 
 func (pcc *PccClient) DeleteRole(id uint64) (err error) {
 	endpoint := fmt.Sprintf("user-management/role/%d", id)
-	err = pcc.Delete(endpoint, nil)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }
 
@@ -239,7 +239,7 @@ func (pcc *PccClient) GetUserSpace(scope string) (content string, err error) {
 
 func (pcc *PccClient) DeleteUserSpace(scope string) (err error) {
 	endpoint := fmt.Sprintf("user-management/userspace/%s", scope)
-	err = pcc.Delete(endpoint, nil)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }
 
