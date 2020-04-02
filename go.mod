@@ -13,7 +13,7 @@ require (
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/pelletier/go-toml v1.6.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200326151155-b348a8cbc28f
+	github.com/platinasystems/go-common v0.0.0-20200331104813-d090e159a52c
 	github.com/platinasystems/pcc-models v0.0.0-20200326164202-5a459a30b8ff // indirect
 	github.com/platinasystems/test v1.6.0
 	github.com/platinasystems/tiles v1.3.1-rc1.0.20200323064519-aa7b8f96bc7d

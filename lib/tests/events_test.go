@@ -50,7 +50,7 @@ func (frc *FakeRestClient) Get(endPoint string, out interface{}) (err error) {
 }
 
 // DELETE
-func (pcc *FakeRestClient) Delete(endPoint string, out interface{}) (err error) {
+func (pcc *FakeRestClient) Delete(endPoint string, data interface{}, out interface{}) (err error) {
 	return // Nothing to do
 }
 
