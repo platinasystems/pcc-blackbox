@@ -30,9 +30,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	test.SkipIfDryRun(t)
 
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
-	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from time.Time) {
-		fmt.Printf("Checking %s installation for nodeId:%v\n", app, nodeId)
-		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout, app, "", &from)
+	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
+		fmt.Printf("Checking %s installation for nodeId:%v from %s \n", app, nodeId, from.String())
+		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout, app, "", from)
 		if waitErr != nil {
 			fmt.Printf("\n%v\n", waitErr)
 			err = waitErr
@@ -45,7 +45,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	var wg sync.WaitGroup
 	wg.Add(len(nodes))
 
-	addNodeAndWait := func(n node) { // add the node and wait for the services. FIXME add a channel for stopping on error
+	addNodeAndWait := func(n node, nodeNumbers int) { // add the node and wait for the services. FIXME add a channel for stopping on error
 		defer wg.Done()
 		var (
 			node         pcc.NodeWithKubernetes
@@ -56,7 +56,6 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 
 		if Nodes[NodebyHostIP[node.Host]] == nil { // add the node
 			fmt.Printf("adding the node %s\n", node.Host)
-			eventsFrom := time.Now() // FIXME a do better notification check
 			if routineError = Pcc.AddNode(&node); routineError == nil {
 				n.Id = node.Id
 				node.Invader = true
@@ -64,8 +63,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 				NodebyHostIP[node.Host] = node.Id
 				fmt.Printf("Add id %d to Nodes. Mapping hostIP %v to id %d\n", node.Id, node.Host, node.Id)
 
-				waitInstallation(AGENT_TIMEOUT, AGENT_NOTIFICATION, node.Id, eventsFrom)
-				waitInstallation(COLLECTOR_TIMEOUT, COLLECTOR_NOTIFICATION, node.Id, eventsFrom)
+				eventsFrom := time.Now()
+				waitInstallation(AGENT_TIMEOUT*time.Duration(nodeNumbers), AGENT_NOTIFICATION, node.Id, &eventsFrom)
+				waitInstallation(COLLECTOR_TIMEOUT*time.Duration(nodeNumbers), COLLECTOR_NOTIFICATION, node.Id, &eventsFrom)
 				start := time.Now()
 				timeout := time.Duration(180*len(nodes)) * time.Second
 				var (
@@ -120,7 +120,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	}
 
 	for i := range nodes { // add nodes in parallel
-		go addNodeAndWait(nodes[i])
+		go addNodeAndWait(nodes[i], len(nodes))
 	}
 
 	wg.Wait() // wait for all addition

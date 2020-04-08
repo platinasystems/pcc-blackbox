@@ -9,8 +9,8 @@ import (
 
 const (
 	FREQUENCY                            = 10
-	AGENT_TIMEOUT                        = 150
-	COLLECTOR_TIMEOUT                    = 150
+	AGENT_TIMEOUT                        = 180
+	COLLECTOR_TIMEOUT                    = 180
 	LLDP_TIMEOUT                         = 300
 	MAAS_INSTALL_TIMEOUT                 = 300
 	K8S_INSTALL_TIMEOUT                  = 1800
