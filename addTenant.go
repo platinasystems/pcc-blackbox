@@ -50,7 +50,8 @@ func addTenantA(t *testing.T) {
 	fmt.Printf("add tenant %v\n", addReq.Name)
 	_, err = Pcc.AddTenant(addReq)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		assert.Fatalf("Failed to add tenant %v: %v\n",
+			addReq.Name, err)
 	}
 
 	fmt.Printf("find tenant %v\n", addReq.Name)
@@ -100,9 +101,7 @@ func addTenantA(t *testing.T) {
 	}
 
 	source := fmt.Sprintf("https://%v:7654/setPass", Env.PccIp)
-	addUser := pcc.User{
-		UserName: "BadBart",
-	}
+
 	// remove existing users
 	if users, err := Pcc.GetUsers(); err != nil {
 		assert.Fatalf("Failed to get users: %v\n", err)
@@ -121,7 +120,7 @@ func addTenantA(t *testing.T) {
 		}
 	}
 
-	addUser = pcc.User{
+	addUser := pcc.User{
 		UserName:  "bsimpson@platinasystems.com",
 		FirstName: "Bart",
 		LastName:  "Simpson",
@@ -158,16 +157,11 @@ func addTenantA(t *testing.T) {
 		return
 	}
 
-	fmt.Printf("try change password\n")
-	req := pcc.User{
-		UserName: "BadBart",
-		Active:   false,
-	}
 	fmt.Printf("Try change firstname\n")
 	newName := "Mr Bart"
 	addUser.LastName = newName
 
-	if err = Pcc.UpdateUser(req); err != nil {
+	if err = Pcc.UpdateUser(addUser); err != nil {
 		assert.Fatalf("Failed to update user %v: %v\n", newName, err)
 		return
 	}

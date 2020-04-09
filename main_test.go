@@ -101,6 +101,17 @@ func TestNodes(t *testing.T) {
 	})
 }
 
+func TestUsers(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n",
+		count, time.Now().Format(timeFormat))
+	mayRun(t, "users", func(t *testing.T) {
+		mayRun(t, "addTenant", addTenant)
+		mayRun(t, "addSite", addSite)
+	})
+}
+
 func TestMaaS(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
