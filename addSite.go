@@ -60,7 +60,7 @@ func delSites(t *testing.T) {
 	}
 	for _, s := range sites {
 		fmt.Printf("found site %v\n", s.Name)
-		err = Pcc.DelSite(s)
+		err = Pcc.DelSite(s.Id)
 		if err != nil {
 			assert.Fatalf("%v\n", err)
 		}
@@ -97,7 +97,7 @@ func delAllSites(t *testing.T) {
 	}
 	for _, s := range sites {
 		fmt.Printf("deleting site %v\n", s.Name)
-		err = Pcc.DelSite(s)
+		err = Pcc.DelSite(s.Id)
 		if err != nil {
 			assert.Fatalf("Failed to DelSite %v: %v\n", s.Name, err)
 		}

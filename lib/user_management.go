@@ -78,6 +78,7 @@ type User struct {
 	Protect   bool          `json:"protect"`
 	Role      *SecurityRole `json:"role"`
 	Tenant    Tenant        `json:"tenant"`
+	Profile   Profile       `json:"profile"`
 }
 
 func (pcc *PccClient) AddTenant(tenant Tenant) (t *Tenant, err error) {

@@ -5,6 +5,7 @@
 package pcc
 
 import (
+	"fmt"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -17,8 +18,8 @@ func (p *PccClient) AddSite(siteReq Site) (err error) {
 	return
 }
 
-func (p *PccClient) DelSite(siteReq Site) (err error) {
-	err = p.Post("pccserver/site/delete", &siteReq, nil)
+func (p *PccClient) DelSite(id uint64) (err error) {
+	err = p.Delete(fmt.Sprintf("pccserver/site/%d", id), nil, nil)
 	return
 }
 

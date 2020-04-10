@@ -157,7 +157,7 @@ func addTenantA(t *testing.T) {
 		return
 	}
 
-	fmt.Printf("Try change firstname\n")
+	fmt.Printf("Try change firstname of user %v \n", addUser.UserName)
 	newName := "Mr Bart"
 	addUser.LastName = newName
 
@@ -169,9 +169,9 @@ func addTenantA(t *testing.T) {
 	if users, err := Pcc.GetUsers(); err == nil {
 		found := false
 		for _, u := range users {
-			if u.Email == addUser.Email {
+			if u.UserName == addUser.UserName {
 				fmt.Printf("Found updated user %v\n", u)
-				if u.LastName == newName {
+				if u.Profile.LastName == newName {
 					fmt.Printf("user update worked\n")
 					found = true
 				} else {
