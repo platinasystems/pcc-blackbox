@@ -53,6 +53,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 		)
 		node.Host = n.HostIp
 		node.Managed = new(bool)
+		*node.Managed = true
 
 		if Nodes[NodebyHostIP[node.Host]] == nil { // add the node
 			fmt.Printf("adding the node %s\n", node.Host)
