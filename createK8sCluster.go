@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/tiles/pccserver/executor"
 	"strings"
 	"testing"
 	"time"
@@ -192,7 +193,10 @@ func deleteAllK8sCluster(t *testing.T) {
 						err)
 					return
 				}
-				percent := cluster.AnsibleJob.ProgressPercentage
+				var percent int8
+				if clusterTask, ok := (cluster.Task).(*executor.Task); ok{
+					percent = clusterTask.Progress
+				}
 				if percent != last_percent {
 					fmt.Printf("delete status: %v  %v%%\n",
 						cluster.DeployStatus, percent)

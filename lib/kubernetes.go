@@ -5,14 +5,15 @@
 package pcc
 
 import (
+	"encoding/base64"
 	"fmt"
+	"github.com/platinasystems/tiles/pccserver/executor"
 	"github.com/platinasystems/tiles/pccserver/kubernetes"
 	"github.com/platinasystems/tiles/pccserver/models"
-	"time"
-	"regexp"
-	"encoding/base64"
 	"io/ioutil"
+	"regexp"
 	"strings"
+	"time"
 )
 
 const (
@@ -52,6 +53,9 @@ func (p *PccClient) GetKubernetes() (clusters []K8sCluster, err error) {
 }
 
 func (p *PccClient) GetKubernetesId(id uint64) (cluster K8sCluster, err error) {
+	cluster = K8sCluster{
+		models.KCluster{Task: &executor.Task{}},
+	}
 	endpoint := fmt.Sprintf("pccserver/kubernetes/%v", id)
 	err = p.Get(endpoint, &cluster)
 	return
@@ -82,7 +86,9 @@ func (p *PccClient) GetKubernetesDeployStatus(id uint64) (status string,
 		return
 	}
 	status = cluster.DeployStatus
-	percent = cluster.AnsibleJob.ProgressPercentage
+	if clusterTask, ok := (cluster.Task).(*executor.Task); ok{
+		percent = clusterTask.Progress
+	}
 	return
 }
 
