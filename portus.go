@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -159,7 +160,9 @@ func delAllPortus(t *testing.T) {
 			case <-tick:
 				_, err = Pcc.GetPortusNodeById(id)
 				if err != nil {
-					if err.Error() == "record not found" {
+					mesg := err.Error()
+					if strings.Contains(mesg,
+						"record not found") {
 						done = true
 						continue
 					}
