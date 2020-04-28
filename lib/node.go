@@ -66,17 +66,10 @@ func (p *PccClient) FindNodeId(name string) (id uint64, err error) {
 }
 
 func (p *PccClient) GetProvisionStatus(id uint64) (status string, err error) {
-	var nodes *[]NodeWithKubernetes
-	if nodes, err = p.GetNodes(); err != nil {
-		return
+	var node *NodeWithKubernetes
+	if node, err = p.GetNode(id); err == nil {
+		status = node.ProvisionStatus
 	}
-	for _, n := range *nodes {
-		if n.Id == id {
-			status = n.ProvisionStatus
-			return
-		}
-	}
-	err = fmt.Errorf("node [%v] not found", id)
 	return
 }
 
