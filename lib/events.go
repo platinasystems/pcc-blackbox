@@ -2,16 +2,17 @@ package pcc
 
 import (
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"strings"
 	"time"
+
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 const (
 	FREQUENCY = 10
 )
 
-type Status struct {
+type EventStatus struct {
 	Msg     string
 	IsError bool
 }
@@ -76,8 +77,8 @@ type Verifier interface {
 }
 
 //FIXME Verify is similar with checkNotifications.go
-func (p *PccClient) Verify(startTime time.Time, v Verifier) (s Status) {
-	done := make(chan Status)
+func (p *PccClient) Verify(startTime time.Time, v Verifier) (s EventStatus) {
+	done := make(chan EventStatus)
 	go p.SyncCheckGenericInstallation(0, v, startTime, done)
 	s = <-done
 	go func() {
@@ -91,8 +92,8 @@ func (p *PccClient) Verify(startTime time.Time, v Verifier) (s Status) {
 
 // Synchronize checking for installation
 //FIXME SyncCheckGenericInstallation is similar with checkNotifications.go
-func (p *PccClient) SyncCheckGenericInstallation(id uint64, v Verifier, from time.Time, found chan Status) {
-	s := Status{}
+func (p *PccClient) SyncCheckGenericInstallation(id uint64, v Verifier, from time.Time, found chan EventStatus) {
+	s := EventStatus{}
 	timeout := v.GetTimeout() * time.Second
 	for time.Since(from) < timeout {
 		select {

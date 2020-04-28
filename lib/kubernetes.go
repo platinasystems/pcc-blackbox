@@ -7,13 +7,14 @@ package pcc
 import (
 	"encoding/base64"
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/executor"
-	"github.com/platinasystems/tiles/pccserver/kubernetes"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"io/ioutil"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/platinasystems/tiles/pccserver/executor"
+	"github.com/platinasystems/tiles/pccserver/kubernetes"
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 const (
@@ -86,7 +87,7 @@ func (p *PccClient) GetKubernetesDeployStatus(id uint64) (status string,
 		return
 	}
 	status = cluster.DeployStatus
-	if clusterTask, ok := (cluster.Task).(*executor.Task); ok{
+	if clusterTask, ok := (cluster.Task).(*executor.Task); ok {
 		percent = clusterTask.Progress
 	}
 	return
@@ -302,8 +303,8 @@ type K8sAppConfiguration struct {
 }
 
 type StorageClassHelmConfig struct {
-	Type                         string	`json:"type"`
-	StorageClassHelmVariableName string	`json:"storageClassHelmVariableName"`
+	Type                         string `json:"type"`
+	StorageClassHelmVariableName string `json:"storageClassHelmVariableName"`
 }
 
 type ConfigKApp struct {
@@ -379,7 +380,7 @@ func (config *K8sAppConfiguration) GetAllAppNamesString() (appsName string) {
 	return
 }
 
-func (config *K8sAppConfiguration) VerifyK8sApp(startTime time.Time, action string, name string) (s Status, err error) {
+func (config *K8sAppConfiguration) VerifyK8sApp(startTime time.Time, action string, name string) (s EventStatus, err error) {
 	s = config.PccClient.Verify(startTime, config.getK8sAppVerifier(action, name))
 
 	failed := !(strings.Contains(s.Msg, fmt.Sprintf(K8S_APP_DEPLOYMENT_SUCCESS_NOTIFICATION, config.GetAllAppNamesString(), config.GetK8sClusterName(), config.K8sCluster.ID)) ||
