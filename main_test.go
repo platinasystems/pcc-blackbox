@@ -252,11 +252,9 @@ func TestTunnel(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "TUNNEL", func(t *testing.T) {
-		//mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		//mayRun(t, "installLLDP", updateNodes_installLLDP)
-		//mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
 		mayRun(t, "checkInvaderTunnels", checkInvaderTunnels)
 		mayRun(t, "checkServerTunnels", checkServerTunnels)
 		mayRun(t, "checkTunnelConnection", checkTunnelConnection)
@@ -269,6 +267,8 @@ func TestAvailability(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "AVAILABILITY", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "checkAddUnreachableNode", addUnreachableNode)
 		mayRun(t, "checkAddInaccessibleNode", addInaccessibleNode)
 		mayRun(t, "checkAgentAndCollectorRestore", checkAgentAndCollectorRestore)
