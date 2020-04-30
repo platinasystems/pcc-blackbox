@@ -15,7 +15,7 @@ func addUnreachableNode(t *testing.T) {
 	if address == "" {
 		address = "IamNotWorking"
 	}
-	if err := checkNodeConnectionStatus("unreachable", "IamNotWorking"); err != nil {
+	if err := checkNodeConnectionStatus("unreachable", address); err != nil {
 		t.Fatal(err)
 	}
 }
