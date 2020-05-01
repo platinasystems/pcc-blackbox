@@ -10,9 +10,11 @@ import (
 )
 
 const ( // FIXME unify role and notification type
-	ROLE_LLDP  = "LLDP"
-	ROLE_LLDPD = "LLDPD"
-	ROLE_MAAS  = "MaaS"
+	ROLE_LLDP     = "LLDP"    // Phuket
+	ROLE_DEFAULT  = "Default" // Takayama
+	ROLE_LLDPD    = "LLDPD"
+	ROLE_MAAS     = "MaaS"                      // Phuket
+	ROLE_MAAS_NEW = "Baremetal Management Node" // Takayama
 )
 
 type Role struct {
@@ -25,21 +27,22 @@ func (p *PccClient) GetRoles() (roles []*Role, err error) {
 	return
 }
 
-func (p *PccClient) FindRoleId(role string) (id uint64, err error) {
+// Find a role between more alternatives
+func (p *PccClient) FindRoleId(role ...string) (id uint64, err error) {
 	var (
 		roles []*Role
 	)
 
 	if roles, err = p.GetRoles(); err == nil {
 		for _, r := range roles {
-			if r.Name == role {
-				id = r.ID
-				goto end
+			for _, desiredRole := range role {
+				if r.Name == desiredRole {
+					id = r.ID
+					return
+				}
 			}
 		}
-		err = fmt.Errorf("Error: role [%v] not found", role)
+		err = fmt.Errorf("error: role [%v] not found", role)
 	}
-
-end:
 	return
 }
