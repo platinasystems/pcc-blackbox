@@ -15,7 +15,7 @@ func addUnreachableNode(t *testing.T) {
 	if address == "" {
 		address = "IamNotWorking"
 	}
-	if err := checkNodeConnectionStatus("unreachable", "IamNotWorking"); err != nil {
+	if err := checkNodeConnectionStatus("unreachable", address); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -44,12 +44,12 @@ func checkNodeConnectionStatus(status string, host string) (err error) {
 			Pcc.DeleteNode(node.Id)
 		}()
 
-		fmt.Println(fmt.Sprintf("node [%s] added with id [%d]. Waiting for connection status [%s]", node.Host, node.Id, status))
-		for i := 1; i <= 12; i++ { // wait for the status
+		fmt.Printf("node [%s] added with id [%d]. Waiting for connection status [%s]\n", node.Host, node.Id, status)
+		for i := 1; i <= 20; i++ { // wait for the status
 			time.Sleep(time.Second * time.Duration(10))
 			if node, err = Pcc.GetNode(node.Id); err == nil && node.NodeAvailabilityStatus != nil {
 				connectionStatus := node.NodeAvailabilityStatus.ConnectionStatus
-				fmt.Printf("Connection status for node %s is %s", host, connectionStatus)
+				fmt.Printf("Connection status for node %s is %s\n", host, connectionStatus)
 				if strings.Compare(strings.ToLower(connectionStatus), status) == 0 {
 					return
 				}
