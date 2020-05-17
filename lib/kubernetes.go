@@ -31,8 +31,6 @@ type K8sClusterRequest struct {
 	CniPlugin   string     `json:"cniPlugin" validate:"required"`
 	Nodes       []K8sNodes `json:"nodes"`
 	Pools       []*int     `json:"-" gorm:"-"`
-	ControlCIDR string     `json:"controlCIDR" validate:"required,cidrv4"`
-	IgwPolicy   string     `json:"igwPolicy" validate:"required"`
 }
 
 type K8sNodes struct {
