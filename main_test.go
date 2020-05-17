@@ -150,7 +150,6 @@ func TestK8s(t *testing.T) {
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
 }
@@ -357,4 +356,17 @@ func uutInfo() {
 	fmt.Println("---")
 	defer fmt.Println("...")
 	fmt.Println("pcc instance unknown")
+}
+
+func TestNetworking(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "networking", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
+		mayRun(t, "installLLDP", updateNodes_installLLDP)
+		mayRun(t, "configNetworkIntefaces", configNetworkInterfaces)
+		mayRun(t, "testNetworking", testNetworking)
+	})
 }

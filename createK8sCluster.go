@@ -59,7 +59,6 @@ func createK8s_3nodes(t *testing.T) {
 		K8sVersion: "v1.14.3", //todo dynamic
 		CniPlugin:  "kube-router",
 		Nodes:      k8sNodes,
-		IgwPolicy:  "default",
 	}
 	err = Pcc.CreateKubernetes(k8sRequest)
 	if err != nil {
