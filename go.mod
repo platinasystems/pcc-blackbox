@@ -16,10 +16,9 @@ require (
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/otiai10/copy v1.1.1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200419155905-1f3ce46ed4ca
-	github.com/platinasystems/pcc-models v0.0.0-20200416101810-c1da67174b4d // indirect
+	github.com/platinasystems/go-common v0.0.0-20200423142027-2572e02edcfd
 	github.com/platinasystems/test v1.6.0
-	github.com/platinasystems/tiles v1.3.1-rc1.0.20200419065523-f132776e0d4c
+	github.com/platinasystems/tiles v1.4.1
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect
