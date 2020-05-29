@@ -13,7 +13,8 @@ type testEnv struct {
 	DBConfiguration       *pcc.DBConfiguration
 	SshConfiguration      *pcc.SshConfiguration
 	CephConfiguration     pcc.CephConfiguration
-	K8sAppConfiguration      pcc.K8sAppConfiguration
+	K8sAppConfiguration   pcc.K8sAppConfiguration
+	Availability          Availability
 }
 
 type node struct {
@@ -49,8 +50,14 @@ type server struct {
 	node
 }
 
+type Availability struct {
+	FakeAddress  string
+	Inaccessible string
+}
+
 var exampleEnv = testEnv{
-	PccIp: "172.17.2.238",
+	PccIp:        "172.17.2.238",
+	Availability: Availability{"ImNotWorking", "172.17.0.0"},
 	Invaders: []invader{
 		invader{
 			node{

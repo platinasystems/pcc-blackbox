@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -57,6 +58,8 @@ func TestMain(m *testing.M) {
 	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
 	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
 
+	log.InitWithDefault(nil)
+
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
 		Password: "admin",
@@ -85,9 +88,7 @@ var timeFormat = "Mon Jan 2 15:04:05 2006"
 // automatically config a cluser
 func TestNodes(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n",
-		count, time.Now().Format(timeFormat))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -103,9 +104,7 @@ func TestNodes(t *testing.T) {
 
 func TestUsers(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n",
-		count, time.Now().Format(timeFormat))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "users", func(t *testing.T) {
 		mayRun(t, "addTenant", addTenant)
 		mayRun(t, "addSite", addSite)
@@ -114,7 +113,6 @@ func TestUsers(t *testing.T) {
 
 func TestMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
@@ -131,7 +129,6 @@ func TestMaaS(t *testing.T) {
 
 func TestTenantMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
@@ -150,7 +147,6 @@ func TestTenantMaaS(t *testing.T) {
 
 func TestK8s(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
@@ -164,7 +160,6 @@ func TestK8s(t *testing.T) {
 
 func TestDeleteK8s(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
@@ -173,8 +168,7 @@ func TestDeleteK8s(t *testing.T) {
 
 func TestCeph(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "ceph", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -187,8 +181,7 @@ func TestCeph(t *testing.T) {
 
 func TestK8sApp(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "K8sApp", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testK8sApp", testK8sApp)
@@ -197,7 +190,6 @@ func TestK8sApp(t *testing.T) {
 
 func TestPortus(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
@@ -223,7 +215,6 @@ func TestDelPortus(t *testing.T) {
 
 func TestHardwareInventory(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "hardwareinventory", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
@@ -236,7 +227,6 @@ func TestHardwareInventory(t *testing.T) {
 
 func TestFull(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
@@ -257,7 +247,6 @@ func TestFull(t *testing.T) {
 
 func TestClean(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
@@ -274,14 +263,11 @@ func TestClean(t *testing.T) {
 
 func TestTunnel(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "TUNNEL", func(t *testing.T) {
-		//mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		//mayRun(t, "installLLDP", updateNodes_installLLDP)
-		//mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
 		mayRun(t, "checkInvaderTunnels", checkInvaderTunnels)
 		mayRun(t, "checkServerTunnels", checkServerTunnels)
 		mayRun(t, "checkTunnelConnection", checkTunnelConnection)
@@ -292,9 +278,10 @@ func TestTunnel(t *testing.T) {
 
 func TestAvailability(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "AVAILABILITY", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "checkAddUnreachableNode", addUnreachableNode)
 		mayRun(t, "checkAddInaccessibleNode", addInaccessibleNode)
 		mayRun(t, "checkAgentAndCollectorRestore", checkAgentAndCollectorRestore)
@@ -303,8 +290,7 @@ func TestAvailability(t *testing.T) {
 
 func TestGreenfield(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "GREENFIELD", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
@@ -320,9 +306,8 @@ func TestGreenfield(t *testing.T) {
 
 func TestConfigNetworkInterfaces(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
-	mayRun(t, "GREENFIELD", func(t *testing.T) {
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "configureNetwork", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
 	})
@@ -330,8 +315,7 @@ func TestConfigNetworkInterfaces(t *testing.T) {
 
 func TestMonitor(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "MONITOR", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -344,8 +328,7 @@ func TestMonitor(t *testing.T) {
 
 func TestUserManagement(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "USER-MANAGEMENT", func(t *testing.T) {
 		mayRun(t, "testUMRole", testUMRole)
 		mayRun(t, "testUMTenant", testUMTenant)
@@ -358,8 +341,7 @@ func TestUserManagement(t *testing.T) {
 
 func TestKeyManager(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format("Mon Jan 2 15:04:05 2006"))
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "KEY-MANAGER", func(t *testing.T) {
 		mayRun(t, "testKMKeys", testKMKeys)
 		mayRun(t, "testKMCertificates", testKMCertificates)
@@ -369,6 +351,7 @@ func TestKeyManager(t *testing.T) {
 func TestGen(t *testing.T) {
 	// Not a real testcase, but can be used to generate a
 	// testEnv.json file from existing PCC setup.
+	test.SkipIfDryRun(t)
 	genEnv()
 	os.Exit(0)
 }

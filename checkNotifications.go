@@ -14,7 +14,7 @@ const (
 	LLDP_TIMEOUT                         = 300
 	MAAS_INSTALL_TIMEOUT                 = 300
 	K8S_INSTALL_TIMEOUT                  = 1800
-	PORTUS_TIMEOUT                       = 400
+	PORTUS_TIMEOUT                       = 600
 	PXEBOOT_TIMEOUT                      = 400
 	PORTUS_NOTIFICATION                  = "PORTUS"
 	COLLECTOR_NOTIFICATION               = "COLLECTOR"

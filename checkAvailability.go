@@ -11,14 +11,22 @@ import (
 
 // Add UNREACHABLE NODE
 func addUnreachableNode(t *testing.T) {
-	if err := checkNodeConnectionStatus("unreachable", "IamNotWorking"); err != nil {
+	address := Env.Availability.FakeAddress
+	if address == "" {
+		address = "IamNotWorking"
+	}
+	if err := checkNodeConnectionStatus("unreachable", address); err != nil {
 		t.Fatal(err)
 	}
 }
 
 // Add INACCESSIBLE NODE
 func addInaccessibleNode(t *testing.T) {
-	if err := checkNodeConnectionStatus("inaccessible", Env.PccIp); err != nil {
+	address := Env.Availability.Inaccessible
+	if address == "" {
+		address = Env.PccIp
+	}
+	if err := checkNodeConnectionStatus("inaccessible", address); err != nil {
 		t.Fatal(err)
 	}
 }
@@ -36,11 +44,13 @@ func checkNodeConnectionStatus(status string, host string) (err error) {
 			Pcc.DeleteNode(node.Id)
 		}()
 
-		fmt.Println(fmt.Sprintf("node [%s] added with id [%d]. Waiting for connection status [%s]", node.Host, node.Id, status))
-		for i := 1; i <= 12; i++ { // wait for the status
+		fmt.Printf("node [%s] added with id [%d]. Waiting for connection status [%s]\n", node.Host, node.Id, status)
+		for i := 1; i <= 20; i++ { // wait for the status
 			time.Sleep(time.Second * time.Duration(10))
 			if node, err = Pcc.GetNode(node.Id); err == nil && node.NodeAvailabilityStatus != nil {
-				if strings.Compare(strings.ToLower(node.NodeAvailabilityStatus.ConnectionStatus), status) == 0 {
+				connectionStatus := node.NodeAvailabilityStatus.ConnectionStatus
+				fmt.Printf("Connection status for node %s is %s\n", host, connectionStatus)
+				if strings.Compare(strings.ToLower(connectionStatus), status) == 0 {
 					return
 				}
 			}
@@ -71,10 +81,12 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 				}
 			}
 
-			go f(AGENT_NOTIFICATION, "pccagent/pccagent")                     // Delete the agent and wait for the restore
-			go f(COLLECTOR_NOTIFICATION, "collectors/system/systemCollector") // Delete the collector and wait for the restore
+			go f(AGENT_NOTIFICATION, "pccagent")            // Delete the agent and wait for the restore
+			go f(COLLECTOR_NOTIFICATION, "systemCollector") // Delete the collector and wait for the restore
 
 			wg.Wait()
+		} else {
+			t.Fatal("No nodes were found")
 		}
 	} else {
 		t.Fatal(err)
@@ -84,8 +96,8 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 // Remove the service and wait for the restore
 func checkRestore(service string, path string, node *pcc.NodeWithKubernetes) error {
 	var ssh pcc.SSHHandler
-
-	if _, stderr, err := ssh.Run(node.Host, fmt.Sprintf("sudo rm -f /home/pcc/%s && ps auxww | grep %s | grep -v grep | grep -v ansible | awk '{print $2}' | xargs sudo kill -9", path, path)); err == nil {
+	fmt.Println(fmt.Sprintf("Stopping and removing the service %s from node %d %s %s ", service, node.Id, node.Name, node.Host))
+	if _, stderr, err := ssh.Run(node.Host, fmt.Sprintf("sudo rm -f /opt/platina/pcc/bin/%s && ps auxww | grep %s | grep -v grep | grep -v ansible | awk '{print $2}' | xargs sudo kill -9", path, path)); err == nil {
 		fmt.Println(fmt.Sprintf("The %s:%s was correctly killed and removed from node %d:%s", service, path, node.Id, node.Name))
 
 		if check, _ := Pcc.WaitForInstallation(node.Id, 60*10, service, "", nil); check {
