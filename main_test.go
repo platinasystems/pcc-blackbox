@@ -211,6 +211,16 @@ func TestPortus(t *testing.T) {
 	})
 }
 
+func TestDelPortus(t *testing.T) {
+	count++
+	fmt.Printf("Environment:\n%v\n", Env)
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "portus", func(t *testing.T) {
+		mayRun(t, "getAvailableNodes", getAvailableNodes)
+		mayRun(t, "delAllPortus", delAllPortus)
+	})
+}
+
 func TestHardwareInventory(t *testing.T) {
 	count++
 	fmt.Printf("Environment:\n%v\n", Env)
