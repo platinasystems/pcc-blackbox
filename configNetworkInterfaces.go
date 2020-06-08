@@ -148,9 +148,13 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	rGateway := strings.Split(intfReq.Gateway, ",")
 	cGateway := strings.Split(iface.Interface.Gateway, ",")
 	if rGateway[0] != cGateway[0] {
-		fmt.Printf("    gateway mismatch %v %v\n",
-			intfReq.Gateway, iface.Interface.Gateway)
-		return
+		if rGateway[0] == "" && cGateway[0] != "" {
+			fmt.Printf("    skipping configured gateway\n")
+		} else {
+			fmt.Printf("    gateway mismatch %v %v\n",
+				intfReq.Gateway, iface.Interface.Gateway)
+			return
+		}
 	}
 	if iface.Interface.Autoneg {
 		if intfReq.Autoneg != "on" {
