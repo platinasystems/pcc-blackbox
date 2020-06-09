@@ -49,7 +49,7 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
 	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
 		if len(installed) > 0 {
-			fmt.Printf("%s already installed on nodes %d", app, installed)
+			fmt.Printf("%s already installed on nodes %d\n", app, installed)
 		}
 		//Check APP installation
 		for i := 0; i < len(nodesToCheck); i++ {

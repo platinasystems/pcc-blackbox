@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -56,6 +57,8 @@ func TestMain(m *testing.M) {
 
 	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
 	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
+
+	log.InitWithDefault(nil)
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
