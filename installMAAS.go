@@ -21,8 +21,8 @@ func installMAAS(t *testing.T) {
 		lldpId uint64
 	)
 
-	if maasId, err = Pcc.FindRoleId(pcc.ROLE_MAAS); err == nil {
-		if lldpId, err = Pcc.FindRoleId(pcc.ROLE_LLDP); err == nil {
+	if maasId, err = Pcc.FindRoleId(pcc.ROLE_MAAS, pcc.ROLE_MAAS_NEW); err == nil {
+		if lldpId, err = Pcc.FindRoleId(pcc.ROLE_LLDP, pcc.ROLE_DEFAULT); err == nil {
 			if nodes, err := Pcc.GetInvaderIds(); err == nil {
 				if err = setRolesToNodesAndCheck([]uint64{lldpId, maasId}, "MAAS", nodes, MAAS_INSTALL_TIMEOUT); err != nil {
 					t.Fatal(err)
@@ -49,7 +49,7 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
 	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
 		if len(installed) > 0 {
-			fmt.Printf("%s already installed on nodes %d", app, installed)
+			fmt.Printf("%s already installed on nodes %d\n", app, installed)
 		}
 		//Check APP installation
 		for i := 0; i < len(nodesToCheck); i++ {
