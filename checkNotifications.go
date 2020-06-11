@@ -8,14 +8,14 @@ import (
 )
 
 const (
-	FREQUENCY                            = 10
-	AGENT_TIMEOUT                        = 180
-	COLLECTOR_TIMEOUT                    = 180
-	LLDP_TIMEOUT                         = 300
-	MAAS_INSTALL_TIMEOUT                 = 300
-	K8S_INSTALL_TIMEOUT                  = 1800
-	PORTUS_TIMEOUT                       = 600
-	PXEBOOT_TIMEOUT                      = 400
+	FREQUENCY                            = 10   // FIXME move to props
+	AGENT_TIMEOUT                        = 300  // FIXME move to props
+	COLLECTOR_TIMEOUT                    = 300  // FIXME move to props
+	LLDP_TIMEOUT                         = 300  // FIXME move to props
+	MAAS_INSTALL_TIMEOUT                 = 900  // FIXME move to props
+	K8S_INSTALL_TIMEOUT                  = 1800 // FIXME move to props
+	PORTUS_TIMEOUT                       = 600  // FIXME move to props
+	PXEBOOT_TIMEOUT                      = 400  // FIXME move to props
 	PORTUS_NOTIFICATION                  = "PORTUS"
 	COLLECTOR_NOTIFICATION               = "COLLECTOR"
 	AGENT_NOTIFICATION                   = "AGENT"

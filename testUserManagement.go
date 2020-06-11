@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/tiles/pccserver/security/model"
+	"github.com/platinasystems/pcc-models/security"
 	"testing"
 	"time"
 )
@@ -200,7 +200,7 @@ func testUMTenant(t *testing.T) {
 	var err error
 
 	name := fmt.Sprintf("%s-%d", "bb_test", time.Now().Unix())
-	tenant := &(pcc.Tenant{Tenant: model.Tenant{Name: name, Description: "blackbox test"}})
+	tenant := &(security.Tenant{Name: name, Description: "blackbox test"})
 	fmt.Println(fmt.Sprintf("adding the tenant %s", name))
 	if tenant, err = Pcc.AddTenant(*tenant); err == nil {
 		fmt.Println(fmt.Sprintf("added the tenant %v", *tenant))

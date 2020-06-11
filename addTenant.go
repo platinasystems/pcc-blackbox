@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-models/security"
 	"github.com/platinasystems/test"
 	"testing"
 )
@@ -15,11 +16,11 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		tenants []pcc.Tenant
-		tenant  pcc.Tenant
-		tenant2 pcc.Tenant
-		addReq  pcc.Tenant
-		addReq2 pcc.Tenant
+		tenants []security.Tenant
+		tenant  security.Tenant
+		tenant2 security.Tenant
+		addReq  security.Tenant
+		addReq2 security.Tenant
 		err     error
 	)
 
@@ -43,7 +44,7 @@ func addTenantA(t *testing.T) {
 		Pcc.DelTenant(t.ID)
 	}
 
-	addReq = pcc.Tenant{}
+	addReq = security.Tenant{}
 	addReq.Name = "cust-a"
 	addReq.Description = "a tenant of ROOT"
 
@@ -198,7 +199,7 @@ func delAllTenants(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	var (
-		tenants []pcc.Tenant
+		tenants []security.Tenant
 		err     error
 	)
 

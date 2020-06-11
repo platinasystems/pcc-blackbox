@@ -6,14 +6,8 @@ package pcc
 
 import (
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/security/model"
+	"github.com/platinasystems/pcc-models/security"
 )
-
-// FIXME move in a common module
-type Tenant struct {
-	model.Tenant
-	Protect bool `json:"protect"`
-}
 
 // FIXME move in a common module
 type GenericModel struct {
@@ -64,24 +58,25 @@ type Operation struct {
 
 // tried re-using model.User, but not sure about
 // unmarshal in to type interface
+// FIXME import from pcc-models
 type User struct {
-	Id        uint64        `json:"id"`
-	UserName  string        `json:"username"`
-	FirstName string        `json:"firstname"`
-	LastName  string        `json:"lastname"`
-	Email     string        `json:"email"`
-	Password  string        `json:"password,omitempty"`
-	TenantId  uint64        `json:"tenant"`
-	RoleId    uint64        `json:"roleID"`
-	Source    string        `json:"source"`
-	Active    bool          `json:"active"`
-	Protect   bool          `json:"protect"`
-	Role      *SecurityRole `json:"role"`
-	Tenant    Tenant        `json:"tenant"`
-	Profile   Profile       `json:"profile"`
+	Id        uint64          `json:"id"`
+	UserName  string          `json:"username"`
+	FirstName string          `json:"firstname"`
+	LastName  string          `json:"lastname"`
+	Email     string          `json:"email"`
+	Password  string          `json:"password,omitempty"`
+	TenantId  uint64          `json:"tenant"`
+	RoleId    uint64          `json:"roleID"`
+	Source    string          `json:"source"`
+	Active    bool            `json:"active"`
+	Protect   bool            `json:"protect"`
+	Role      *SecurityRole   `json:"role"`
+	Tenant    security.Tenant `json:"tenant"`
+	Profile   Profile         `json:"profile"`
 }
 
-func (pcc *PccClient) AddTenant(tenant Tenant) (t *Tenant, err error) {
+func (pcc *PccClient) AddTenant(tenant security.Tenant) (t *security.Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/register")
 	err = pcc.Post(endpoint, &tenant, &tenant)
 	t = &tenant
@@ -94,15 +89,15 @@ func (pcc *PccClient) DelTenant(tenantId uint64) (err error) {
 	return
 }
 
-func (pcc *PccClient) GetTenants() (tenants []Tenant, err error) {
+func (pcc *PccClient) GetTenants() (tenants []security.Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/list")
 	err = pcc.Get(endpoint, &tenants)
 	return
 }
 
-func (pcc *PccClient) GetTenant(id uint64) (tenant *Tenant, err error) {
+func (pcc *PccClient) GetTenant(id uint64) (tenant *security.Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/%d", id)
-	var t Tenant
+	var t security.Tenant
 	err = pcc.Get(endpoint, &t)
 	tenant = &t
 	return
@@ -185,8 +180,8 @@ func (pcc *PccClient) AssignTenantNodes(tenantId uint64, nodes []uint64) (err er
 	return
 }
 
-func (pcc *PccClient) FindTenant(tenantName string) (tenant Tenant, err error) {
-	var tenants []Tenant
+func (pcc *PccClient) FindTenant(tenantName string) (tenant security.Tenant, err error) {
+	var tenants []security.Tenant
 
 	if tenants, err = pcc.GetTenants(); err == nil {
 		for _, t := range tenants {
