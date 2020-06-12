@@ -53,13 +53,20 @@ func createK8s_3nodes(t *testing.T) {
 			continue
 		}
 	}
+
+	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
+	if err != nil {
+		assert.Fatalf("FindNetClusterId failed: %v\n", err)
+		return
+	}
+
 	k8sRequest = pcc.K8sClusterRequest{
-		ID:         0,         //todo dynamic counter
-		Name:       k8sname,   //todo dynamic
-		K8sVersion: "v1.14.3", //todo dynamic
-		CniPlugin:  "kube-router",
-		Nodes:      k8sNodes,
-		IgwPolicy:  "default",
+		ID:               0,         //todo dynamic counter
+		Name:             k8sname,   //todo dynamic
+		K8sVersion:       "v1.14.3", //todo dynamic
+		CniPlugin:        "kube-router",
+		Nodes:            k8sNodes,
+		NetworkClusterId: netClusterId,
 	}
 	err = Pcc.CreateKubernetes(k8sRequest)
 	if err != nil {
@@ -194,7 +201,7 @@ func deleteAllK8sCluster(t *testing.T) {
 					return
 				}
 				var percent int8
-				if clusterTask, ok := (cluster.Task).(*executor.Task); ok{
+				if clusterTask, ok := (cluster.Task).(*executor.Task); ok {
 					percent = clusterTask.Progress
 				}
 				if percent != last_percent {

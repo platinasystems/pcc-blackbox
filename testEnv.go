@@ -2,6 +2,11 @@ package main
 
 import pcc "github.com/platinasystems/pcc-blackbox/lib"
 
+// Note: The lib directory is intended to be the start of an SDK, so
+//       test configuration/infrastructure should NOT be in lib.
+//       All the configuration below with "pcc." will eventually
+//       removed from lib.  Please do not add more.
+
 type testEnv struct {
 	Env                   string
 	PccIp                 string
@@ -15,6 +20,7 @@ type testEnv struct {
 	CephConfiguration     pcc.CephConfiguration
 	K8sAppConfiguration   pcc.K8sAppConfiguration
 	Availability          Availability
+	NetCluster            netCluster
 }
 
 type node struct {
@@ -53,6 +59,11 @@ type server struct {
 type Availability struct {
 	FakeAddress  string
 	Inaccessible string
+}
+
+type netCluster struct {
+	ControlCIDR string
+	IgwPolicy   string
 }
 
 var exampleEnv = testEnv{

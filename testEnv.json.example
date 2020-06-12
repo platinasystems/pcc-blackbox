@@ -1,5 +1,12 @@
 {
    "PccIp":"172.17.2.238",
+     "Availability":{
+      "Inaccessible": "172.17.2.1"   // some address that can not ssh into
+    },
+    "NetCluster": {
+	"IgwPolicy": "upstream",
+	"ControlCIDR": "1.0.0.0/24"
+    },  
    "DBConfiguration":{
       "address":"127.0.0.1",
       "port":5432,

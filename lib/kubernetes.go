@@ -25,14 +25,13 @@ const (
 )
 
 type K8sClusterRequest struct {
-	ID          uint64
-	Name        string     `json:"name" validate:"required"`
-	K8sVersion  string     `json:"k8sVersion" validate:"required"`
-	CniPlugin   string     `json:"cniPlugin" validate:"required"`
-	Nodes       []K8sNodes `json:"nodes"`
-	Pools       []*int     `json:"-" gorm:"-"`
-	ControlCIDR string     `json:"controlCIDR" validate:"required,cidrv4"`
-	IgwPolicy   string     `json:"igwPolicy" validate:"required"`
+	ID               uint64
+	Name             string     `json:"name" validate:"required"`
+	K8sVersion       string     `json:"k8sVersion" validate:"required"`
+	CniPlugin        string     `json:"cniPlugin" validate:"required"`
+	Nodes            []K8sNodes `json:"nodes"`
+	Pools            []*int     `json:"-" gorm:"-"`
+	NetworkClusterId uint64     `json:"networkClusterID" gorm:"network_cluster_id"`
 }
 
 type K8sNodes struct {

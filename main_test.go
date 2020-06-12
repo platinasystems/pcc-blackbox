@@ -145,7 +145,7 @@ func TestTenantMaaS(t *testing.T) {
 	})
 }
 
-func TestK8s(t *testing.T) {
+func TestAddK8s(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
@@ -154,6 +154,7 @@ func TestK8s(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
+		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
 }
@@ -163,6 +164,16 @@ func TestDeleteK8s(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
+		mayRun(t, "deleteNetCluster", deleteNetCluster)
+	})
+}
+
+func TestNetCluster(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "netCluster", func(t *testing.T) {
+		mayRun(t, "getNodesList", getNodes)
+		mayRun(t, "addNetCluster", addNetCluster)
 	})
 }
 
@@ -251,6 +262,7 @@ func TestClean(t *testing.T) {
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
+		mayRun(t, "delAllNetsCluster", delAllNetsCluster)
 		mayRun(t, "delAllPortus", delAllPortus)
 		mayRun(t, "delAllNodes", delAllNodes)
 		mayRun(t, "delAllUsers", delAllUsers)
