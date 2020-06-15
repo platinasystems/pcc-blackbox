@@ -394,11 +394,9 @@ github.com/pkg/errors v0.8.1/go.mod h1:bwawxfHBFNV+L2hUp1rHADufV3IMtnDRdf1r5NINE
 github.com/pkg/profile v1.2.1/go.mod h1:hJw3o1OdXxsrSjjVksARp5W95eeEaEfptyVZyv6JUPA=
 github.com/platinasystems/buildid v1.0.0/go.mod h1:r7AszdHHCZVPcw3zr1UhLHUx9NxlFcUlX1D9DwkDM1c=
 github.com/platinasystems/buildinfo v1.1.0/go.mod h1:VO8oKwJRCwPKxkqaLjkMxPHLAoe5i+9hmlFZ2x3RFik=
-github.com/platinasystems/go-common v0.0.0-20200610160926-bc5db2c2c178 h1:SwzbFFrIXLf+BMm8BO8N0Zgf9MEH9L4qXCjiGZPRNzg=
-github.com/platinasystems/go-common v0.0.0-20200610160926-bc5db2c2c178/go.mod h1:lu1oQOis3QlMLPp0q6S0Qo0GEcs+Qdq3r2Dek+wDGHw=
+github.com/platinasystems/go-common v0.0.0-20200615065724-94f102cc6403 h1:IootxDdiUEytZyUaGVTos7gK8HIrlglX1JCsq46fnmw=
+github.com/platinasystems/go-common v0.0.0-20200615065724-94f102cc6403/go.mod h1:Or0wDJI8jArHAf9k9jdtVy39Oay0/Z7SZYWwkMtiC1c=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
-github.com/platinasystems/pcc-models v0.0.0-20200610140458-bd9bc0ba1409 h1:L2KUi6oRXmzHgTFgJQwW7KVfiumCExSCUwbuSdVx9lA=
-github.com/platinasystems/pcc-models v0.0.0-20200610140458-bd9bc0ba1409/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200611121815-393a8121153b h1:fIqd+8SISPwnp+xaUM5VLM5TgbfreT9W77pVNJE5rEU=
 github.com/platinasystems/pcc-models v0.0.0-20200611121815-393a8121153b/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/test v1.8.3 h1:vZrl1An0N6wfWIynBW/s0LXjdQxx8uRWEoS6WX56Q9E=
