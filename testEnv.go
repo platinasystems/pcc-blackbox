@@ -2,6 +2,11 @@ package main
 
 import pcc "github.com/platinasystems/pcc-blackbox/lib"
 
+// Note: The lib directory is intended to be the start of an SDK, so
+//       test configuration/infrastructure should NOT be in lib.
+//       All the configuration below with "pcc." will eventually
+//       removed from lib.  Please do not add more.
+
 type testEnv struct {
 	Env                   string
 	PccIp                 string
