@@ -61,7 +61,7 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 				fmt.Printf("Checking %s installation for node:%v\n", app, id)
 
 				start := time.Now()
-				if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
+				if check, err = Pcc.WaitForInstallation(id, timeout*time.Duration(n), app, "", &start); err != nil {
 					err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
 					return
 				} else if check {
