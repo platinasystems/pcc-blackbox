@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	"strconv"
 )
 
 const (
@@ -100,9 +101,12 @@ func (p *PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKe
 	return
 }
 
-func (p *PccClient) UploadCert(filePath string, label string, description string) (certificate Certificate, err error) {
+func (p *PccClient) UploadCert(filePath string, label string, description string, keyId uint64) (certificate Certificate, err error) {
 	endPoint := fmt.Sprintf("key-manager/certificates/upload/%s", label)
 	m := map[string]string{"description": description}
+	if keyId > 0 {
+		m["keyId"] = strconv.FormatUint(keyId, 10)
+	}
 	err = p.PutFile(endPoint, filePath, m, &certificate)
 	return
 }

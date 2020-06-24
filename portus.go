@@ -38,7 +38,7 @@ func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY,
-		pcc.PRIVATE_KEY)
+		pcc.PRIVATE_KEY, 0)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
@@ -47,7 +47,14 @@ func uploadSecurityKey_Portus(t *testing.T) {
 func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, pcc.CERT)
+	var keyId uint64
+	exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
+	if err != nil {
+		fmt.Printf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
+	} else if exist {
+		keyId = privateKey.Id
+	}
+	err = CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, pcc.CERT, keyId)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}

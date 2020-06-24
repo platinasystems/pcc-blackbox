@@ -9,7 +9,7 @@ import (
 	"github.com/platinasystems/test"
 )
 
-func CreateFileAndUpload(fileName string, key string, fileType string) (err error) {
+func CreateFileAndUpload(fileName string, key string, fileType string, keyId uint64) (err error) {
 	var f *os.File
 	f, err = os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
@@ -50,7 +50,7 @@ func CreateFileAndUpload(fileName string, key string, fileType string) (err erro
 			Pcc.DeleteCertificate(cert.Id)
 		}
 
-		_, err = Pcc.UploadCert(filePath, fileName, "")
+		_, err = Pcc.UploadCert(filePath, fileName, "", keyId)
 		if err != nil {
 			return
 		}

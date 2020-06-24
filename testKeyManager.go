@@ -107,7 +107,7 @@ func testKMCertificates(t *testing.T) {
 	}
 
 	fmt.Println("uploading the certificate", fileName)
-	if cert, err = Pcc.UploadCert(fileName, alias, ""); err != nil {
+	if cert, err = Pcc.UploadCert(fileName, alias, "", 0); err != nil {
 		t.Fatal(err)
 	}
 

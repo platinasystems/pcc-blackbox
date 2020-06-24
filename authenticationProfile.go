@@ -26,7 +26,7 @@ func UploadSecurityAuthProfileCert(t *testing.T) {
 func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
-	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT)
+	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT, 0)
 	if err != nil {
 		assert.Fatalf(err.Error())
 	}
