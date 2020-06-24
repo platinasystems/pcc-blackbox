@@ -4,6 +4,7 @@ import (
 	"fmt"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
+	"sync"
 	"testing"
 	"time"
 )
@@ -44,6 +45,7 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 		installed    []uint64
 		nodesToCheck []uint64
 		check        bool
+		wg           sync.WaitGroup
 	)
 
 	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
@@ -51,18 +53,29 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 		if len(installed) > 0 {
 			fmt.Printf("%s already installed on nodes %d\n", app, installed)
 		}
-		//Check APP installation
-		for i := 0; i < len(nodesToCheck); i++ {
-			id := nodesToCheck[i]
-			fmt.Printf("Checking %s installation for node:%v\n", app, id)
 
-			start := time.Now()
-			if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
-				err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
-				return
-			} else if check {
-				fmt.Printf("%s correctly installed on nodeId:%v\n", app, id)
+		if n := len(nodesToCheck); n > 0 {
+			wg.Add(n)
+			checkInstall := func(id uint64) {
+				defer wg.Done()
+				fmt.Printf("Checking %s installation for node:%v\n", app, id)
+
+				start := time.Now()
+				if check, err = Pcc.WaitForInstallation(id, timeout*time.Duration(n), app, "", &start); err != nil {
+					err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
+					return
+				} else if check {
+					fmt.Printf("%s correctly installed on nodeId:%v\n", app, id)
+				}
 			}
+
+			//Check APP installation
+			for i := 0; i < n; i++ {
+				id := nodesToCheck[i]
+				go checkInstall(id)
+			}
+
+			wg.Wait()
 		}
 	}
 

@@ -27,7 +27,7 @@ func (client *PccClient) GetEvents() (events []models.Notification, err error) {
 }
 
 func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, str2check string, requestId string, start *time.Time) (found bool, err error) {
-	fmt.Printf("Looking for event [%s] %d\n", str2check, targetId)
+	fmt.Printf("Looking for event [%s] %d. Timeout is %v\n", str2check, targetId, timeout)
 	if start == nil {
 		n := time.Now()
 		start = &n
