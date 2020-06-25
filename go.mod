@@ -28,3 +28,7 @@ require (
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
 )
+
+replace github.com/platinasystems/pcc-models => /home/sparrow/workspace/go/src/github.com/platinasystems/pcc-models
+
+replace github.com/platinasystems/go-common => /home/sparrow/workspace/go/src/github.com/platinasystems/go-common
