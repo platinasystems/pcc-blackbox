@@ -19,15 +19,7 @@ import (
 	"github.com/platinasystems/test"
 )
 
-var Env testEnv
 var envFile string = "testEnv.json"
-var Pcc *pcc.PccClient
-
-var Nodes = make(map[uint64]*pcc.NodeWithKubernetes)
-var SecurityKeys = make(map[string]*pcc.SecurityKey)
-var NodebyHostIP = make(map[string]uint64) // deprecated use Env
-
-var dockerStats *pcc.DockerStats
 
 func TestMain(m *testing.M) {
 	var (
@@ -347,6 +339,24 @@ func TestKeyManager(t *testing.T) {
 	mayRun(t, "KEY-MANAGER", func(t *testing.T) {
 		mayRun(t, "testKMKeys", testKMKeys)
 		mayRun(t, "testKMCertificates", testKMCertificates)
+	})
+}
+
+func TestAppCredentials(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "APP CREDENTIALS", func(t *testing.T) {
+		mayRun(t, "testCreateCredendialMetadataProfile", testCreateCredendialMetadataProfile)
+		mayRun(t, "testUpdateCredendialMetadataProfile", testUpdateCredendialMetadataProfile)
+		mayRun(t, "testDeleteCredendialMetadataProfile", testDeleteCredendialMetadataProfile)
+	})
+}
+
+func TestRGW(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "CEPH RADOS GATEWAY", func(t *testing.T) {
+		mayRun(t, "deployRadosGateway", deployRadosGateway)
 	})
 }
 
