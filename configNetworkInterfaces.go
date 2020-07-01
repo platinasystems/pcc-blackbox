@@ -73,11 +73,16 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	ifaceRequest.ManagedByPcc = configIface.ManagedByPcc
 	ifaceRequest.Gateway = configIface.Gateway
 	ifaceRequest.Autoneg = configIface.Autoneg
-	if ifaceRequest.Autoneg == "off" {
-		ifaceRequest.Speed =
-			json.Number(configIface.Speed)
-	} else {
-		ifaceRequest.Speed = ""
+	switch configIface.Autoneg {
+	case "true", "on", "":
+		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_ON
+	case "false", "off":
+		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_OFF
+		ifaceRequest.Speed = json.Number(configIface.Speed)
+	default:
+		fmt.Printf("Error: invalid autoneg [%v] using ON\n",
+			configIface.Autoneg)
+		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_ON
 	}
 	ifaceRequest.Mtu = json.Number(configIface.Mtu)
 	ifaceRequest.AdminStatus = pcc.INTERFACE_STATUS_UP
@@ -171,26 +176,29 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 			return
 		}
 	}
-	if iface.Interface.Autoneg {
-		if intfReq.Autoneg != "on" {
+	switch intfReq.Autoneg {
+	case pcc.INTERFACE_AUTONEG_ON:
+		if iface.Interface.Autoneg != true {
 			fmt.Printf("    autoneg mismatch [%v] [%v]\n",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
-	} else {
-		if intfReq.Autoneg != "off" {
+	case pcc.INTERFACE_AUTONEG_OFF:
+		if iface.Interface.Autoneg != false {
 			fmt.Printf("    autoneg mismatch [%v] [%v]\n",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
-	}
-	if intfReq.Autoneg == "off" {
 		if intfReq.Speed != json.Number(iface.Interface.Speed) {
 			fmt.Printf("    speed mismatch [%v] [%v]\n",
 				intfReq.Speed, iface.Interface.Speed)
 			return
 		}
+	default:
+		fmt.Printf("Error: unexpected autoneg [%v]\n", intfReq.Autoneg)
+		return
 	}
+
 	mtu := fmt.Sprintf("%v", iface.Interface.Mtu)
 	if intfReq.Mtu != json.Number(mtu) {
 		fmt.Printf("    mtu mismatch [%v] [%v]\n", intfReq.Mtu, mtu)
