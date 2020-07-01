@@ -16,6 +16,10 @@ import (
 const INTERFACE_STATUS_UP = models.INTERFACE_STATUS_UP
 const INTERFACE_STATUS_DOWN = models.INTERFACE_STATUS_DOWN
 
+const INTERFACE_FEC_CL91 = "cl91"
+const INTERFACE_FEC_CL74 = "cl74"
+const INTERFACE_FEC_NONE = "none"
+
 // Valid IntfState
 const (
 	Ready    = models.IntfState("ready")

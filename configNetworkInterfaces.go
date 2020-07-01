@@ -86,6 +86,21 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	} else {
 		ifaceRequest.IsManagement = "false"
 	}
+
+	var fec string
+	switch configIface.Fec {
+	case "cl91", "fec91", "rs":
+		fec = pcc.INTERFACE_FEC_CL91
+	case "cl74", "fec74", "baser":
+		fec = pcc.INTERFACE_FEC_CL74
+	case "none", "", "off":
+		fec = pcc.INTERFACE_FEC_NONE
+	default:
+		fmt.Printf("Error: invalid fec [%v] using none\n",
+			configIface.Fec)
+		fec = pcc.INTERFACE_FEC_NONE
+	}
+	ifaceRequest.FecType = fec
 	return
 }
 
@@ -151,58 +166,58 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 		if rGateway[0] == "" && cGateway[0] != "" {
 			fmt.Printf("    skipping configured gateway\n")
 		} else {
-			fmt.Printf("    gateway mismatch %v %v\n",
+			fmt.Printf("    gateway mismatch [%v] [%v]\n",
 				intfReq.Gateway, iface.Interface.Gateway)
 			return
 		}
 	}
 	if iface.Interface.Autoneg {
 		if intfReq.Autoneg != "on" {
-			fmt.Printf("    autoneg mismatch %v %v\n",
+			fmt.Printf("    autoneg mismatch [%v] [%v]\n",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
 	} else {
 		if intfReq.Autoneg != "off" {
-			fmt.Printf("    autoneg mismatch %v %v\n",
+			fmt.Printf("    autoneg mismatch [%v] [%v]\n",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
 	}
 	if intfReq.Autoneg == "off" {
 		if intfReq.Speed != json.Number(iface.Interface.Speed) {
-			fmt.Printf("    speed mismatch %v %v\n",
+			fmt.Printf("    speed mismatch [%v] [%v]\n",
 				intfReq.Speed, iface.Interface.Speed)
 			return
 		}
 	}
 	mtu := fmt.Sprintf("%v", iface.Interface.Mtu)
 	if intfReq.Mtu != json.Number(mtu) {
-		fmt.Printf("    mtu mismatch %v %v\n", intfReq.Mtu, mtu)
+		fmt.Printf("    mtu mismatch [%v] [%v]\n", intfReq.Mtu, mtu)
 		return
 	}
 	if intfReq.AdminStatus != iface.Interface.AdminStatus {
-		fmt.Printf("    adminStatus mismatch %v %v\n",
+		fmt.Printf("    adminStatus mismatch [%v] [%v]\n",
 			intfReq.AdminStatus, iface.Interface.AdminStatus)
 		return
 	}
 	if iface.Interface.IsManagement {
 		if intfReq.IsManagement != "true" {
-			fmt.Printf("    IsManagement mismatch %v %v\n",
+			fmt.Printf("    IsManagement mismatch [%v] [%v]\n",
 				intfReq.IsManagement,
 				iface.Interface.IsManagement)
 			return
 		}
 	} else {
 		if intfReq.IsManagement != "false" {
-			fmt.Printf("    IsManagement mismatch %v %v\n",
+			fmt.Printf("    IsManagement mismatch [%v] [%v]\n",
 				intfReq.IsManagement,
 				iface.Interface.IsManagement)
 			return
 		}
 	}
 	if intfReq.ManagedByPcc != iface.Interface.ManagedByPcc {
-		fmt.Printf("    ManagedByPcc mismatch %v %v\n",
+		fmt.Printf("    ManagedByPcc mismatch [%v] [%v]\n",
 			intfReq.ManagedByPcc, iface.Interface.ManagedByPcc)
 		return
 	}
