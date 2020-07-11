@@ -35,7 +35,13 @@ type K8sClusterRequest struct {
 }
 
 type K8sNodes struct {
-	ID uint64
+	ID uint64 `json:"id"`
+}
+
+type KClusterUpdateRequest struct {
+	RolePolicy string     `json:"rolePolicy"`
+	ToAdd      []K8sNodes `json:"toAdd"`
+	ToRemove   []K8sNodes `json:"toRemove"`
 }
 
 type K8sCluster struct {
@@ -44,6 +50,12 @@ type K8sCluster struct {
 
 func (p *PccClient) CreateKubernetes(k8sReq K8sClusterRequest) (err error) {
 	err = p.Post("pccserver/kubernetes", &k8sReq, nil)
+	return
+}
+
+func (p *PccClient) UpdateKubernetes(id uint64, k8sUpdate KClusterUpdateRequest) (err error) {
+	endpoint := fmt.Sprintf("pccserver/kubernetes/%v", id)
+	err = p.Put(endpoint, &k8sUpdate, nil)
 	return
 }
 

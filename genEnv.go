@@ -35,10 +35,11 @@ func addTestTestNode(testNode *pcc.NodeDetail) {
 
 			net.Name = intf.Interface.Name
 			net.Gateway = intf.Interface.Gateway
-			if intf.Interface.Autoneg {
-				net.Autoneg = "on"
-			} else {
-				net.Autoneg = "off"
+			switch intf.Interface.Autoneg {
+			case true:
+				net.Autoneg = "true"
+			case false:
+				net.Autoneg = "false"
 				net.Speed = intf.Interface.Speed
 			}
 			net.MacAddr = intf.Interface.MacAddress

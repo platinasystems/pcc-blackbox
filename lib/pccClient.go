@@ -57,9 +57,15 @@ func (pcc *PccClient) Put(endPoint string, data interface{}, out interface{}) (e
 	return
 }
 
-// PUT
+// PUT one file (multipart/form-data)
 func (pcc *PccClient) PutFile(endPoint string, filePath string, fields map[string]string, out interface{}) (err error) { // FIXME all services should share the same structure
 	err = (*pcc.getClient()).PutFile(endPoint, filePath, fields, out)
+	return
+}
+
+// PUT one or more files (multipart/form-data)
+func (pcc *PccClient) PutFiles(method string, endPoint string, files map[string]string, fields map[string]string, out interface{}) (err error) { // FIXME all services should share the same structure
+	err = (*pcc.getClient()).PutFiles(method, endPoint, files, fields, out)
 	return
 }
 

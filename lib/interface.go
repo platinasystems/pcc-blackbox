@@ -13,17 +13,27 @@ import (
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
-const INTERFACE_STATUS_UP = models.INTERFACE_STATUS_UP
-const INTERFACE_STATUS_DOWN = models.INTERFACE_STATUS_DOWN
-
-// Valid IntfState
 const (
+	// Valid IntfState
 	Ready    = models.IntfState("ready")
 	Queued   = models.IntfState("queued")
 	Updating = models.IntfState("updating")
 	Stale    = models.IntfState("stale")
 	Offline  = models.IntfState("offline")
 	Unknown  = models.IntfState("unknown")
+
+	// admin up/down
+	INTERFACE_STATUS_UP   = models.INTERFACE_STATUS_UP
+	INTERFACE_STATUS_DOWN = models.INTERFACE_STATUS_DOWN
+
+	// FEC
+	INTERFACE_FEC_CL91 = "cl91"
+	INTERFACE_FEC_CL74 = "cl74"
+	INTERFACE_FEC_NONE = "none"
+
+	// autoneg
+	INTERFACE_AUTONEG_ON  = "true"
+	INTERFACE_AUTONEG_OFF = "false"
 )
 
 // Temporary duplicate Interface definition until
