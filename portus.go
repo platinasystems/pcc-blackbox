@@ -91,13 +91,6 @@ func installPortus(t *testing.T) {
 				portusConfiguration.RegistryCertId = &certificate.Id
 			}
 
-			exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
-			if err != nil {
-				fmt.Printf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
-			} else if exist {
-				portusConfiguration.RegistryKeyId = &privateKey.Id
-			}
-
 			fmt.Printf("Installing Portus on Node with id %v\n",
 				node.Id)
 

@@ -13,10 +13,10 @@ require (
 	github.com/lib/pq v1.4.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200626063555-e5999d100cb5
-	github.com/platinasystems/pcc-models v0.0.0-20200626063433-3034d3ca4498
+	github.com/platinasystems/go-common v0.0.0-20200706100608-8edf8e821392
+	github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e
 	github.com/platinasystems/test v1.8.3
-	github.com/platinasystems/tiles v1.3.1-rc1.0.20200619071252-c25ba58315e7
+	github.com/platinasystems/tiles v1.5.0
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect
