@@ -15,10 +15,19 @@ func addNetCluster(t *testing.T) {
 	assert := test.Assert{t}
 
 	var (
-		reqCluster  pcc.NetworkClusterReq
-		igwPolicy   string
-		controlCIDR string
+		reqCluster   pcc.NetworkClusterReq
+		igwPolicy    string
+		controlCIDR  string
+		netClusterId uint64
+		err          error
 	)
+
+	netClusterId, err = Pcc.FindNetClusterId(netClusterName)
+	if err == nil {
+		fmt.Printf("Network cluster [%v] already exists node [%d]\n",
+			netClusterName, netClusterId)
+		return
+	}
 
 	igwPolicy = Env.NetCluster.IgwPolicy
 	controlCIDR = Env.NetCluster.ControlCIDR
@@ -58,7 +67,7 @@ func addNetCluster(t *testing.T) {
 	reqCluster.ControlCIDR = controlCIDR
 	reqCluster.IgwPolicy = igwPolicy
 
-	err := Pcc.AddNetCluster(&reqCluster)
+	err = Pcc.AddNetCluster(&reqCluster)
 	if err != nil {
 		assert.Fatalf("AddNetCluster failed: %v\n", err)
 		return

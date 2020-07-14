@@ -195,8 +195,6 @@
       "numberOfNodes":3,
       "publicNetwork":"192.168.20.0/30",
       "clusterNetwork":"192.168.22.0/30",
-      "controlCIDR":"",
-      "igwPolicy":"",
       "tests":{
          "createCluster":true,
          "createPools":true,

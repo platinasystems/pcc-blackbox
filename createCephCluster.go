@@ -6,16 +6,16 @@ import (
 	"github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
+	"strings"
 	"testing"
 	"time"
-	"strings"
 )
 
 var (
-	startTime  time.Time
-	cephConfig = &pcc.CephConfiguration{}
-	isCephDeploy   = true
-	isCephUndeploy = true
+	startTime                time.Time
+	cephConfig               = &pcc.CephConfiguration{}
+	isCephDeploy             = true
+	isCephUndeploy           = true
 	cephClusterAlreadyExists = false
 )
 
@@ -24,7 +24,7 @@ func testCeph(t *testing.T) {
 		if isCephDeploy {
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephCluster]; ok && run {
 				if t.Run("createCephCluster", testCreateCephCluster) {
-					if ! cephClusterAlreadyExists {
+					if !cephClusterAlreadyExists {
 						t.Run("verifyCephInstallation", testVerifyCephInstallation)
 					}
 				}
@@ -123,7 +123,7 @@ func createCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 		//TODO: Delete existing ceph cluster with same name if any
 		clusterId, err = cephConfig.PccClient.CreateCephCluster(createRequest)
 		if err != nil {
-			if ! strings.Contains(err.Error(), "already exist") {
+			if !strings.Contains(err.Error(), "already exist") {
 				errMsg := fmt.Sprintf("Ceph cluster deployment failed..ERROR:%v", err)
 				err = fmt.Errorf(errMsg)
 			} else {
@@ -153,8 +153,14 @@ func getCephCreateClusterRequest(cephConfig *pcc.CephConfiguration) (createReque
 	}
 	createRequest.PublicNetwork = cephConfig.PublicNetwork
 	createRequest.ClusterNetwork = cephConfig.ClusterNetwork
-	createRequest.ControlCIDR = cephConfig.ControlCIDR
-	createRequest.IgwPolicy = cephConfig.IgwPolicy
+
+	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
+	if err != nil {
+		err = fmt.Errorf("FindNetClusterId failed: %v\n", err)
+		return
+	}
+	createRequest.NetworkClusterId = netClusterId
+
 	if createRequest.ClusterNetwork == "" || createRequest.PublicNetwork == "" {
 		err = fmt.Errorf("Invalid Public or Cluster Network")
 	}

@@ -178,6 +178,7 @@ func TestCeph(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "configNetworkIntefaces", configNetworkInterfaces)
+		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "testCeph", testCeph)
 	})
 }

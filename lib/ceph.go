@@ -115,8 +115,6 @@ type CephConfiguration struct {
 	NumberOfNodes    int             `json:"numberOfNodes"`
 	PublicNetwork    string          `json:"publicNetwork"`
 	ClusterNetwork   string          `json:"clusterNetwork"`
-	IgwPolicy        string          `json:"igwPolicy"`
-	ControlCIDR      string          `json:"controlCIDR"`
 	Tests            map[string]bool `json:"tests"`
 	PccClient        *PccClient
 }
@@ -155,13 +153,12 @@ func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier str
 }
 
 type CreateCephClusterRequest struct {
-	Name        string         `json:"name"`
-	Nodes       []CephNodes    `json:"nodes"`
-	Version     string         `json:"version"`
-	Tags        pq.StringArray `json:"tags"`
-	IgwPolicy   string         `json:"igwPolicy"`
-	ControlCIDR string         `json:"controlCIDR"`
-
+	// models.CephCluster
+	Name                     string         `json:"name"`
+	Nodes                    []CephNodes    `json:"nodes"`
+	Version                  string         `json:"version"`
+	Tags                     pq.StringArray `json:"tags"`
+	NetworkClusterId         uint64         `gorm:"network_cluster_id" json:"networkClusterID"`
 	models.CephClusterConfig `json:"config"`
 }
 
