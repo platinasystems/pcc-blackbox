@@ -58,6 +58,7 @@ func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
+	fails := 0
 	if key, err := getFirstKey(); err == nil {
 		keys := []string{key.Alias}
 
@@ -87,6 +88,7 @@ func reimageAllBrown(t *testing.T) {
 				status, err := Pcc.GetProvisionStatus(id)
 				if err != nil {
 					fmt.Printf("Node %v error: %v\n", id, err)
+					fails++
 					continue
 				}
 				if strings.Contains(status, "Ready") {
@@ -96,12 +98,17 @@ func reimageAllBrown(t *testing.T) {
 				} else if strings.Contains(status, "reimage failed") {
 					fmt.Printf("Node %v has failed reimage\n", id)
 					nodesList = removeIndex(i, nodesList)
+					fails++
 					continue
 				}
 				fmt.Printf("Node %v: %v\n", id, status)
 			}
 			if len(nodesList) == 0 {
-				fmt.Printf("Brownfield re-image done\n")
+				if fails == 0 {
+					fmt.Printf("Brownfield re-image done\n")
+				} else {
+					assert.Fatalf("Brownfield re-image failed on %v nodes\n", fails)
+				}
 				return
 			}
 			time.Sleep(60 * time.Second)

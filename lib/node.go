@@ -302,7 +302,7 @@ func (pcc *PccClient) DeleteNode(id uint64) (err error) {
 	return
 }
 
-// Delete a node
+// Update a node
 func (pcc *PccClient) UpdateNode(node *NodeWithKubernetes) (err error) {
 	fmt.Println(fmt.Sprintf("updating the node %d", node.Id))
 	if len(node.RoleIds) > 0 { // FIXME fix pcc-side
@@ -318,6 +318,13 @@ func (pcc *PccClient) UpdateNode(node *NodeWithKubernetes) (err error) {
 	}
 
 	err = pcc.Put("pccserver/node/update", node, node)
+	return
+}
+
+// Update MaaS role
+func (pcc *PccClient) UpdateMaas(node *NodeWithKubernetes) (err error) {
+	endpoint := fmt.Sprintf("pccserver/node/updateMaas/%v", node.Id)
+	err = pcc.Put(endpoint, node, node)
 	return
 }
 

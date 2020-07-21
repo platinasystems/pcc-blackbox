@@ -20,6 +20,20 @@ func addGreenfieldServers(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	invaders, err := Pcc.GetInvaders()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	for _, i := range *invaders {
+		fmt.Printf("Update MaaS for node [%v]\n", i.Id)
+		err = Pcc.UpdateMaas(&i)
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+	}
+
 	wg.Add(len(Env.Servers))
 
 	pxeboot := func(server node) {
