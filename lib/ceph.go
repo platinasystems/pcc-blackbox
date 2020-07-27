@@ -77,7 +77,7 @@ var (
 	CEPH_POOL_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_COMPLETED)
 	CEPH_POOL_CREATION_FAILED_NOTIFICATION         = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_FAILED)
 	CEPH_POOL_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating Pool : [%s] for cluster [%s]"
-	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from DB"
+	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from cluster"
 	CEPH_POOL_DELETION_FAILED_NOTIFICATION         = "Unable to remove pool [%s]"
 	CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing Pool : [%s] from cluster [%s]"
 
