@@ -7,21 +7,20 @@ require (
 	github.com/astaxie/beego v1.12.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31
-	github.com/gorilla/mux v1.7.4 // indirect
 	github.com/jinzhu/gorm v1.9.12
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.4.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200706100608-8edf8e821392
-	github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e
+	github.com/platinasystems/go-common v0.0.0-20200810130239-d7a9e08d6c10
+	github.com/platinasystems/pcc-models v0.0.0-20200810125954-071c543076f0
 	github.com/platinasystems/test v1.8.3
-	github.com/platinasystems/tiles v1.5.0
+	github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect
 	golang.org/x/crypto v0.0.0-20200420104511-884d27f42877
 	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
+	golang.org/x/tools v0.0.0-20200428211428-0c9eba77bc32
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
-	gopkg.in/ini.v1 v1.55.0 // indirect
 )

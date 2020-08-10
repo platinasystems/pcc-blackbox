@@ -21,9 +21,43 @@ type Role struct {
 	models.Role
 }
 
+type Template struct {
+	models.Template
+}
+
 func (p *PccClient) GetRoles() (roles []*Role, err error) {
 	endpoint := fmt.Sprintf("pccserver/roles")
 	err = p.Get(endpoint, &roles)
+	return
+}
+
+// Get a Node Roles
+func (pcc *PccClient) GetNodeRoles() (result []Role, err error) {
+	err = pcc.Get("pccserver/roles", &result)
+	return
+}
+
+// Get a Node Role
+func (pcc *PccClient) GetNodeRole(id uint64) (result Role, err error) {
+	err = pcc.Get(fmt.Sprintf("pccserver/roles/%d", id), &result)
+	return
+}
+
+// Add a Node Role
+func (pcc *PccClient) AddNodeRole(item *Role) (result Role, err error) {
+	err = pcc.Post("pccserver/roles", item, &result)
+	return
+}
+
+// Add a Node Role
+func (pcc *PccClient) GetRoleTemplates(item *Role) (result Role, err error) {
+	err = pcc.Post("pccserver/templates", item, &result)
+	return
+}
+
+// Delete a Node Role
+func (pcc *PccClient) DeleteNodeRole(id uint64) (result Role, err error) {
+	err = pcc.Delete(fmt.Sprintf("pccserver/roles/%d", id), nil, &result)
 	return
 }
 

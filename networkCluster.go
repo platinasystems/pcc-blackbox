@@ -31,18 +31,12 @@ func addNetCluster(t *testing.T) {
 
 	igwPolicy = Env.NetCluster.IgwPolicy
 	controlCIDR = Env.NetCluster.ControlCIDR
-
-	if igwPolicy == "" {
-		assert.Fatal("No IgwPolicy defined")
+	switch igwPolicy {
+	case pcc.IGW_UPSTREAM:
+	case pcc.IGW_DEFAULT:
+	default:
+		assert.Fatal("Invalid IgwPolicy")
 		return
-	} else {
-		switch igwPolicy {
-		case pcc.IGW_UPSTREAM:
-		case pcc.IGW_DEFAULT:
-		default:
-			assert.Fatalf("Invalid IgwPolicy")
-			return
-		}
 	}
 
 	if controlCIDR == "" {

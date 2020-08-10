@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/platinasystems/pcc-models/authentication"
+	models "github.com/platinasystems/pcc-models/items"
 	"strconv"
 	"strings"
 	"testing"
@@ -17,13 +18,13 @@ var metadataProfiles = make(map[uint64]*authentication.AuthProfile)
 //
 // get profile's parameters
 //
-func getServiceParameters(t *testing.T, servicetype string, mandatory bool, str bool, numeric bool) (parameters map[string]authentication.ItemDescription) {
+func getServiceParameters(t *testing.T, servicetype string, mandatory bool, str bool, numeric bool) (parameters map[string]models.ItemDescription) {
 	var (
 		description authentication.AuthenticationServiceDescription
 		err         error
 	)
 
-	parameters = make(map[string]authentication.ItemDescription)
+	parameters = make(map[string]models.ItemDescription)
 	if description, err = Pcc.GetAppCredentialTemplate(servicetype); err == nil {
 		for i := range description.Parameters {
 			parameter := description.Parameters[i]
@@ -52,7 +53,7 @@ func createProfile(t *testing.T, servicetype string) (created authentication.Aut
 		err        error
 		profile    map[string]interface{}
 		value      interface{}
-		parameters map[string]authentication.ItemDescription
+		parameters map[string]models.ItemDescription
 	)
 
 	profile = make(map[string]interface{})
@@ -124,7 +125,7 @@ func testUpdateCredendialMetadataProfile(t *testing.T) {
 	fmt.Println("\nAPP CREDENTIALS: updating the metadata profile")
 	var (
 		err            error
-		parameters     map[string]authentication.ItemDescription
+		parameters     map[string]models.ItemDescription
 		updatedProfile authentication.AuthProfile
 		newValue       interface{}
 	)

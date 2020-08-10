@@ -281,6 +281,18 @@ func TestTunnel(t *testing.T) {
 	})
 }
 
+func TestPolicy(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "POLICY", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addInvaders", addClusterHeads)
+		mayRun(t, "testPreparePolicies", testPreparePolicies)
+		mayRun(t, "testPolicies", testPolicies)
+		mayRun(t, "testPolicyScope", testPolicyScope)
+	})
+}
+
 func TestAvailability(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))

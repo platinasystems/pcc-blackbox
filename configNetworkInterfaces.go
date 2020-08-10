@@ -14,12 +14,10 @@ import (
 var nodeIntfMap = make(map[uint64][]int64)
 
 func configServerInterfaces(t *testing.T) {
-	mayRun(t, "interfaces", func(t *testing.T) {
-		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
-		mayRun(t, "verifyNetworkInterfaces", verifyNetworkInterfaces)
-		mayRun(t, "verifyNetworkConfig", verifyNetworkConfig)
-		mayRun(t, "verifyNetworkUp", verifyNetworkUp)
-	})
+	t.Run("configNetworkInterfaces", configNetworkInterfaces)
+	t.Run("verifyNetworkInterfaces", verifyNetworkInterfaces)
+	t.Run("verifyNetworkConfig", verifyNetworkConfig)
+	t.Run("verifyNetworkUp", verifyNetworkUp)
 }
 
 // FIXME lump the functions in an single one

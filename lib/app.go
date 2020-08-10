@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	"github.com/platinasystems/pcc-models/app"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -13,18 +14,25 @@ type ProvisionedApp struct {
 	models.ProvisionedApp
 }
 
-func (p *PccClient) GetApps(nodeId uint64) (apps []ProvisionedApp, err error) {
-	var endpoint string
-	endpoint = fmt.Sprintf("pccserver/node/%d/apps", nodeId)
-	err = p.Get(endpoint, &apps)
+func (p *PccClient) GetApps() (result []app.AppConfiguration, err error) {
+	err = p.Get("pccserver/apps", &result)
+	return
+}
 
+func (p *PccClient) GetApp(id string) (result []app.AppConfiguration, err error) {
+	err = p.Get(fmt.Sprintf("pccserver/apps/%s", id), &result)
+	return
+}
+
+func (p *PccClient) GetNodeApps(nodeId uint64) (apps []ProvisionedApp, err error) {
+	err = p.Get(fmt.Sprintf("pccserver/node/%d/apps", nodeId), &apps)
 	return
 }
 
 func (p *PccClient) IsAppInstalled(nodeId uint64, appId string) (isInstalled bool, err error) {
 	var apps []ProvisionedApp
 
-	if apps, err = p.GetApps(nodeId); err == nil {
+	if apps, err = p.GetNodeApps(nodeId); err == nil {
 		for i := range apps {
 			if apps[i].ID == appId && apps[i].Local.Installed {
 				isInstalled = true

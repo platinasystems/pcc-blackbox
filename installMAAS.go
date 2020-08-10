@@ -40,28 +40,31 @@ func installMAAS(t *testing.T) {
 }
 
 // FIXME move the wait to PccClient
-func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout time.Duration) (err error) {
+func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeoutSec int) (err error) {
 	var (
 		installed    []uint64
 		nodesToCheck []uint64
 		check        bool
 		wg           sync.WaitGroup
 	)
-
 	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
 	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
 		if len(installed) > 0 {
 			fmt.Printf("%s already installed on nodes %d\n", app, installed)
 		}
-
 		if n := len(nodesToCheck); n > 0 {
+			if timeoutSec <= 0 {
+				timeoutSec = DEFAULT_TIMEOUT
+			}
+			timeout := time.Duration(timeoutSec*n) * time.Second
+
 			wg.Add(n)
 			checkInstall := func(id uint64) {
 				defer wg.Done()
 				fmt.Printf("Checking %s installation for node:%v\n", app, id)
 
 				start := time.Now()
-				if check, err = Pcc.WaitForInstallation(id, timeout*time.Duration(n), app, "", &start); err != nil {
+				if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
 					err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
 					return
 				} else if check {

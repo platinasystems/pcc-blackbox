@@ -12,6 +12,7 @@ const (
 	AGENT_TIMEOUT                        = 300  // FIXME move to props
 	COLLECTOR_TIMEOUT                    = 300  // FIXME move to props
 	LLDP_TIMEOUT                         = 300  // FIXME move to props
+	DEFAULT_TIMEOUT                      = 300  // FIXME move to props
 	MAAS_INSTALL_TIMEOUT                 = 900  // FIXME move to props
 	K8S_INSTALL_TIMEOUT                  = 1800 // FIXME move to props
 	PORTUS_TIMEOUT                       = 600  // FIXME move to props
