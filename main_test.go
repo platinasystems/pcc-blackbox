@@ -91,6 +91,7 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
+		mayRun(t, "addIpam", updateIpam)
 	})
 }
 
