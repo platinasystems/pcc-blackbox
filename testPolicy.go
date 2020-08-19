@@ -174,6 +174,7 @@ func testPolicies(t *testing.T) {
 func testPolicyScope(t *testing.T) {
 	defer testPreparePolicies(t)
 	var (
+		siteScope   *scope2.Scope
 		s           scope2.Scope
 		err         error
 		application app.AppConfiguration
@@ -183,13 +184,28 @@ func testPolicyScope(t *testing.T) {
 	)
 	s.Name = SCOPE_BB_TEST
 	s.Description = SCOPE_BB_TEST
-	s.Type = scope2.LabelTypeName
+	s.Type = scope2.RackTypeName
+
+	////
+	// Get default scopes
+	////
+	scopes, err := Pcc.GetScopes()
+	checkError(t, err)
+	err = defaultScopesCheck(scopes)
+	checkError(t, err)
+
+	////
+	// Select first site scope as parent
+	////
+	siteScope, err = selectFirstSite(scopes)
+	checkError(t, err)
+	s.ParentID = &siteScope.ID
 
 	////
 	// Add the scope
 	////
 	fmt.Println("\n--- ADD SCOPE")
-	fmt.Printf("Creating the scope %s\n", s.Description)
+	fmt.Printf("Creating the scope %s as child of site %d\n", s.Description, *s.ParentID)
 	s, err = Pcc.AddScope(&s)
 	checkError(t, err)
 	fmt.Printf("Added the scope %d %s\n\n", s.ID, s.Description)
@@ -222,7 +238,7 @@ func testPolicyScope(t *testing.T) {
 	node, err := Pcc.GetNode(nodeId)
 	checkError(t, err)
 	node.ScopeId = &s.ID
-	fmt.Printf("Assigning the scope %s to the node %s\n", s.Description, node.Name)
+	fmt.Printf("Assigning the scope %s (%d) to the node %s\n", s.Description, s.ID, node.Name)
 	err = Pcc.UpdateNode(node)
 	checkError(t, err)
 
@@ -247,4 +263,25 @@ func testPolicyScope(t *testing.T) {
 	checkError(t, err)
 
 	// TODO check for inputs parameters. Look at the default/ansible.log file
+}
+
+func defaultScopesCheck(scopes []scope2.Scope) (err error) {
+	if len(scopes) < 4 {
+		err = fmt.Errorf("default scopes are missing. Available: %+v", scopes)
+	}
+	return
+}
+
+func selectFirstSite(scopes []scope2.Scope) (site *scope2.Scope, err error) {
+	for _, aScope := range scopes {
+		if aScope.GetType() == scope2.SiteType {
+			site = &aScope
+			fmt.Printf("Selected site %+v", *site)
+			break
+		}
+	}
+	if site == nil {
+		err = fmt.Errorf("default site scope is missing")
+	}
+	return
 }

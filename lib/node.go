@@ -304,7 +304,13 @@ func (pcc *PccClient) DeleteNode(id uint64) (err error) {
 
 // Update a node
 func (pcc *PccClient) UpdateNode(node *NodeWithKubernetes) (err error) {
-	fmt.Println(fmt.Sprintf("updating the node %d", node.Id))
+	var scopeIDString string
+	if node.ScopeId == nil {
+		scopeIDString = "nil"
+	} else {
+		scopeIDString = fmt.Sprintf("%d", *node.ScopeId)
+	}
+	fmt.Println(fmt.Sprintf("updating the node %d with scope %q", node.Id, scopeIDString))
 	if len(node.RoleIds) > 0 { // FIXME fix pcc-side
 		m := make(map[uint64]bool)
 		for _, k := range node.RoleIds {
