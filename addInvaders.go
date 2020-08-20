@@ -59,7 +59,6 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 			fmt.Printf("adding the node %s\n", node.Host)
 			if routineError = Pcc.AddNode(&node); routineError == nil {
 				n.Id = node.Id
-				node.Invader = true
 				Nodes[node.Id] = &node
 				NodebyHostIP[node.Host] = node.Id
 				fmt.Printf("Add id %d to Nodes. Mapping hostIP %v to id %d\n", node.Id, node.Host, node.Id)
