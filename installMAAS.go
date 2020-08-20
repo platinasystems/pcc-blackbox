@@ -56,12 +56,12 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 			if timeoutSec <= 0 {
 				timeoutSec = DEFAULT_TIMEOUT
 			}
-			timeout := time.Duration(timeoutSec*n) * time.Second
+			timeout := time.Duration(timeoutSec*n)
 
 			wg.Add(n)
 			checkInstall := func(id uint64) {
 				defer wg.Done()
-				fmt.Printf("Checking %s installation for node:%v\n", app, id)
+				fmt.Printf("Checking %q installation for node: %d\n", app, id)
 
 				start := time.Now()
 				if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
