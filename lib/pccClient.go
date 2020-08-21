@@ -34,26 +34,26 @@ func (pcc *PccClient) getClient() (rc *http.PlatinaRestService) {
 }
 
 // GET
-func (pcc *PccClient) Get(endPoint string, out interface{}) (err error) {
-	err = (*pcc.getClient()).Get(endPoint, out)
+func (pcc *PccClient) Get(endPoint string, out interface{}, options ...interface{}) (err error) {
+	err = (*pcc.getClient()).Get(endPoint, out, options...)
 	return
 }
 
 // DELETE
-func (pcc *PccClient) Delete(endPoint string, data interface{}, out interface{}) (err error) {
-	err = (*pcc.getClient()).Delete(endPoint, data, out)
+func (pcc *PccClient) Delete(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
+	err = (*pcc.getClient()).Delete(endPoint, data, out, options...)
 	return
 }
 
 // POST
-func (pcc *PccClient) Post(endPoint string, data interface{}, out interface{}) (err error) {
-	err = (*pcc.getClient()).Post(endPoint, data, out)
+func (pcc *PccClient) Post(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
+	err = (*pcc.getClient()).Post(endPoint, data, out, options...)
 	return
 }
 
 // PUT
-func (pcc *PccClient) Put(endPoint string, data interface{}, out interface{}) (err error) {
-	err = (*pcc.getClient()).Put(endPoint, data, out)
+func (pcc *PccClient) Put(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
+	err = (*pcc.getClient()).Put(endPoint, data, out, options...)
 	return
 }
 
