@@ -5,6 +5,8 @@
 package pcc
 
 import (
+	"time"
+
 	"github.com/platinasystems/tiles/pccserver/maas/models"
 )
 
@@ -13,6 +15,9 @@ type MaasRequest struct {
 }
 
 func (p *PccClient) MaasDeploy(maasReq MaasRequest) (err error) {
-	err = p.Post("maas/deployments", &maasReq, nil)
+	// This POST is syncronous
+	var timeout time.Duration = 3 * time.Minute
+
+	err = p.Post("maas/deployments", &maasReq, nil, timeout)
 	return
 }
