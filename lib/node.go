@@ -6,10 +6,10 @@ package pcc
 
 import (
 	"fmt"
-	avro "github.com/platinasystems/tiles/pccserver/kafka/models"
 	"sync"
 	"time"
 
+	"github.com/platinasystems/pcc-models/avro"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -82,8 +82,8 @@ func (p *PccClient) GetNodeSummary(id uint64, node *NodeWithKubernetes) (err err
 func (p *PccClient) GetNodeConnectionStatus(nodeId uint64) (status string, err error) {
 	var node *NodeWithKubernetes
 	if node, err = p.GetNode(nodeId); err == nil {
-		if node.NodeAvailabilityStatus != nil {
-			status = node.NodeAvailabilityStatus.ConnectionStatus
+		if node.NodeStatus != nil {
+			status = node.NodeStatus.ConnectionStatus
 		}
 	}
 	return

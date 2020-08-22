@@ -47,8 +47,8 @@ func checkNodeConnectionStatus(status string, host string) (err error) {
 		fmt.Printf("node [%s] added with id [%d]. Waiting for connection status [%s]\n", node.Host, node.Id, status)
 		for i := 1; i <= 20; i++ { // wait for the status
 			time.Sleep(time.Second * time.Duration(10))
-			if node, err = Pcc.GetNode(node.Id); err == nil && node.NodeAvailabilityStatus != nil {
-				connectionStatus := node.NodeAvailabilityStatus.ConnectionStatus
+			if node, err = Pcc.GetNode(node.Id); err == nil && node.NodeStatus != nil {
+				connectionStatus := node.NodeStatus.ConnectionStatus
 				fmt.Printf("Connection status for node %s is %s\n", host, connectionStatus)
 				if strings.Compare(strings.ToLower(connectionStatus), status) == 0 {
 					return
