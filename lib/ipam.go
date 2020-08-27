@@ -12,12 +12,12 @@ import (
 
 const subEndpoint string = "pccserver/subnet-objs"
 
-type SubnetStr struct {
-	models.SubnetStr
-}
-
 type SubnetObj struct {
 	models.SubnetObj
+}
+
+func (sub *SubnetObj) SetSubnet(s string) {
+	sub.Subnet = models.SubnetStr(s)
 }
 
 func (pcc *PccClient) GetSubnetObj() (subnetObjs *[]SubnetObj, err error) {

@@ -83,7 +83,16 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_ON
 	}
 	ifaceRequest.Mtu = json.Number(configIface.Mtu)
-	ifaceRequest.AdminStatus = pcc.INTERFACE_STATUS_UP
+
+	adminStatus := configIface.AdminStatus
+	switch adminStatus {
+	case pcc.INTERFACE_STATUS_UP:
+	case pcc.INTERFACE_STATUS_DOWN:
+	default:
+		adminStatus = pcc.INTERFACE_STATUS_UP
+	}
+	ifaceRequest.AdminStatus = adminStatus
+
 	if configIface.IsManagement {
 		ifaceRequest.IsManagement = "true"
 	} else {
@@ -202,10 +211,12 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 		fmt.Printf("    mtu mismatch [%v] [%v]\n", intfReq.Mtu, mtu)
 		return
 	}
-	if intfReq.AdminStatus != iface.Interface.AdminStatus {
-		fmt.Printf("    adminStatus mismatch [%v] [%v]\n",
-			intfReq.AdminStatus, iface.Interface.AdminStatus)
-		return
+	if iface.Interface.AdminStatus != "" {
+		if intfReq.AdminStatus != iface.Interface.AdminStatus {
+			fmt.Printf("    adminStatus mismatch [%v] [%v]\n",
+				intfReq.AdminStatus, iface.Interface.AdminStatus)
+			return
+		}
 	}
 	if iface.Interface.IsManagement {
 		if intfReq.IsManagement != "true" {

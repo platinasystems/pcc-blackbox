@@ -42,6 +42,7 @@ func addTestTestNode(testNode *pcc.NodeDetail) {
 				net.Autoneg = "false"
 				net.Speed = intf.Interface.Speed
 			}
+			net.AdminStatus = intf.Interface.AdminStatus
 			net.MacAddr = intf.Interface.MacAddress
 			net.IsManagement = intf.Interface.IsManagement
 			net.ManagedByPcc = intf.Interface.ManagedByPcc
@@ -66,6 +67,26 @@ func addTestTestNode(testNode *pcc.NodeDetail) {
 		s := server{node: n}
 		outEnv.Servers = append(outEnv.Servers, s)
 	}
+
+}
+
+func addTestIpam() {
+	subnets, err := Pcc.GetSubnetObj()
+	if err != nil {
+		fmt.Printf("Failed to GetSubnetObj: %v\n", err)
+		return
+	}
+	if len(*subnets) > 0 {
+		for _, ipam := range *subnets {
+			var sub netIpam
+
+			sub.Name = ipam.Name
+			sub.Subnet = string(ipam.Subnet)
+			sub.PubAccess = ipam.PubAccess
+			sub.Routed = ipam.Routed
+			outEnv.NetIpam = append(outEnv.NetIpam, sub)
+		}
+	}
 }
 
 func genEnv() {
@@ -80,6 +101,8 @@ func genEnv() {
 	for _, testNode := range nodes {
 		addTestTestNode(testNode)
 	}
+
+	addTestIpam()
 
 	data, err := json.MarshalIndent(outEnv, "", "    ")
 	if err == nil {

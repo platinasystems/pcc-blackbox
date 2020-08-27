@@ -5,6 +5,7 @@ go 1.13
 require (
 	contrib.go.opencensus.io/exporter/ocagent v0.5.0 // indirect
 	github.com/KyleBanks/dockerstats v0.0.0-20180213183355-b5fec062e953
+	github.com/actgardner/gogen-avro/v7 v7.1.1 // indirect
 	github.com/astaxie/beego v1.12.1 // indirect
 	github.com/coreos/bbolt v1.3.3 // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
@@ -27,8 +28,8 @@ require (
 	github.com/nats-io/go-nats-streaming v0.4.4 // indirect
 	github.com/nats-io/nats-server v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200820074450-850ac1d72151
-	github.com/platinasystems/pcc-models v0.0.0-20200821142350-0fb5b4678f48
+	github.com/platinasystems/go-common v0.0.0-20200826003141-3cc7cd71b91a
+	github.com/platinasystems/pcc-models v0.0.0-20200826003009-c9ae4f56c273
 	github.com/platinasystems/test v1.8.3
 	github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect

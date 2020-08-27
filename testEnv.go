@@ -21,6 +21,7 @@ type testEnv struct {
 	K8sAppConfiguration   pcc.K8sAppConfiguration
 	Availability          Availability
 	NetCluster            netCluster
+	NetIpam               []netIpam
 }
 
 type node struct {
@@ -41,6 +42,7 @@ type netInterface struct {
 	MacAddr      string
 	IsManagement bool
 	ManagedByPcc bool
+	AdminStatus  string
 	Speed        string
 	Autoneg      string
 	Fec          string
@@ -64,6 +66,13 @@ type Availability struct {
 type netCluster struct {
 	ControlCIDR string
 	IgwPolicy   string
+}
+
+type netIpam struct {
+	Name      string
+	Subnet    string
+	PubAccess bool
+	Routed    bool
 }
 
 var exampleEnv = testEnv{

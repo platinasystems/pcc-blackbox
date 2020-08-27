@@ -462,6 +462,8 @@ github.com/platinasystems/go-common v0.0.0-20200810130239-d7a9e08d6c10 h1:wF6jrw
 github.com/platinasystems/go-common v0.0.0-20200810130239-d7a9e08d6c10/go.mod h1:Sc/sZyHbTgosLDCohYCWJQ+emv6DkVCqc28xEjuPqOg=
 github.com/platinasystems/go-common v0.0.0-20200820074450-850ac1d72151 h1:9wyJcQPsP6ZS7B+V1p05M/gQBxgXn05CD5FD0Xo7nuY=
 github.com/platinasystems/go-common v0.0.0-20200820074450-850ac1d72151/go.mod h1:fCcorDrh8JCcQiMpJP/9XHH1gPXXhhGbPmVgKlE2+jk=
+github.com/platinasystems/go-common v0.0.0-20200826003141-3cc7cd71b91a h1:eVnHIZN44M6M5U6hbNzW4IH0wNtDkXpDGjc0RaOdLoE=
+github.com/platinasystems/go-common v0.0.0-20200826003141-3cc7cd71b91a/go.mod h1:2toRHIH/9dKAqQw2UjpnZDlaLK15bT3ZJpGVBFfbrG4=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
 github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200803165142-0998ef20e0b6/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
@@ -477,6 +479,8 @@ github.com/platinasystems/pcc-models v0.0.0-20200810125954-071c543076f0/go.mod h
 github.com/platinasystems/pcc-models v0.0.0-20200820073309-6496472b67e6/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/pcc-models v0.0.0-20200821142350-0fb5b4678f48 h1:DXYjqwVdfEL75/ygMlTaeInH0YZ/0wlBGT2R/rVGgkQ=
 github.com/platinasystems/pcc-models v0.0.0-20200821142350-0fb5b4678f48/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v0.0.0-20200826003009-c9ae4f56c273 h1:6rBFvspkxHy6dW2P8shXA//PH98ThSNSnsH7o+2BjFU=
+github.com/platinasystems/pcc-models v0.0.0-20200826003009-c9ae4f56c273/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/test v1.8.3 h1:vZrl1An0N6wfWIynBW/s0LXjdQxx8uRWEoS6WX56Q9E=
 github.com/platinasystems/test v1.8.3/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770 h1:cx1XU3+/vagNdFCCEAcRE6gp5qVwFYcbJWND3Z7REBw=
