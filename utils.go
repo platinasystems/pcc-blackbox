@@ -6,7 +6,7 @@ import (
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
-func IsInvader(node *pcc.NodeWithKubernetes) bool {
+func IsInvader(node *pcc.NodeDetailed) bool {
 	for i := 0; i < len(Env.Invaders); i++ {
 		if Env.Invaders[i].HostIp == node.Host {
 			return true

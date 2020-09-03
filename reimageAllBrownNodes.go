@@ -22,7 +22,7 @@ func updateBmcInfo(t *testing.T) {
 
 	for _, i := range Env.Servers {
 		var (
-			addReq pcc.NodeWithKubernetes
+			addReq pcc.NodeDetailed
 			err    error
 			key    pcc.SecurityKey
 		)

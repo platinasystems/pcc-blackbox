@@ -33,7 +33,8 @@ func configNetworkInterfaces(t *testing.T) {
 		)
 
 		id := NodebyHostIP[node.HostIp]
-		if ifaces, err = Pcc.GetIfacesByNodeId(id); err != nil {
+		ifaces, err = Pcc.GetIfacesByNodeId(id)
+		if err != nil {
 			assert.Fatalf("Error retrieving node %s id[%d] interfaces\n %v", node.HostIp, id, err)
 			return
 		}
@@ -196,10 +197,12 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
-		if intfReq.Speed != json.Number(iface.Interface.Speed) {
-			fmt.Printf("    speed mismatch [%v] [%v]\n",
-				intfReq.Speed, iface.Interface.Speed)
-			return
+		if intfReq.AdminStatus == pcc.INTERFACE_STATUS_UP {
+			if intfReq.Speed != json.Number(iface.Interface.Speed) {
+				fmt.Printf("    speed mismatch [%v] [%v]\n",
+					intfReq.Speed, iface.Interface.Speed)
+				return
+			}
 		}
 	default:
 		fmt.Printf("Error: unexpected autoneg [%v]\n", intfReq.Autoneg)

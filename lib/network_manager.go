@@ -13,12 +13,17 @@ import (
 const (
 	IGW_UPSTREAM = "upstream"
 	IGW_DEFAULT  = "default"
+
+	NETWORK_DEPLOY_STATUS_COMPLETED     = "completed"
+	NETWORK_DEPLOY_STATUS_FAILED        = "failed"
+	NETWORK_DEPLOY_STATUS_UPDATE_FAILED = "update_failed"
 )
 
 type NetworkClusterReq struct {
 	Id                 uint64   `json:"id"`
 	Name               string   `json:"name"`
-	ControlCIDR        string   `json:"controlCIDR"`
+	ControlCIDRId      uint64   `json:"controlCIDRId"`
+	DataCIDRId         uint64   `json:"dataCIDRId"`
 	DeployStatus       string   `json:"deploy_status"`
 	IgwPolicy          string   `json:"igwPolicy"`
 	ProgressPercentage int8     `json:"progressPercentage"`

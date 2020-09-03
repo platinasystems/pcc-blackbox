@@ -28,6 +28,11 @@ func (pcc *PccClient) GetSubnetObj() (subnetObjs *[]SubnetObj, err error) {
 	return
 }
 
+func (pcc *PccClient) GetSubnetObjId(id uint64) (subnetObj SubnetObj, err error) {
+	err = pcc.Get(fmt.Sprintf("%v/%v", subEndpoint, id), &subnetObj)
+	return
+}
+
 func (pcc *PccClient) AddSubnetObj(subnetObj *SubnetObj) (err error) {
 	if subnetObj.Id != 0 {
 		err = fmt.Errorf("Invalid subnetObj Id [%v] for AddSubnetObj",
@@ -52,5 +57,22 @@ func (pcc *PccClient) UpdateSubnetObj(subnetObj *SubnetObj) (err error) {
 
 func (pcc *PccClient) DeleteSubnetObj(id uint64) (err error) {
 	err = pcc.Delete(fmt.Sprintf("%v/%v", subEndpoint, id), nil, nil)
+	return
+}
+
+func (pcc *PccClient) FindSubnetObj(name string) (subnetObj *SubnetObj, err error) {
+
+	subnets, err := pcc.GetSubnetObj()
+	if err != nil {
+		return
+	}
+
+	for _, subObj := range *subnets {
+		if subObj.Name == name {
+			subnetObj = &subObj
+			return
+		}
+	}
+	err = fmt.Errorf("SubnetObj [%v] not found", name)
 	return
 }

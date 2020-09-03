@@ -75,7 +75,7 @@ func checkServerTunnels(t *testing.T) {
 }
 
 // Check data received from the environment endpoint
-func checkEnvironmentForNode(t *testing.T, node *pcc.NodeWithKubernetes) (address string) {
+func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address string) {
 	fmt.Println(fmt.Sprintf("Tunnel: checking the tunnel address for the node %d:%s:%s", node.Id, node.Name, node.Host))
 
 	if defaultEnv, err := Pcc.GetEnvironment(nil); err == nil {
@@ -116,7 +116,7 @@ func checkTunnelConnection(t *testing.T) {
 	}
 }
 
-func tunnelPing(node *pcc.NodeWithKubernetes, log bool) error {
+func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 	nodeId := node.Id
 	var ssh pcc.SSHHandler
 	if stdout, stderr, err := ssh.Run(node.Host, fmt.Sprintf("ping -c 3 %s", node.TunnelServerAddress)); err == nil {

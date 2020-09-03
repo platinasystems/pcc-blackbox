@@ -20,8 +20,8 @@ type testEnv struct {
 	CephConfiguration     pcc.CephConfiguration
 	K8sAppConfiguration   pcc.K8sAppConfiguration
 	Availability          Availability
-	NetCluster            netCluster
 	NetIpam               []netIpam
+	NetCluster            []netCluster
 }
 
 type node struct {
@@ -64,8 +64,11 @@ type Availability struct {
 }
 
 type netCluster struct {
+	Name        string
 	ControlCIDR string
+	DataCIDR    string
 	IgwPolicy   string
+	Nodes       []string
 }
 
 type netIpam struct {

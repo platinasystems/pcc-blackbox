@@ -11,9 +11,9 @@ import (
 
 var outEnv testEnv
 
-var nodes = make(map[uint64]*pcc.NodeDetail)
+var nodes = make(map[uint64]*pcc.NodeDetailed)
 
-func addTestTestNode(testNode *pcc.NodeDetail) {
+func addTestTestNode(testNode *pcc.NodeDetailed) {
 	var n node
 
 	n.HostIp = testNode.Host
@@ -76,16 +76,44 @@ func addTestIpam() {
 		fmt.Printf("Failed to GetSubnetObj: %v\n", err)
 		return
 	}
-	if len(*subnets) > 0 {
-		for _, ipam := range *subnets {
-			var sub netIpam
+	if len(*subnets) == 0 {
+		return
+	}
+	for _, ipam := range *subnets {
+		var sub netIpam
 
-			sub.Name = ipam.Name
-			sub.Subnet = string(ipam.Subnet)
-			sub.PubAccess = ipam.PubAccess
-			sub.Routed = ipam.Routed
-			outEnv.NetIpam = append(outEnv.NetIpam, sub)
+		sub.Name = ipam.Name
+		sub.Subnet = string(ipam.Subnet)
+		sub.PubAccess = ipam.PubAccess
+		sub.Routed = ipam.Routed
+		outEnv.NetIpam = append(outEnv.NetIpam, sub)
+	}
+}
+
+func addTestNetCluster() {
+	netClusters, err := Pcc.GetNetCluster()
+	if err != nil {
+		fmt.Printf("Failed to GetSubnetObj: %v\n", err)
+		return
+	}
+	if len(netClusters) == 0 {
+		return
+	}
+	for _, net := range netClusters {
+		var cluster netCluster
+		var nodes []string
+
+		cluster.Name = net.Name
+		cluster.IgwPolicy = net.IgwPolicy
+		controlCidr, _ := Pcc.GetSubnetObjId(net.ControlCIDRId)
+		cluster.ControlCIDR = controlCidr.Name
+		dataCidr, _ := Pcc.GetSubnetObjId(net.DataCIDRId)
+		cluster.DataCIDR = dataCidr.Name
+		for _, node := range net.Nodes {
+			nodes = append(nodes, node.MgmtIPv4Address)
 		}
+		cluster.Nodes = nodes
+		outEnv.NetCluster = append(outEnv.NetCluster, cluster)
 	}
 }
 
@@ -103,6 +131,7 @@ func genEnv() {
 	}
 
 	addTestIpam()
+	addTestNetCluster()
 
 	data, err := json.MarshalIndent(outEnv, "", "    ")
 	if err == nil {

@@ -48,7 +48,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	addNodeAndWait := func(n node, nodeNumbers int) { // add the node and wait for the services. FIXME add a channel for stopping on error
 		defer wg.Done()
 		var (
-			node         pcc.NodeWithKubernetes
+			node         pcc.NodeDetailed
 			routineError error
 		)
 		node.Host = n.HostIp

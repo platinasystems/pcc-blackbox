@@ -34,9 +34,9 @@ func addInaccessibleNode(t *testing.T) {
 // add a node and wait for the connection status
 func checkNodeConnectionStatus(status string, host string) (err error) {
 	fmt.Println(fmt.Sprintf("\nAVAILABILITY: add %s node", status))
-	var node *pcc.NodeWithKubernetes
+	var node *pcc.NodeDetailed
 
-	node = &pcc.NodeWithKubernetes{}
+	node = &pcc.NodeDetailed{}
 	node.Host = host
 
 	if err = Pcc.AddNode(node); err == nil {
@@ -94,7 +94,7 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 }
 
 // Remove the service and wait for the restore
-func checkRestore(service string, path string, node *pcc.NodeWithKubernetes) error {
+func checkRestore(service string, path string, node *pcc.NodeDetailed) error {
 	var ssh pcc.SSHHandler
 	fmt.Println(fmt.Sprintf("Stopping and removing the service %s from node %d %s %s ", service, node.Id, node.Name, node.Host))
 	if _, stderr, err := ssh.Run(node.Host, fmt.Sprintf("sudo rm -f /opt/platina/pcc/bin/%s && ps auxww | grep %s | grep -v grep | grep -v ansible | awk '{print $2}' | xargs sudo kill -9", path, path)); err == nil {

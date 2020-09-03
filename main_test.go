@@ -87,8 +87,8 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "installMAAS", updateNodes_installMAAS)
+		// mayRun(t, "installLLDP", updateNodes_installLLDP)
+		// mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
 		mayRun(t, "addIpam", updateIpam)
@@ -100,7 +100,7 @@ func TestUsers(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "users", func(t *testing.T) {
 		mayRun(t, "addTenant", addTenant)
-		mayRun(t, "addSite", addSite)
+		// mayRun(t, "addSite", addSite)
 	})
 }
 
@@ -133,7 +133,7 @@ func TestTenantMaaS(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "addTenant", addTenant)
-		mayRun(t, "addSite", addSite)
+		// mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 	})
 }
@@ -166,6 +166,7 @@ func TestNetCluster(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "netCluster", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
+		mayRun(t, "addIpam", updateIpam)
 		mayRun(t, "addNetCluster", addNetCluster)
 	})
 }
@@ -244,7 +245,7 @@ func TestFull(t *testing.T) {
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "addTenant", addTenant)
-		mayRun(t, "addSite", addSite)
+		// mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})

@@ -29,7 +29,12 @@ func addIpam(t *testing.T) {
 	}
 
 	for _, sub := range *subs {
-		fmt.Printf("Delete IPAM %v [%v] [%v]\n",
+		if sub.UsedBy != "{}" {
+			fmt.Printf("IPAM [%v] in uses, not deleting\n",
+				sub.Name)
+			continue
+		}
+		fmt.Printf("delete IPAM %v [%v] [%v]\n",
 			sub.Id, sub.Name, sub.Subnet)
 		err = Pcc.DeleteSubnetObj(sub.Id)
 		if err != nil {
@@ -74,10 +79,6 @@ func addIpam(t *testing.T) {
 		assert.Fatalf("Error getting subnetObjs: %v\n", err)
 		return
 	}
-	if len(*subs) != 0 {
-		assert.Fatalf("Error expecting 0 subnetObj: %v\n", len(*subs))
-		return
-	}
 }
 
 func addIpamConfig(t *testing.T) {
@@ -92,13 +93,18 @@ func addIpamConfig(t *testing.T) {
 	for _, ipam := range Env.NetIpam {
 		var sub pcc.SubnetObj
 
+		oldSub, err := Pcc.FindSubnetObj(ipam.Name)
+		if err == nil {
+			fmt.Printf("IPAM  [%v] already exists\n", oldSub.Name)
+			continue
+		}
 		sub.Name = ipam.Name
 		sub.SetSubnet(ipam.Subnet)
 		sub.PubAccess = ipam.PubAccess
 		sub.Routed = ipam.Routed
 
 		fmt.Printf("Add IPAM  [%+v]\n", sub)
-		err := Pcc.AddSubnetObj(&sub)
+		err = Pcc.AddSubnetObj(&sub)
 		if err != nil {
 			assert.Fatalf("Error adding subnetObj: %v\n", err)
 			return

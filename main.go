@@ -8,7 +8,7 @@ import pcc "github.com/platinasystems/pcc-blackbox/lib"
 
 var Env testEnv
 var Pcc *pcc.PccClient
-var Nodes = make(map[uint64]*pcc.NodeWithKubernetes)
+var Nodes = make(map[uint64]*pcc.NodeDetailed)
 var SecurityKeys = make(map[string]*pcc.SecurityKey)
 var NodebyHostIP = make(map[string]uint64) // deprecated use Env
 var dockerStats *pcc.DockerStats

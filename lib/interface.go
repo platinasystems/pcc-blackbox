@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/lib/pq"
-	avro "github.com/platinasystems/tiles/pccagent/models"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -46,8 +45,7 @@ type Interface struct {
 }
 
 type InterfaceDetail struct {
-	Interface          Interface        `json:"interface"`
-	RemoteLinksDetails []avro.Interface `json:"remoteLinksDetails"`
+	models.InterfaceDetail
 }
 
 type InterfaceRequest struct { // FIXME use the common models module
@@ -82,9 +80,12 @@ type InterfaceRequest struct { // FIXME use the common models module
 
 func (p *PccClient) GetIfacesByNodeId(nodeId uint64) (ifaces []*InterfaceDetail, err error) {
 	var node NodeDetail
+
 	endpoint := fmt.Sprintf("pccserver/node/%v", nodeId)
-	if err = p.Get(endpoint, &node); err == nil {
+	err = p.Get(endpoint, &node)
+	if err == nil {
 		ifaces = node.Interfaces
+		return
 	}
 	return
 }

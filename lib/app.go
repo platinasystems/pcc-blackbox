@@ -50,7 +50,7 @@ func (p *PccClient) IsRoleInstalled(nodeId uint64, roleId uint64) (isInstalled b
 }
 
 func (p *PccClient) AreRoleInstalled(nodeId uint64, roles []uint64) (areInstalled bool, err error) {
-	var node *NodeWithKubernetes
+	var node *NodeDetailed
 
 	if node, err = p.GetNode(nodeId); err == nil {
 		areInstalled = true
