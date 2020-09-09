@@ -295,6 +295,8 @@ github.com/klauspost/pgzip v1.2.1/go.mod h1:Ch1tH69qFZu15pkjo5kYi6mth2Zzwzt50oCQ
 github.com/klauspost/readahead v1.3.1/go.mod h1:AH9juHzNH7xqdqFHrMRSHeH2Ps+vFf+kblDqzPFiLJg=
 github.com/klauspost/reedsolomon v1.9.7/go.mod h1:+8WD025Xpby8/kG5h/HDPIFhiiuGEtZOKw+5Y4drAD8=
 github.com/klauspost/reedsolomon v1.9.9/go.mod h1:O7yFFHiQwDR6b2t63KPUpccPtNdp5ADgh1gg4fd12wo=
+github.com/kolo/xmlrpc v0.0.0-20200310150728-e0350524596b h1:DzHy0GlWeF0KAglaTMY7Q+khIFoG8toHP+wLFBVBQJc=
+github.com/kolo/xmlrpc v0.0.0-20200310150728-e0350524596b/go.mod h1:o03bZfuBwAXHetKXuInt4S7omeXUu62/A845kiycsSQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.1/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/konsorten/go-windows-terminal-sequences v1.0.3/go.mod h1:T0+1ngSBFLxvqU3pZ+m/2kptfBszLMUkC4ZK/EgS/cQ=
 github.com/kr/logfmt v0.0.0-20140226030751-b84e30acd515/go.mod h1:+0opPa2QZZtGFBFZlji/RkVcI2GknAs/DXo4wKdlNEc=
@@ -467,6 +469,8 @@ github.com/platinasystems/go-common v0.0.0-20200826003141-3cc7cd71b91a h1:eVnHIZ
 github.com/platinasystems/go-common v0.0.0-20200826003141-3cc7cd71b91a/go.mod h1:2toRHIH/9dKAqQw2UjpnZDlaLK15bT3ZJpGVBFfbrG4=
 github.com/platinasystems/go-common v0.0.0-20200831080649-fabc40c0f265 h1:MO2d9JdqwsPjYEnz8Zf6RwBBwEScsdxXcrrijybIU98=
 github.com/platinasystems/go-common v0.0.0-20200831080649-fabc40c0f265/go.mod h1:tT3TOzBn4JlCnUBTsdfXfnUWWWUOu0+N52f6M+WrVqE=
+github.com/platinasystems/go-common v0.0.0-20200904190207-e0086d380e71 h1:G2QEmAFsOClGWyuSQKhrxufNwtVQwjK2B5ngbhQgrS0=
+github.com/platinasystems/go-common v0.0.0-20200904190207-e0086d380e71/go.mod h1:ohe6UnEw8hKEYKriPQvbg5m2Zz7mCIYPIgLK3GY5uJU=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
 github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200803165142-0998ef20e0b6/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
@@ -488,6 +492,10 @@ github.com/platinasystems/pcc-models v0.0.0-20200828104051-3b167f487f96 h1:Uk9ZO
 github.com/platinasystems/pcc-models v0.0.0-20200828104051-3b167f487f96/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/pcc-models v0.0.0-20200831080336-df51419a2d9e h1:0Ry+N0bIH0g8d5s4ytJP9dnvOkwYydfOq2y66blbnpM=
 github.com/platinasystems/pcc-models v0.0.0-20200831080336-df51419a2d9e/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v0.0.0-20200901154637-1114395e8754 h1:XRtMpcVCCQNPd0OPPEXS2DbNssgl/pHSoO75sMxNEgE=
+github.com/platinasystems/pcc-models v0.0.0-20200901154637-1114395e8754/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v0.0.0-20200904190025-f1d68c51697f h1:g1tTeLFgJ4pgxrLcmg+rCz0oo8iugnCNKylAuo2e0S0=
+github.com/platinasystems/pcc-models v0.0.0-20200904190025-f1d68c51697f/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/test v1.8.3 h1:vZrl1An0N6wfWIynBW/s0LXjdQxx8uRWEoS6WX56Q9E=
 github.com/platinasystems/test v1.8.3/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770 h1:cx1XU3+/vagNdFCCEAcRE6gp5qVwFYcbJWND3Z7REBw=

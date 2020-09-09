@@ -6,6 +6,8 @@ package pcc
 
 import (
 	"fmt"
+	"strings"
+	"time"
 
 	"github.com/platinasystems/tiles/pccserver/models"
 )
@@ -107,5 +109,32 @@ func (p *PccClient) UpdateNetCluster(netClusterReq *NetworkClusterReq) (err erro
 func (p *PccClient) DelNetCluster(id uint64) (err error) {
 	endpoint := fmt.Sprintf("pccserver/network/cluster/%d", id)
 	err = p.Delete(endpoint, nil, nil)
+	return
+}
+
+func (p *PccClient) DelNetClusterWait(id uint64) (err error) {
+	endpoint := fmt.Sprintf("pccserver/network/cluster/%d", id)
+	err = p.Delete(endpoint, nil, nil)
+	if err != nil {
+		return
+	}
+	timeout := time.After(15 * time.Minute)
+	tick := time.Tick(10 * time.Second)
+	done := false
+	for !done {
+		select {
+		case <-timeout:
+			err = fmt.Errorf("Timed out waiting for network cluster")
+			return
+		case <-tick:
+			_, err = p.GetNetClusterId(id)
+			if err != nil {
+				if strings.Contains(err.Error(), "doesn't exists") {
+					err = nil
+				}
+				return
+			}
+		}
+	}
 	return
 }
