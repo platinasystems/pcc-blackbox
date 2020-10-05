@@ -91,7 +91,6 @@ func TestNodes(t *testing.T) {
 		// mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
-		mayRun(t, "addIpam", updateIpam)
 	})
 }
 
@@ -147,6 +146,7 @@ func TestAddK8s(t *testing.T) {
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
+		mayRun(t, "addIpam", updateIpam)
 		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
@@ -181,6 +181,7 @@ func TestCeph(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "configNetworkIntefaces", configNetworkInterfaces)
 		mayRun(t, "addNetCluster", addNetCluster)
+		mayRun(t, "addIpam", updateIpam)
 		mayRun(t, "testCeph", testCeph)
 	})
 }
@@ -190,6 +191,8 @@ func TestK8sApp(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "K8sApp", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "addIpam", updateIpam)
+		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "testK8sApp", testK8sApp)
 	})
 }
