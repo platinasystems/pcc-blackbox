@@ -69,7 +69,7 @@ func reimageAllBrown(t *testing.T) {
 
 		var request pcc.MaasRequest
 		request.Nodes = nodesList
-		request.Image = "centos76"
+		request.Image = "centos78"
 		request.Locale = "en-US"
 		request.Timezone = "PDT"
 		request.AdminUser = "admin"
