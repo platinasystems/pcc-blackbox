@@ -62,6 +62,21 @@ func (p *PccClient) FindNodeId(name string) (id uint64, err error) {
 	return
 }
 
+func (p *PccClient) FindNodeAddress(addr string) (id uint64, err error) {
+	var nodes *[]NodeDetailed
+
+	if nodes, err = p.GetNodes(); err == nil {
+		for _, n := range *nodes {
+			if n.Host == addr {
+				id = n.Id
+				return
+			}
+		}
+	}
+	err = fmt.Errorf("node [%v] not found", addr)
+	return
+}
+
 func (p *PccClient) GetProvisionStatus(id uint64) (status string, err error) {
 	var node *NodeDetailed
 	if node, err = p.GetNode(id); err == nil {
