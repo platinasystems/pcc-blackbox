@@ -16,6 +16,7 @@ func addNetCluster(t *testing.T) {
 
 	for _, netCluster := range Env.NetCluster {
 		netClusterId, err := Pcc.FindNetClusterId(netCluster.Name)
+		netClusterName = netCluster.Name
 		if err == nil {
 			fmt.Printf("Network cluster [%v] already exists [%v]\n",
 				netCluster.Name, netClusterId)
