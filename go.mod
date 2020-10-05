@@ -44,3 +44,5 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 )
+
+replace github.com/platinasystems/tiles => ../tiles
