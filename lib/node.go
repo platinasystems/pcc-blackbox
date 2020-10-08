@@ -117,6 +117,16 @@ func (pcc *PccClient) GetNodes() (nodes *[]NodeDetailed, err error) {
 	return
 }
 
+func (pcc *PccClient) GetNodesOptions(page int, limit int, sortBy string, sortDir string, search string) (nodes *[]NodeDetailed, err error) {
+	var n []NodeDetailed
+	endpoint := fmt.Sprintf("pccserver/node?page=%d&limit=%d&sortBy=%s&sortDir=%s&search=%s",
+		page, limit, sortBy, sortDir, search)
+	if err = pcc.Get(endpoint, &n); err == nil {
+		nodes = &n
+	}
+	return
+}
+
 func (pcc *PccClient) GetNode(id uint64) (node *NodeDetailed, err error) {
 	var n NodeDetailed
 	if err = pcc.Get(fmt.Sprintf("pccserver/node/%d", id), &n); err == nil {
