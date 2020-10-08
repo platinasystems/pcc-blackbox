@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+
 	"github.com/platinasystems/tiles/pccserver/models"
 )
 
@@ -49,9 +50,8 @@ func (pcc *PccClient) AddNodeRole(item *Role) (result Role, err error) {
 	return
 }
 
-// Add a Node Role
-func (pcc *PccClient) GetRoleTemplates(item *Role) (result Role, err error) {
-	err = pcc.Post("pccserver/templates", item, &result)
+func (pcc *PccClient) GetRoleTemplates() (templates []Template, err error) {
+	err = pcc.Get("pccserver/templates", &templates)
 	return
 }
 
