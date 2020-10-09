@@ -394,3 +394,46 @@ func (pcc *PccClient) AddRolesToNodes(nodes []uint64, roles []uint64) (installed
 	wg.Wait()
 	return
 }
+
+// node group
+
+type NodeGroup struct {
+	models.Cluster
+}
+
+type NodeGroupRequest struct {
+	Id          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	CreatedAt   uint64 `json:"createAt"`
+	ModifiedAt  uint64 `json:"modifiedAt"`
+	Owner       uint64 `json:"owner"`
+}
+
+func (pcc *PccClient) GetNodeGroups() (groups []NodeGroup, err error) {
+	err = pcc.Get("pccserver/cluster", &groups)
+	return
+}
+
+func (pcc *PccClient) GetNodeGroupId(id uint64) (group NodeGroup, err error) {
+	endpoint := fmt.Sprintf("pccserver/cluster/%v", id)
+	err = pcc.Get(endpoint, &group)
+	return
+}
+
+func (pcc *PccClient) AddNodeGroup(req *NodeGroupRequest) (err error) {
+	err = pcc.Post("pccserver/cluster/add", req, req)
+	return
+}
+
+func (pcc *PccClient) UpdateNodeGroup(group *NodeGroup) (err error) {
+	endpoint := fmt.Sprintf("pccserver/cluster/%v", group.ID)
+	err = pcc.Put(endpoint, group, group)
+	return
+}
+
+func (pcc *PccClient) DeleteNodeGroup(id uint64) (err error) {
+	endpoint := fmt.Sprintf("pccserver/cluster/%v", id)
+	err = pcc.Delete(endpoint, nil, nil)
+	return
+}
