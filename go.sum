@@ -508,6 +508,8 @@ github.com/platinasystems/tiles v1.5.0 h1:leOKqnap9t3bDZoWjZaQpqStlMf7eCNkyrdyJY
 github.com/platinasystems/tiles v1.5.0/go.mod h1:oxuA3DwxeRJ5J8c5zT5vVb3rbrAEa+tTDG+JQVjD8w8=
 github.com/platinasystems/tiles v1.6.0-rc1 h1:iAKKpXork9JRhATuIy5ykAihR0h7uP13cXQnATXlqqc=
 github.com/platinasystems/tiles v1.6.0-rc1/go.mod h1:up4/lGT3FTyBkUPCMJ3fVBiCxHObc10t4nF78IBnU+o=
+github.com/platinasystems/tiles v1.6.0 h1:DDkLnFgKU4AiuvNFhC8oj9pDJijKK0RZqGBYHdpq3lg=
+github.com/platinasystems/tiles v1.6.0/go.mod h1:up4/lGT3FTyBkUPCMJ3fVBiCxHObc10t4nF78IBnU+o=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/posener/complete v1.1.1/go.mod h1:em0nMJCgc9GFtwrmVmEMR/ZL6WyhyjMBndrE9hABlRI=
