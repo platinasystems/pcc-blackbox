@@ -137,7 +137,7 @@ func deleteNetCluster(t *testing.T) {
 		return
 	}
 
-	err = Pcc.DelNetClusterWait(netClusterId)
+	err = Pcc.DelNetClusterWait(netClusterId, false)
 	if err != nil {
 		assert.Fatalf("DelNetCluster failed: %v\n", err)
 		return
@@ -158,14 +158,14 @@ func delAllNetsCluster(t *testing.T) {
 
 	for _, nC := range netCluster {
 		fmt.Printf("delete net cluster [%v]\n", nC.Id)
-		err = Pcc.DelNetCluster(nC.Id)
+		err = Pcc.DelNetCluster(nC.Id, false)
 		if err != nil {
 			assert.Fatalf("DelNetCluster %v failed: %v\n",
 				nC.Id, err)
 			return
 		}
 
-		err = Pcc.DelNetClusterWait(nC.Id)
+		err = Pcc.DelNetClusterWait(nC.Id, false)
 		if err != nil {
 			assert.Fatalf("DelNetCluster %v failed: %v\n",
 				nC.Id, err)

@@ -94,8 +94,6 @@ func (p *PccClient) FindNetClusterId(name string) (id uint64, err error) {
 }
 
 func (p *PccClient) AddNetCluster(netClusterReq *NetworkClusterReq) (err error) {
-	// This call to POST blocks.  Might want a non-blocking version
-	// and use the GET to check progress/error/timeout
 	err = p.Post("pccserver/network/cluster", netClusterReq, nil)
 	return
 }
@@ -106,20 +104,20 @@ func (p *PccClient) UpdateNetCluster(netClusterReq *NetworkClusterReq) (err erro
 	return
 }
 
-func (p *PccClient) DelNetCluster(id uint64) (err error) {
+func (p *PccClient) DelNetCluster(id uint64, force bool) (err error) {
+	type delNetCluster struct {
+		forceRemove bool
+	}
 	endpoint := fmt.Sprintf("pccserver/network/cluster/%d", id)
-	err = p.Delete(endpoint, nil, nil)
+	req := delNetCluster{forceRemove: force}
+	err = p.Delete(endpoint, &req, nil)
 	return
 }
 
-func (p *PccClient) DelNetClusterWait(id uint64) (err error) {
-	endpoint := fmt.Sprintf("pccserver/network/cluster/%d", id)
-	err = p.Delete(endpoint, nil, nil)
-	if err != nil {
-		return
-	}
-	timeout := time.After(15 * time.Minute)
-	tick := time.Tick(10 * time.Second)
+func (p *PccClient) DelNetClusterWait(id uint64, force bool) (err error) {
+	p.DelNetCluster(id, force)
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(1 * time.Second)
 	done := false
 	for !done {
 		select {
@@ -129,7 +127,8 @@ func (p *PccClient) DelNetClusterWait(id uint64) (err error) {
 		case <-tick:
 			_, err = p.GetNetClusterId(id)
 			if err != nil {
-				if strings.Contains(err.Error(), "doesn't exists") {
+				if strings.Contains(err.Error(),
+					"record not found") {
 					err = nil
 				}
 				return
