@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -64,6 +65,8 @@ func configNetworkInterfaces(t *testing.T) {
 
 func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface netInterface) (ifaceRequest pcc.InterfaceRequest) {
 
+	var digitCheck = regexp.MustCompile(`^[0-9]+$`)
+
 	ifaceRequest.NodeId = nodeId
 	ifaceRequest.InterfaceId = iface.Interface.Id
 	ifaceRequest.Name = iface.Interface.Name
@@ -77,7 +80,10 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_ON
 	case "false", "off":
 		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_OFF
-		ifaceRequest.Speed = json.Number(configIface.Speed)
+
+		if digitCheck.MatchString(configIface.Speed) {
+			ifaceRequest.Speed = json.Number(configIface.Speed)
+		}
 	default:
 		fmt.Printf("Error: invalid autoneg [%v] using ON\n",
 			configIface.Autoneg)
