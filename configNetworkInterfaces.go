@@ -73,7 +73,9 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	ifaceRequest.Ipv4Addresses = configIface.Cidrs
 	ifaceRequest.MacAddress = configIface.MacAddr
 	ifaceRequest.ManagedByPcc = configIface.ManagedByPcc
-	ifaceRequest.Gateway = configIface.Gateway
+	if configIface.IsManagement {
+		ifaceRequest.Gateway = configIface.Gateway
+	}
 	ifaceRequest.Autoneg = configIface.Autoneg
 	switch configIface.Autoneg {
 	case "true", "on", "":
