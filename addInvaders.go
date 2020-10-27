@@ -67,7 +67,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 				waitInstallation(AGENT_TIMEOUT*time.Duration(nodeNumbers), AGENT_NOTIFICATION, node.Id, &eventsFrom)
 				waitInstallation(COLLECTOR_TIMEOUT*time.Duration(nodeNumbers), COLLECTOR_NOTIFICATION, node.Id, &eventsFrom)
 				start := time.Now()
-				timeout := time.Duration(180*len(nodes)) * time.Second
+				timeout := time.Duration(300*len(nodes)) * time.Second
 				var (
 					connection         string
 					previousConnection string
