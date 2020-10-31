@@ -471,6 +471,15 @@ func verifyNetworkInterfaces(t *testing.T) {
 					fmt.Printf("Node %v interfaces "+
 						"updated\n", id)
 					delete(nodesToCheck, id)
+				} else {
+					// work around for PCC-3012
+					fmt.Printf("Pcc.ApplyIface(%d)\n", id)
+					err := Pcc.ApplyIface(id)
+					if err != nil {
+						assert.Fatalf("Interface "+
+							"apply failed: %v\n",
+							err)
+					}
 				}
 			}
 			if len(nodesToCheck) == 0 {
