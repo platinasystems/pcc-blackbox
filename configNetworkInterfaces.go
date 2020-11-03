@@ -17,6 +17,9 @@ var nodeIntfMap = make(map[uint64][]int64)
 func configServerInterfaces(t *testing.T) {
 	t.Run("configNetworkInterfaces", configNetworkInterfaces)
 	t.Run("verifyNetworkInterfaces", verifyNetworkInterfaces)
+	if t.Failed() {
+		return
+	}
 	t.Run("verifyNetworkConfig", verifyNetworkConfig)
 	t.Run("verifyNetworkUp", verifyNetworkUp)
 }
