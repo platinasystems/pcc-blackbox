@@ -119,8 +119,10 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				done = true
 			case pcc.NETWORK_DEPLOY_STATUS_FAILED:
 				done = true
+				assert.Fatal("Network deploy failed\n")
 			case pcc.NETWORK_DEPLOY_STATUS_UPDATE_FAILED:
 				done = true
+				assert.Fatal("Network deploy update failed\n")
 			default:
 			}
 		}
