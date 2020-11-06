@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/platinasystems/tiles/pccserver/executor"
-	"strings"
 	"testing"
 	"time"
 
@@ -232,20 +231,28 @@ func deleteAllK8sCluster(t *testing.T) {
 				assert.Fatalf("Time out deleting Kubernetes")
 				return
 			case <-tick:
-				cluster, err := Pcc.GetKubernetesId(c.ID)
-				if err != nil && strings.Contains(err.Error(),
-					"doesn't exist") {
-					fmt.Printf("K8s delete OK\n")
-					return
-				}
+				var cluster pcc.K8sCluster
+				allClusters, err := Pcc.GetKubernetes()
 				if err != nil {
 					assert.Fatalf("get cluster failed: %v",
 						err)
 					return
 				}
+				found := false
+				for _, cluster = range allClusters {
+					if cluster.ID == c.ID {
+						found = true
+						break
+					}
+				}
+				if !found {
+					fmt.Printf("K8s delete OK\n")
+					return
+				}
 				var percent int8
-				if clusterTask, ok := (cluster.Task).(*executor.Task); ok {
-					percent = clusterTask.Progress
+				task, ok := (cluster.Task).(*executor.Task)
+				if ok {
+					percent = task.Progress
 				}
 				if percent != last_percent {
 					fmt.Printf("delete status: %v  %v%%\n",
