@@ -26,6 +26,23 @@ func addNetCluster(t *testing.T) {
 	}
 }
 
+func deleteNetCluster(t *testing.T) {
+	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
+
+	for _, netCluster := range Env.NetCluster {
+		_, err := Pcc.FindNetClusterId(netCluster.Name)
+		if err != nil {
+			assert.Fatalf("Network cluster [%v] not found: %v\n",
+				netCluster.Name, err)
+			continue
+		}
+		netClusterName = netCluster.Name
+		break
+	}
+	deleteNetClusterInternal(t)
+}
+
 func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	assert := test.Assert{t}
 
@@ -129,7 +146,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	}
 }
 
-func deleteNetCluster(t *testing.T) {
+func deleteNetClusterInternal(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
