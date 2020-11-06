@@ -119,14 +119,22 @@ func validateK8sCluster(t *testing.T) {
 
 			switch status {
 			case pcc.K8S_DEPLOY_STATUS_PROGRESS:
+				fallthrough
+			case pcc.K8S_DEPLOY_STATUS_COMPLETED:
+				// When adding a new k8s cluster the deploy
+				// status goes to this state when complete.
+				// However on update k8s cluster it's
+				// already at this state and only the percent
+				// changes.
 				if percent != last_percent {
 					fmt.Printf("Cluster %v = %v  %v%%\n",
 						id, status, percent)
 					last_percent = percent
 				}
-			case pcc.K8S_DEPLOY_STATUS_COMPLETED:
-				fmt.Println("Kubernetes cluster installed")
-				done = true
+				if percent == 100 {
+					fmt.Println("Kubernetes cluster done")
+					done = true
+				}
 			case pcc.K8S_DEPLOY_STATUS_FAILED:
 				assert.Fatalf("Kubernetes cluster install " +
 					"failed")
