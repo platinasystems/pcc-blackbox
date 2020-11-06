@@ -15,6 +15,9 @@ var k8sname string = "k8stest"
 func createK8sCluster(t *testing.T) {
 	t.Run("CreateK8sCluster", createK8s_3nodes)
 	t.Run("ValidateK8sCluster", validateK8sCluster)
+	if t.Failed() {
+		return
+	}
 	t.Run("AddNodeK8sCluster", addNodeK8sCluster)
 	t.Run("ValidateK8sCluster", validateK8sCluster)
 }
