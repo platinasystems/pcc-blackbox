@@ -16,7 +16,7 @@ type MaasRequest struct {
 
 func (p *PccClient) MaasDeploy(maasReq MaasRequest) (err error) {
 	// This POST is syncronous
-	var timeout time.Duration = 3 * time.Minute
+	var timeout time.Duration = 6 * time.Minute
 
 	err = p.Post("maas/deployments", &maasReq, nil, timeout)
 	return
