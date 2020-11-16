@@ -68,7 +68,18 @@ type netCluster struct {
 	ControlCIDR string
 	DataCIDR    string
 	IgwPolicy   string
-	Nodes       []string
+	Nodes       []netNode
+}
+
+type netNode struct {
+	IpAddr       string
+	LocalAs      string
+	BgpNeighbors []bgpPeer
+}
+
+type bgpPeer struct {
+	NeighborIp string
+	RemoteAs   string
 }
 
 type netIpam struct {

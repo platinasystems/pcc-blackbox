@@ -22,14 +22,25 @@ const (
 )
 
 type NetworkClusterReq struct {
-	Id                 uint64   `json:"id"`
-	Name               string   `json:"name"`
-	ControlCIDRId      uint64   `json:"controlCIDRId"`
-	DataCIDRId         uint64   `json:"dataCIDRId"`
-	DeployStatus       string   `json:"deploy_status"`
-	IgwPolicy          string   `json:"igwPolicy"`
-	ProgressPercentage int8     `json:"progressPercentage"`
-	Nodes              []NodeId `json:"nodes"`
+	Id                 uint64    `json:"id"`
+	Name               string    `json:"name"`
+	ControlCIDRId      uint64    `json:"controlCIDRId"`
+	DataCIDRId         uint64    `json:"dataCIDRId"`
+	DeployStatus       string    `json:"deploy_status"`
+	IgwPolicy          string    `json:"igwPolicy"`
+	ProgressPercentage int8      `json:"progressPercentage"`
+	Nodes              []NetNode `json:"nodes"`
+}
+
+type NetNode struct {
+	Id           uint64    `json:"id"`
+	LocalAs      uint16    `json:"local_as"`
+	BgpNeighbors []BgpPeer `json:"bgp_neighbors"`
+}
+
+type BgpPeer struct {
+	NeighborIp string `json:"neighbor_ip"`
+	RemoteAs   uint16 `json:"remote_as"`
 }
 
 type NodeId struct {

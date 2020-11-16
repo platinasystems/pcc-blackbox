@@ -28,10 +28,10 @@ require (
 	github.com/nats-io/go-nats-streaming v0.4.4 // indirect
 	github.com/nats-io/nats-server v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20200929094200-8e11dc1ece02
-	github.com/platinasystems/pcc-models v0.0.0-20200911122145-72af6f979917
-	github.com/platinasystems/test v1.8.3
-	github.com/platinasystems/tiles v1.6.0
+	github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952
+	github.com/platinasystems/pcc-models v0.0.0-20201113133120-760a5e7f3530
+	github.com/platinasystems/test v1.8.6
+	github.com/platinasystems/tiles v1.3.1-rc1.0.20201116194853-ff637eb02b78
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect

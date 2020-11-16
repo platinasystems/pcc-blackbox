@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"regexp"
+	"strconv"
 	"testing"
 	"time"
 
@@ -92,9 +94,37 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	}
 	reqCluster.DataCIDRId = dataCIDRObj.Id
 
-	nodes := make([]pcc.NodeId, len(netCluster.Nodes))
-	for i, ip := range netCluster.Nodes {
-		nodes[i].Id = NodebyHostIP[ip]
+	var digitCheck = regexp.MustCompile(`^[0-9]+$`)
+
+	nodes := make([]pcc.NetNode, len(netCluster.Nodes))
+	for i, n := range netCluster.Nodes {
+		nodes[i].Id = NodebyHostIP[n.IpAddr]
+		if digitCheck.MatchString(n.LocalAs) {
+			val, err := strconv.Atoi(n.LocalAs)
+			if err == nil {
+				nodes[i].LocalAs = uint16(val)
+			}
+		}
+		peers := len(n.BgpNeighbors)
+		if peers > 0 {
+			nodes[i].BgpNeighbors = make([]pcc.BgpPeer, peers)
+			for j, p := range n.BgpNeighbors {
+				nodes[i].BgpNeighbors[j].NeighborIp =
+					p.NeighborIp
+				if !digitCheck.MatchString(p.RemoteAs) {
+					fmt.Printf("Invalid RemoteAs [%v]\n",
+						p.RemoteAs)
+					continue
+				}
+				val, err := strconv.Atoi(p.RemoteAs)
+				if err != nil {
+					fmt.Printf("Atoi convert failed: %v\n",
+						err)
+					continue
+				}
+				nodes[i].BgpNeighbors[j].RemoteAs = uint16(val)
+			}
+		}
 	}
 	reqCluster.Nodes = nodes
 
@@ -104,7 +134,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		return
 	}
 
-	time.Sleep(5 * time.Second)
+	time.Sleep(1 * time.Second)
 	netClusterObj, err := Pcc.FindNetClusterName(reqCluster.Name)
 	if err != nil {
 		assert.Fatalf("Network cluster [%v]: %v\n",

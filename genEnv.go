@@ -33,6 +33,9 @@ func addTestTestNode(testNode *pcc.NodeDetailed) {
 		if intf.Interface.IsManagement || intf.Interface.ManagedByPcc {
 			var net netInterface
 
+			if intf.Interface.Name == "control0" {
+				continue
+			}
 			net.Name = intf.Interface.Name
 			net.Gateway = intf.Interface.Gateway
 			switch intf.Interface.Autoneg {
@@ -100,8 +103,10 @@ func addTestNetCluster() {
 		return
 	}
 	for _, net := range netClusters {
-		var cluster netCluster
-		var nodes []string
+		var (
+			cluster netCluster
+			nodes   []netNode
+		)
 
 		cluster.Name = net.Name
 		cluster.IgwPolicy = net.IgwPolicy
@@ -110,7 +115,29 @@ func addTestNetCluster() {
 		dataCidr, _ := Pcc.GetSubnetObjId(net.DataCIDRId)
 		cluster.DataCIDR = dataCidr.Name
 		for _, node := range net.Nodes {
-			nodes = append(nodes, node.MgmtIPv4Address)
+			var n netNode
+			tmpNode, err := Pcc.GetNode(node.NodeId)
+			if err != nil {
+				fmt.Printf("GetNode failed %v: %v\n",
+					node.NodeId, err)
+				continue
+			}
+			n.IpAddr = tmpNode.Host
+			if node.BgpLocalAsn != 0 {
+				n.LocalAs = fmt.Sprint(node.BgpLocalAsn)
+			}
+			var neighbors []bgpPeer
+			for _, peer := range node.BgpNeighbors {
+				p := bgpPeer{
+					NeighborIp: peer.NeighborIP,
+					RemoteAs:   fmt.Sprint(peer.RemoteAsn),
+				}
+				neighbors = append(neighbors, p)
+			}
+			if len(neighbors) > 0 {
+				n.BgpNeighbors = neighbors
+			}
+			nodes = append(nodes, n)
 		}
 		cluster.Nodes = nodes
 		outEnv.NetCluster = append(outEnv.NetCluster, cluster)

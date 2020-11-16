@@ -255,5 +255,49 @@
                "deleteK8sStorageClass": true,
                "deleteK8sCluster": false
         }
-   }
+   },
+       "NetIpam": [
+        {
+            "Name": "control-cidr",
+            "Subnet": "10.0.201.192/26",
+            "PubAccess": true,
+            "Routed": true
+        },
+        {
+            "Name": "data-cidr",
+            "Subnet": "7.0.0.0/24",
+            "PubAccess": false,
+            "Routed": false
+        }
+    ],
+    "NetCluster": [
+        {
+            "Name": "my-net",
+            "ControlCIDR": "control-cidr",
+            "DataCIDR": "data-cidr",
+            "IgwPolicy": "upstream",
+            "Nodes": [
+                {
+                    "IpAddr": "172.17.2.72",
+                    "LocalAs": "64733",
+                    "BgpNeighbors": [
+                        {
+                            "NeighborIp": "10.0.6.6",
+                            "RemoteAs": "64608"
+                        }
+                    ]
+                },
+                {
+                    "IpAddr": "172.17.2.71",
+                    "LocalAs": "64733",
+                    "BgpNeighbors": [
+                        {
+                            "NeighborIp": "10.0.6.36",
+                            "RemoteAs": "64608"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
 }

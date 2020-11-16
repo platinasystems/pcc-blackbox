@@ -76,6 +76,7 @@ github.com/coreos/bbolt v1.3.3/go.mod h1:iRUV2dpdMOn7Bo10OQBFzIJO9kkE559Wcmn+qkE
 github.com/coreos/etcd v3.3.10+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.12+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
 github.com/coreos/etcd v3.3.13+incompatible/go.mod h1:uF7uidLiAD3TWHmW31ZFd/JWoc32PjwdhPthX9715RE=
+github.com/coreos/go-iptables v0.4.5/go.mod h1:/mVI274lEDI2ns62jHCDnCyBF9Iwsmekav8Dbxlm1MU=
 github.com/coreos/go-semver v0.2.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/coreos/go-semver v0.3.0/go.mod h1:nnelYz7RCh+5ahJtPPxZlU+153eP4D4r3EedlOD2RNk=
 github.com/coreos/go-systemd v0.0.0-20190321100706-95778dfbb74e/go.mod h1:F5haX7vjVVG0kc13fIWeqUViNPyEJxv/OmvnBo0Yme4=
@@ -473,6 +474,8 @@ github.com/platinasystems/go-common v0.0.0-20200904190207-e0086d380e71 h1:G2QEmA
 github.com/platinasystems/go-common v0.0.0-20200904190207-e0086d380e71/go.mod h1:ohe6UnEw8hKEYKriPQvbg5m2Zz7mCIYPIgLK3GY5uJU=
 github.com/platinasystems/go-common v0.0.0-20200929094200-8e11dc1ece02 h1:oJSowu/GNDhjBTAEjpdxT0qOF1MP42AAGboaTO0OVLc=
 github.com/platinasystems/go-common v0.0.0-20200929094200-8e11dc1ece02/go.mod h1:pA66lymOAkTNQ8/mFyK6K8a0jti45hE8BkYX1sr/nQA=
+github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952 h1:Se8RadXaLqnmRhXu8zeAgpG+CCPoh1R6bcVoLkQEK/k=
+github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952/go.mod h1:pA66lymOAkTNQ8/mFyK6K8a0jti45hE8BkYX1sr/nQA=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
 github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200803165142-0998ef20e0b6/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
@@ -500,10 +503,16 @@ github.com/platinasystems/pcc-models v0.0.0-20200904190025-f1d68c51697f h1:g1tTe
 github.com/platinasystems/pcc-models v0.0.0-20200904190025-f1d68c51697f/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/pcc-models v0.0.0-20200911122145-72af6f979917 h1:8HIZUBqJE7oB8NGz2aBj4TETVb9ptN1P01xg50eLN+c=
 github.com/platinasystems/pcc-models v0.0.0-20200911122145-72af6f979917/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v0.0.0-20201113133120-760a5e7f3530 h1:QJSJNYWQXrBt+U74HxuZgWL7Ey4dQAqSo0fER5xuP6g=
+github.com/platinasystems/pcc-models v0.0.0-20201113133120-760a5e7f3530/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/test v1.8.3 h1:vZrl1An0N6wfWIynBW/s0LXjdQxx8uRWEoS6WX56Q9E=
 github.com/platinasystems/test v1.8.3/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
+github.com/platinasystems/test v1.8.6 h1:HdjebjrTVJfa6+EGdwxKqEoOXD/KOtumqEtEkB2uIXM=
+github.com/platinasystems/test v1.8.6/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770 h1:cx1XU3+/vagNdFCCEAcRE6gp5qVwFYcbJWND3Z7REBw=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20200804164150-8b25554c2770/go.mod h1:YApLZSoc5mFuPaBPx1Yzg0GwHwVBZSdJ80ReVWTvevE=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201116194853-ff637eb02b78 h1:lhTg9/QeW9v7GE/uWoDP/+pvVkIhWD6s+G6C9IX1U1A=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201116194853-ff637eb02b78/go.mod h1:L/w9tTS6hZP5N95P0j5HigoO7CS6rqpyKbp7JZK7Jp8=
 github.com/platinasystems/tiles v1.5.0 h1:leOKqnap9t3bDZoWjZaQpqStlMf7eCNkyrdyJY6qvDE=
 github.com/platinasystems/tiles v1.5.0/go.mod h1:oxuA3DwxeRJ5J8c5zT5vVb3rbrAEa+tTDG+JQVjD8w8=
 github.com/platinasystems/tiles v1.6.0-rc1 h1:iAKKpXork9JRhATuIy5ykAihR0h7uP13cXQnATXlqqc=
