@@ -13,13 +13,15 @@ import (
 )
 
 const (
-	IGW_UPSTREAM = "upstream"
-	IGW_DEFAULT  = "default"
+	IGW_UPSTREAM = models.IgwUpstream
+	IGW_DEFAULT  = models.IgwDefault
 
 	NETWORK_DEPLOY_STATUS_COMPLETED     = "completed"
 	NETWORK_DEPLOY_STATUS_FAILED        = "failed"
 	NETWORK_DEPLOY_STATUS_UPDATE_FAILED = "update_failed"
 )
+
+type AsnType models.AsnType
 
 type NetworkClusterReq struct {
 	Id                 uint64    `json:"id"`
@@ -34,13 +36,13 @@ type NetworkClusterReq struct {
 
 type NetNode struct {
 	Id           uint64    `json:"id"`
-	LocalAs      uint16    `json:"local_as"`
+	LocalAs      AsnType   `json:"local_as"`
 	BgpNeighbors []BgpPeer `json:"bgp_neighbors"`
 }
 
 type BgpPeer struct {
-	NeighborIp string `json:"neighbor_ip"`
-	RemoteAs   uint16 `json:"remote_as"`
+	NeighborIp string  `json:"neighbor_ip"`
+	RemoteAs   AsnType `json:"remote_as"`
 }
 
 type NodeId struct {
@@ -53,6 +55,11 @@ type NetworkClusterUI struct {
 
 type NetworkClusterNode struct {
 	models.NetworkClusterNode
+}
+
+func SetAsn(newAsn uint64) (asn2 AsnType) {
+	asn2 = AsnType(newAsn)
+	return
 }
 
 func (p *PccClient) GetNetCluster() (netCluster []*NetworkClusterUI, err error) {

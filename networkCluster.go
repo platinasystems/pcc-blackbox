@@ -1,9 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
-	"strconv"
 	"testing"
 	"time"
 
@@ -100,10 +100,13 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	for i, n := range netCluster.Nodes {
 		nodes[i].Id = NodebyHostIP[n.IpAddr]
 		if digitCheck.MatchString(n.LocalAs) {
-			val, err := strconv.Atoi(n.LocalAs)
-			if err == nil {
-				nodes[i].LocalAs = uint16(val)
+			val, err := json.Number(n.LocalAs).Int64()
+			if err != nil {
+				fmt.Printf("Atoi convert failed: %v\n", err)
+				continue
 			}
+			val2 := uint64(val)
+			nodes[i].LocalAs = pcc.SetAsn(val2)
 		}
 		peers := len(n.BgpNeighbors)
 		if peers > 0 {
@@ -116,13 +119,14 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 						p.RemoteAs)
 					continue
 				}
-				val, err := strconv.Atoi(p.RemoteAs)
+				val, err := json.Number(p.RemoteAs).Int64()
 				if err != nil {
 					fmt.Printf("Atoi convert failed: %v\n",
 						err)
 					continue
 				}
-				nodes[i].BgpNeighbors[j].RemoteAs = uint16(val)
+				val2 := uint64(val)
+				nodes[i].BgpNeighbors[j].RemoteAs = pcc.SetAsn(val2)
 			}
 		}
 	}
