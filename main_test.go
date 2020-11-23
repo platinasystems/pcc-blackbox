@@ -43,6 +43,12 @@ func TestMain(m *testing.M) {
 	}
 
 	if err = json.Unmarshal(data, &Env); err != nil {
+		if jsonErr, ok := err.(*json.SyntaxError); ok {
+			// emacs users can use M-x goto-char <offset>
+			part := data[jsonErr.Offset-10 : jsonErr.Offset+10]
+			err = fmt.Errorf("%w ~ error near '%s' (offset %d)",
+				err, part, jsonErr.Offset)
+		}
 		panic(fmt.Errorf("error unmarshalling %v: %v\n",
 			envFile, err.Error()))
 	}
