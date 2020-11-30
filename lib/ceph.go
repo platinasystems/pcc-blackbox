@@ -2,6 +2,8 @@ package pcc
 
 import (
 	"fmt"
+	ceph3 "github.com/platinasystems/pcc-models/ceph"
+	ceph2 "github.com/platinasystems/tiles/pccserver/controllers/ceph"
 	"strings"
 	"time"
 
@@ -240,6 +242,11 @@ func (p *PccClient) GetCephPool(name string, cephClusterId uint64) (cephPool *mo
 	return
 }
 
+func (p *PccClient) GetCephPool2(poolId uint64) (cephPool models.CephPool, err error) {
+	err = p.Get(fmt.Sprintf("pccserver/storage/ceph/pool/%d", poolId), &cephPool)
+	return
+}
+
 func (p *PccClient) GetAllCephPools(id uint64) (cephPools []*models.CephPool, err error) {
 	if id != 0 {
 		endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster/%v/pools", id)
@@ -448,4 +455,30 @@ func (config *CephConfiguration) getCephVerifier(action string, name string) (v 
 		}
 	}
 	return
+}
+
+////
+// Cache
+////
+func (p *PccClient) CreateCephCache(request *ceph2.CacheRequest) (*ceph3.CephCacheTier, error) {
+	var r ceph3.CephCacheTier
+	err := p.Post("pccserver/storage/ceph/pool/caches", request, &r)
+	return &r, err
+}
+
+func (p *PccClient) DeleteCephCache(id uint64) (err error) {
+	err = p.Delete(fmt.Sprintf("pccserver/storage/ceph/pool/caches/%d", id), nil, nil)
+	return
+}
+
+func (p *PccClient) GetCephCache(id uint64) (*ceph3.CephCacheTier, error) {
+	var r ceph3.CephCacheTier
+	err := p.Get(fmt.Sprintf("pccserver/storage/ceph/pool/caches/%d", id), &r)
+	return &r, err
+}
+
+func (p *PccClient) GetCephCaches() ([]*ceph3.CephCacheTier, error) {
+	r := make([]*ceph3.CephCacheTier, 0)
+	err := p.Get("pccserver/storage/ceph/pool/caches", &r)
+	return r, err
 }

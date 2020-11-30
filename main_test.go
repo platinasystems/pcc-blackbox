@@ -192,6 +192,14 @@ func TestCeph(t *testing.T) {
 	})
 }
 
+func TestCephCache(t *testing.T) {
+	mayRun(t, "ceph-cache", func(t *testing.T) {
+		mayRun(t, "testCephCacheSetup", testCephCacheSetup)
+		mayRun(t, "testCephCacheAdd", testCephCacheAdd)
+		mayRun(t, "testCephCacheDelete", testCephCacheDelete)
+	})
+}
+
 func TestK8sApp(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
