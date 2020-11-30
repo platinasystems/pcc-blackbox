@@ -18,6 +18,9 @@ import (
 type Config struct {
 	count   int
 	verbose bool
+	search  string
+	page    int
+	limit   int
 }
 
 type actionFunc func()
@@ -33,6 +36,7 @@ const (
 	ADDNODE     string = "addNode"
 	DELNODE     string = "delNode"
 	NODESUMMARY string = "nodeSummary"
+	GETEVENT    string = "getEvent"
 
 	VMTAG string = "vm"
 )
@@ -122,6 +126,14 @@ func main() {
 		nodeSummaryCmd := flag.NewFlagSet(NODESUMMARY, flag.ExitOnError)
 		nodeSummaryCmd.BoolVar(&config.verbose, "v", false, "verbose")
 		nodeSummaryCmd.Parse(os.Args[2:])
+	case GETEVENT:
+		action = getEventAction
+		getEventCmd := flag.NewFlagSet(NODESUMMARY, flag.ExitOnError)
+		getEventCmd.BoolVar(&config.verbose, "v", false, "verbose")
+		getEventCmd.StringVar(&config.search, "s", "", "search")
+		getEventCmd.IntVar(&config.page, "p", 0, "page")
+		getEventCmd.IntVar(&config.limit, "l", 50, "limit")
+		getEventCmd.Parse(os.Args[2:])
 	default:
 		panic("no action\n")
 	}

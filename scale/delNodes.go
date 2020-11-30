@@ -67,7 +67,7 @@ func waitDelNodes() {
 					nodes[i] = n
 					continue
 				}
-				fmt.Printf("err [%v]\n", err)
+				fmt.Printf("GetNode err [%v]\n", err)
 			}
 			done = false
 			if config.verbose {
