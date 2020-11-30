@@ -40,3 +40,37 @@ GetNodesOptions     13 = 4.274975089s
 
 Total elapsed          = 6.506643515s
 ```
+
+Get Events (default page=0, limit=50, search="")
+```
+./scale$ ./scale getEvent -l 5
+5 events found
+1   test1vm4        node.avail:info      Node availability: node is back online             11/20 21:57:00 PST
+2   test1vm4        system:info          [AGENT][COLLECTOR] have been installed             11/20 21:57:00 PST
+3   test2vm10       node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:57:00 PST
+4   test2vm10       system:info          [AGENT][COLLECTOR] have been installed             11/20 21:57:00 PST
+5   test2vm6        system:info          [AGENT][COLLECTOR] have been installed             11/20 21:57:00 PST
+elapsed 641.854321ms
+```
+```
+stig@invader28:~/go/src/github.com/platinasystems/pcc-blackbox6/scale$ ./scale getEvent -l 5 -s "level~warn"
+5 events found
+1   test1vm2        node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:58:00 PST
+2   test2vm10       node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:57:00 PST
+3   test2vm9        node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:57:00 PST
+4   test1vm7        node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:56:00 PST
+5   test1vm10       node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:56:00 PST
+
+elapsed 1.051782232s
+```
+```
+./scale getEvent -l 5 -s "targetName~test1vm1"
+5 events found
+1   test1vm1        system:info          [AGENT][COLLECTOR] have been installed             11/20 21:54:00 PST
+2   test1vm1        node.avail:warn      Node availability: no message received from node for 60 seconds 11/20 21:50:00 PST
+3   test1vm1        system:info          [AGENT][COLLECTOR] have been installed             11/20 21:50:00 PST
+4   test1vm1        node.avail:info      Node availability: node is back online             11/20 21:49:00 PST
+5   test1vm1        system:info          [AGENT][COLLECTOR] have been installed             11/20 21:49:00 PST
+
+elapsed 690.275539ms
+```
