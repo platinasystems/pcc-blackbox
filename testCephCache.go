@@ -21,7 +21,7 @@ func testCephCacheSetup(t *testing.T) {
 	}
 }
 
-func addCephCache(t *testing.T, cacheMode string) *ceph3.CephCacheTier {
+func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheTier {
 	var (
 		clusters []*models.CephCluster
 		pools    []*models.CephPool
@@ -42,7 +42,7 @@ func addCephCache(t *testing.T, cacheMode string) *ceph3.CephCacheTier {
 
 			pool := pools[0]
 
-			fmt.Printf("\nCEPH CACHE: Selected the pool %s", pool.Name)
+			fmt.Printf("\nCEPH CACHE: Selected the pool [%s]", pool.Name)
 			request := ceph.CacheRequest{}
 			request.StoragePoolID = pool.Id
 			request.Size = pool.Size
@@ -52,18 +52,19 @@ func addCephCache(t *testing.T, cacheMode string) *ceph3.CephCacheTier {
 				request.Mode = &cacheMode
 			}
 
-			request.Name = fmt.Sprintf("blackbox-%s-%d", pool.Name, time.Now().UnixNano())
+			poolName := fmt.Sprintf("%s-%s", name, pool.Name)
+			request.Name = poolName
 			if _, err := Pcc.CreateCephCache(&request); err != nil {
 				t.Fatal(err)
 			}
 
-			for { // TODO sync on notification
-				fmt.Printf("\nWait for %s creation...", request.Name)
+			for limit := 1; limit <= 15; limit++ { // TODO sync on notification
+				fmt.Printf("\nWait for %s creation...", poolName)
 				time.Sleep(time.Duration(10) * time.Second)
 				if caches, err := Pcc.GetCephCaches(); err == nil {
 					for i := range caches {
-						if pool, err := Pcc.GetCephPool2(caches[i].StoragePoolID); err == nil {
-							if pool.Name == request.Name {
+						if pool, err := Pcc.GetCephPool2(caches[i].CachePoolID); err == nil {
+							if pool.Name == poolName {
 								return caches[i]
 							}
 						} else {
@@ -74,6 +75,7 @@ func addCephCache(t *testing.T, cacheMode string) *ceph3.CephCacheTier {
 					t.Fatal(err)
 				}
 			}
+			t.Fatal("some error happens in creation")
 		} else {
 			t.Fatal(err)
 		}
@@ -93,12 +95,12 @@ func testCephCacheAdd(t *testing.T) {
 		cephCache2 *ceph3.CephCacheTier
 	)
 
-	cephCache = addCephCache(t, "")
+	cephCache = addCephCache(t, "", "blackbox")
 
 	fmt.Printf("\nCEPH CACHE: added the cache %d", cephCache.ID)
 	defer func() {
 		Pcc.DeleteCephCache(cephCache.ID)
-		fmt.Printf("\nCEPH CACHE: removed the cache %d", cephCache.ID)
+		fmt.Printf("\nCEPH CACHE: removed the cache %d\n", cephCache.ID)
 	}()
 
 	// Check if the cache exist
@@ -124,7 +126,7 @@ func testCephCacheDelete(t *testing.T) {
 		cephCaches []*ceph3.CephCacheTier
 	)
 
-	cephCache = addCephCache(t, "")
+	cephCache = addCephCache(t, "", "blackbox2")
 	Pcc.DeleteCephCache(cephCache.ID)
 
 	// Check if the cache exist
