@@ -49,7 +49,7 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 			request.Quota = pool.Quota
 			request.QuotaUnit = pool.QuotaUnit
 			if cacheMode != "" {
-				request.Mode = &cacheMode
+				request.Mode = cacheMode
 			}
 
 			poolName := fmt.Sprintf("%s-%s", name, pool.Name)

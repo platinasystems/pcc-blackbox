@@ -449,6 +449,7 @@ github.com/onsi/gomega v1.10.3/go.mod h1:V9xEwhxec5O8UDM77eCW8vLymOMltsqPVYWrpDs
 github.com/opencontainers/go-digest v1.0.0-rc1/go.mod h1:cMLVZDEM3+U2I4VmLI6N8jQYUd2OVphdqWwCJHrFt2s=
 github.com/opencontainers/image-spec v1.0.1/go.mod h1:BtxoFyWECRxE4U/7sNtV5W15zMzWCbyJoFRP3s7yZA0=
 github.com/osrg/gobgp v2.0.0+incompatible/go.mod h1:vGVJPLW6JFDD7WA1vJsjB8OKmbbC2TKwHtr90CZS/u4=
+github.com/otiai10/copy v1.0.1 h1:gtBjD8aq4nychvRZ2CyJvFWAw0aja+VHazDdruZKGZA=
 github.com/otiai10/copy v1.0.1/go.mod h1:8bMCJrAqOtN/d9oyh5HR7HhLQMvcGMpGdwRDYsfOCHc=
 github.com/otiai10/curr v0.0.0-20150429015615-9b4961190c95/go.mod h1:9qAhocn7zKJG+0mI8eUu6xqkFDYS2kb2saOteoSB3cE=
 github.com/otiai10/curr v0.0.0-20190513014714-f5a3d24e5776/go.mod h1:3HNVkVOU7vZeFXocWuvtcS0XSFLcf2XUSDHkq9t1jU4=
@@ -496,6 +497,8 @@ github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952 h1:Se8Rad
 github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952/go.mod h1:pA66lymOAkTNQ8/mFyK6K8a0jti45hE8BkYX1sr/nQA=
 github.com/platinasystems/go-common v0.0.0-20201125102358-64d82556ad0a h1:CESLSpCid7BkX9AD+aquyW+UShHyKroNm9yQvKFUguc=
 github.com/platinasystems/go-common v0.0.0-20201125102358-64d82556ad0a/go.mod h1:XA0LbyFus8eZSQ89Ji3S8uxXTUR3plkCStjC2e7vqdQ=
+github.com/platinasystems/go-common v0.0.0-20201209163235-347f66960243 h1:p4Jr91+0CzLa3p7nEyunrGY4pwuHeROdB/4JK01mbjE=
+github.com/platinasystems/go-common v0.0.0-20201209163235-347f66960243/go.mod h1:+MSNzEMDVdrSTOp4/Kx8Tufo80eLAQTcQBUV4g+OI0Q=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
 github.com/platinasystems/pcc-models v0.0.0-20200703173351-fa2a7bf8765e/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200803165142-0998ef20e0b6/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
@@ -529,6 +532,8 @@ github.com/platinasystems/pcc-models v0.0.0-20201118054347-4b5928ef06cb h1:IFbe8
 github.com/platinasystems/pcc-models v0.0.0-20201118054347-4b5928ef06cb/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/pcc-models v0.0.0-20201125102038-c412d5e3cf45 h1:SZ5qAsMNe5XPV+lgCldpKzNJqhbTh4KOO5ryI8KMbXI=
 github.com/platinasystems/pcc-models v0.0.0-20201125102038-c412d5e3cf45/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201204103955-310d82f24b1c h1:TiM855Cr82oy10XPGyf869T0XXTEchACjY4AX2orz4s=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201204103955-310d82f24b1c/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/test v1.8.3 h1:vZrl1An0N6wfWIynBW/s0LXjdQxx8uRWEoS6WX56Q9E=
 github.com/platinasystems/test v1.8.3/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/test v1.8.6 h1:HdjebjrTVJfa6+EGdwxKqEoOXD/KOtumqEtEkB2uIXM=
@@ -543,6 +548,10 @@ github.com/platinasystems/tiles v1.3.1-rc1.0.20201127171947-0c4abb02d113 h1:e6VY
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201127171947-0c4abb02d113/go.mod h1:VgnimhmIYPCZVezzotplQOmWtTziNYPrWObR9Y4kEUo=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201130135656-6714a98d6466 h1:kUB8dogbA49IKSb88dvaE4GOgQWXzZbgVBfro5BMnB4=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201130135656-6714a98d6466/go.mod h1:VgnimhmIYPCZVezzotplQOmWtTziNYPrWObR9Y4kEUo=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201209190649-385aa973a214 h1:OqPj7GHS20CvU1z4ixPzYrsVtgWEAgYhgvb7hHRuBBI=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201209190649-385aa973a214/go.mod h1:TF5zB6FlR8Ii30xm1gTLS4hQGxbdhIuhtlI2fjAHsaY=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201209215148-6d1ed586ca78 h1:xY/pWiJu3Mxv52gQgL49Us0pHdOgAY5ulLL/4UESwjw=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201209215148-6d1ed586ca78/go.mod h1:TF5zB6FlR8Ii30xm1gTLS4hQGxbdhIuhtlI2fjAHsaY=
 github.com/platinasystems/tiles v1.5.0 h1:leOKqnap9t3bDZoWjZaQpqStlMf7eCNkyrdyJY6qvDE=
 github.com/platinasystems/tiles v1.5.0/go.mod h1:oxuA3DwxeRJ5J8c5zT5vVb3rbrAEa+tTDG+JQVjD8w8=
 github.com/platinasystems/tiles v1.6.0-rc1 h1:iAKKpXork9JRhATuIy5ykAihR0h7uP13cXQnATXlqqc=
