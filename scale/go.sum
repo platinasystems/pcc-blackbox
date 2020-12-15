@@ -449,6 +449,8 @@ github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952 h1:Se8Rad
 github.com/platinasystems/go-common v0.0.0-20201028093438-541edf3ee952/go.mod h1:pA66lymOAkTNQ8/mFyK6K8a0jti45hE8BkYX1sr/nQA=
 github.com/platinasystems/go-common v0.0.0-20201125102358-64d82556ad0a h1:CESLSpCid7BkX9AD+aquyW+UShHyKroNm9yQvKFUguc=
 github.com/platinasystems/go-common v0.0.0-20201125102358-64d82556ad0a/go.mod h1:XA0LbyFus8eZSQ89Ji3S8uxXTUR3plkCStjC2e7vqdQ=
+github.com/platinasystems/go-common v0.0.0-20201209163235-347f66960243 h1:p4Jr91+0CzLa3p7nEyunrGY4pwuHeROdB/4JK01mbjE=
+github.com/platinasystems/go-common v0.0.0-20201209163235-347f66960243/go.mod h1:+MSNzEMDVdrSTOp4/Kx8Tufo80eLAQTcQBUV4g+OI0Q=
 github.com/platinasystems/go-kafka-avro v0.0.0-20200513103846-d4d9450f74e0/go.mod h1:XIyO/IVpg6s226zEuD1yDubM9zpc8ubdToKVpJCl2pw=
 github.com/platinasystems/pcc-blackbox v0.0.0-20200909003034-d6ebd1bb089d h1:fln6dllyO1BuQPRwjKFEyNNGsuKwQha87J5O+q1g2jg=
 github.com/platinasystems/pcc-blackbox v0.0.0-20200909003034-d6ebd1bb089d/go.mod h1:koynnOxFqujTy6HshldBfAEcI6tgnZ2blmyw8AVJsS0=
@@ -456,6 +458,8 @@ github.com/platinasystems/pcc-blackbox v1.6.0-rc1 h1:7yyCy8TXKIfbkRgLQQYO0JirCXK
 github.com/platinasystems/pcc-blackbox v1.6.0-rc1/go.mod h1:eLaJRRmV6i25meAdVXAm3xlJER4bfOi7hTA6FyfQAMw=
 github.com/platinasystems/pcc-blackbox v1.6.0-rc1.0.20201123225842-f27abe6f6309 h1:12pnlvNZHiiSOxSfaWYLHOPLXxzjB7OaRukPwhM+BJw=
 github.com/platinasystems/pcc-blackbox v1.6.0-rc1.0.20201123225842-f27abe6f6309/go.mod h1:3O+1dJfZl+3EI6ORWA3fH4Uqn84OGoP87xAvbWLRv+8=
+github.com/platinasystems/pcc-blackbox v1.6.0-rc1.0.20201130040709-92ff89d97ddd h1:N3SgqnFjJLf1mD8I57X91UgQPMP7LFrumJ/wRBkv2JQ=
+github.com/platinasystems/pcc-blackbox v1.6.0-rc1.0.20201130040709-92ff89d97ddd/go.mod h1:3O+1dJfZl+3EI6ORWA3fH4Uqn84OGoP87xAvbWLRv+8=
 github.com/platinasystems/pcc-models v0.0.0-20200803165142-0998ef20e0b6/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200804152717-29a8ec045cea/go.mod h1:/epXjs9cUZZ4UbjQDOR2NCQepjEqLQOUFVhFgnOJd+c=
 github.com/platinasystems/pcc-models v0.0.0-20200820073309-6496472b67e6/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
@@ -469,6 +473,8 @@ github.com/platinasystems/pcc-models v0.0.0-20201118054347-4b5928ef06cb h1:IFbe8
 github.com/platinasystems/pcc-models v0.0.0-20201118054347-4b5928ef06cb/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/pcc-models v0.0.0-20201125102038-c412d5e3cf45 h1:SZ5qAsMNe5XPV+lgCldpKzNJqhbTh4KOO5ryI8KMbXI=
 github.com/platinasystems/pcc-models v0.0.0-20201125102038-c412d5e3cf45/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201204103955-310d82f24b1c h1:TiM855Cr82oy10XPGyf869T0XXTEchACjY4AX2orz4s=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201204103955-310d82f24b1c/go.mod h1:dmlJ2P9tFVt4LcyAN2R2GO5UIU6C6KO1pTy0wLnHf2Q=
 github.com/platinasystems/test v1.8.3/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/test v1.8.6 h1:HdjebjrTVJfa6+EGdwxKqEoOXD/KOtumqEtEkB2uIXM=
 github.com/platinasystems/test v1.8.6/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
@@ -479,6 +485,8 @@ github.com/platinasystems/tiles v1.3.1-rc1.0.20201122025931-1387d34f4740 h1:MPod
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201122025931-1387d34f4740/go.mod h1:guK6/+epfbbJoZeRXb+Dc+SvFsZXHFcq6BAAgqox1Sg=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201127171947-0c4abb02d113 h1:e6VY6qNWFotTUg9sk2m0x20fhZZylx/MM5a5020vLxs=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20201127171947-0c4abb02d113/go.mod h1:VgnimhmIYPCZVezzotplQOmWtTziNYPrWObR9Y4kEUo=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201215191221-e8212049d6c2 h1:xDNAXP6W6jcWO2yGkx62Sz5Qh6Tq+EfzHswOc5WWcjI=
+github.com/platinasystems/tiles v1.3.1-rc1.0.20201215191221-e8212049d6c2/go.mod h1:TF5zB6FlR8Ii30xm1gTLS4hQGxbdhIuhtlI2fjAHsaY=
 github.com/platinasystems/tiles v1.6.0-rc1 h1:iAKKpXork9JRhATuIy5ykAihR0h7uP13cXQnATXlqqc=
 github.com/platinasystems/tiles v1.6.0-rc1/go.mod h1:up4/lGT3FTyBkUPCMJ3fVBiCxHObc10t4nF78IBnU+o=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=

@@ -44,7 +44,7 @@ func getEvent() {
 		} else {
 			fmt.Printf("%-3d %-15s %-20s %-50s %v\n",
 				i+1, e.TargetName, typeLevel, e.Message,
-				cA.Format("01/06 15:04:00 PST"))
+				cA.Format("01/02 15:04:00 MST"))
 		}
 	}
 	fmt.Printf("\nelapsed %v\n", elapsed)
