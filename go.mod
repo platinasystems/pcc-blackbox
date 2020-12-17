@@ -28,17 +28,17 @@ require (
 	github.com/nats-io/nats-server v1.4.1 // indirect
 	github.com/osrg/gobgp v2.0.0+incompatible // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20201209163235-347f66960243
-	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201204103955-310d82f24b1c
+	github.com/platinasystems/go-common v0.0.0-20201215150438-fd77b3df0135
+	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20201215150149-be027be8b19a
 	github.com/platinasystems/test v1.8.6
-	github.com/platinasystems/tiles v1.3.1-rc1.0.20201209215148-6d1ed586ca78
+	github.com/platinasystems/tiles v1.3.1-rc1.0.20201216205809-390c6262522e
 	github.com/satori/go.uuid v1.2.0 // indirect
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect
 	github.com/ugorji/go v1.1.5-pre // indirect
 	go.uber.org/zap v1.15.0 // indirect
-	golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899
+	golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
 	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
 	golang.org/x/tools v0.0.0-20200814172026-c4923e618c08
 	google.golang.org/appengine v1.6.0 // indirect
