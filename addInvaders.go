@@ -64,8 +64,8 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 				fmt.Printf("Add id %d to Nodes. Mapping hostIP %v to id %d\n", node.Id, node.Host, node.Id)
 
 				eventsFrom := time.Now()
-				waitInstallation(AGENT_TIMEOUT*time.Duration(nodeNumbers), AGENT_NOTIFICATION, node.Id, &eventsFrom)
-				waitInstallation(COLLECTOR_TIMEOUT*time.Duration(nodeNumbers), COLLECTOR_NOTIFICATION, node.Id, &eventsFrom)
+				waitInstallation(LLDP_TIMEOUT*time.Duration(nodeNumbers), LLDP_NOTIFICATION, node.Id, &eventsFrom)
+				waitInstallation(DEFAULT_TIMEOUT*time.Duration(nodeNumbers), SELF_HEAL_NOTIFICATION, node.Id, &eventsFrom)
 				start := time.Now()
 				timeout := time.Duration(300*len(nodes)) * time.Second
 				var (
