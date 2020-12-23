@@ -87,7 +87,7 @@ func addTenantA(t *testing.T) {
 	}
 	_, err = Pcc.FindTenant(addReq2.Name)
 	if err != nil {
-		fmt.Printf("FindTenant failed as exepted on deleted tenant\n")
+		fmt.Printf("FindTenant failed as expected on deleted tenant\n")
 	} else {
 		assert.Fatalf("%v\n", "Expecting failure, but didn't")
 	}
@@ -160,7 +160,7 @@ func addTenantA(t *testing.T) {
 
 	fmt.Printf("Try change firstname of user %v \n", addUser.UserName)
 	newName := "Mr Bart"
-	addUser.LastName = newName
+	addUser.FirstName = newName
 
 	if err = Pcc.UpdateUser(addUser); err != nil {
 		assert.Fatalf("Failed to update user %v: %v\n", newName, err)
@@ -172,7 +172,7 @@ func addTenantA(t *testing.T) {
 		for _, u := range users {
 			if u.UserName == addUser.UserName {
 				fmt.Printf("Found updated user %v\n", u)
-				if u.Profile.LastName == newName {
+				if u.Profile.FirstName == newName {
 					fmt.Printf("user update worked\n")
 					found = true
 				} else {
