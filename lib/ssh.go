@@ -50,13 +50,24 @@ func InitSSH(cfg *SshConfiguration) {
 	}
 }
 
-func (sh *SSHHandler) Run(host string, command string) (stdout string, stderr string, err error) {
+func (sh *SSHHandler) Run(host string, command string, options ...string) (stdout string, stderr string, err error) {
 	var (
 		client  *ssh.Client
 		session *ssh.Session
+		quiet   bool
 	)
 
-	fmt.Println(fmt.Sprintf("Running command [%s] on host %s", command, host))
+	for _, opt := range options {
+		switch opt {
+		case "-q":
+			quiet = true
+		case "quiet":
+			quiet = true
+		}
+	}
+	if !quiet {
+		fmt.Println(fmt.Sprintf("Running command [%s] on host %s", command, host))
+	}
 	if client, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", host, sshConfig.Port), sshConfig.SshClientConfig); err == nil {
 		defer client.Close()
 
