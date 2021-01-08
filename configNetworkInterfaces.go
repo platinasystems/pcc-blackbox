@@ -277,7 +277,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 		if strings.HasPrefix(strings.ToLower(addr), "fe80") {
 			continue // skip link local
 		}
-		desire6IpMap[addr] = 1
+		// desire6IpMap[addr] = 1
 	}
 
 	for _, addr := range intfReq.Ipv6Addresses {
