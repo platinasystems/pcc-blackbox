@@ -93,8 +93,6 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		// mayRun(t, "installLLDP", updateNodes_installLLDP)
-		// mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
 	})
@@ -228,7 +226,6 @@ func TestPortus(t *testing.T) {
 
 func TestDelPortus(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
@@ -262,7 +259,6 @@ func TestFull(t *testing.T) {
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "addTenant", addTenant)
-		// mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
