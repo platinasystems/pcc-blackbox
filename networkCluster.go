@@ -49,11 +49,12 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	assert := test.Assert{t}
 
 	var (
-		reqCluster  pcc.NetworkClusterReq
-		igwPolicy   string
-		controlCIDR string
-		dataCIDR    string
-		err         error
+		reqCluster    pcc.NetworkClusterReq
+		netClusterObj *pcc.NetworkClusterUI
+		igwPolicy     string
+		controlCIDR   string
+		dataCIDR      string
+		err           error
 	)
 
 	reqCluster.Name = netCluster.Name
@@ -139,7 +140,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	}
 
 	time.Sleep(1 * time.Second)
-	netClusterObj, err := Pcc.FindNetClusterName(reqCluster.Name)
+	netClusterObj, err = Pcc.FindNetClusterName(reqCluster.Name)
 	if err != nil {
 		assert.Fatalf("Network cluster [%v]: %v\n",
 			reqCluster.Name, err)
@@ -155,7 +156,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 			assert.Fatal("Timed out waiting for network cluster\n")
 			return
 		case <-tick:
-			netClusterObj, err := Pcc.GetNetClusterId(netClusterId)
+			netClusterObj, err = Pcc.GetNetClusterId(netClusterId)
 			if err != nil {
 				assert.Fatalf("Network cluster [%v]: %v\n",
 					reqCluster.Name, err)
@@ -165,18 +166,21 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				netClusterObj.DeployStatus,
 				netClusterObj.ProgressPercentage,
 				netClusterObj.Health)
+
 			switch netClusterObj.DeployStatus {
 			case pcc.NETWORK_DEPLOY_STATUS_COMPLETED:
 				done = true
 			case pcc.NETWORK_DEPLOY_STATUS_FAILED:
 				done = true
 				assert.Fatal("Network deploy failed\n")
-			case pcc.NETWORK_DEPLOY_STATUS_UPDATE_FAILED:
-				done = true
-				assert.Fatal("Network deploy update failed\n")
 			default:
 			}
 		}
+	}
+
+	if netClusterObj.Health != pcc.NETWORK_HEALTH_OK {
+		assert.Fatalf("Network deploy %s\n", netClusterObj.Health)
+		return
 	}
 }
 
