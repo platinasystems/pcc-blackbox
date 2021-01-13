@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"testing"
 	"time"
 )
+
+var optionalTopics = []string{"ceph-metrics", "varnishStats", "ksm", "flowStats", "nodeDetails-2", "podDetails-2", "svcDetails-2", "appDetails"}
 
 // get topics
 func testGetTopic(t *testing.T) {
@@ -22,10 +25,17 @@ func testGetTopic(t *testing.T) {
 // get topics schema
 func testGetTopicSchema(t *testing.T) {
 	if topics, err := Pcc.GetTopics(); err == nil {
+	l1:
 		for _, topic := range topics {
 			if schema, err := Pcc.GetSchema(topic); err == nil {
 				fmt.Println(fmt.Sprintf("there are %d schemas for topic %s", len(schema), topic))
 			} else {
+				for _, optionalTopic := range optionalTopics {
+					if optionalTopic == topic {
+						fmt.Println(fmt.Sprintf("topic %s not created yet", topic))
+						continue l1
+					}
+				}
 				t.Fatal(err)
 			}
 		}
@@ -40,9 +50,13 @@ func testMonitorSample(t *testing.T) {
 		node := (*nodes)[0]
 		if data, err := Pcc.GetLiveSample("cpu", node.Id); err == nil {
 			fmt.Println(fmt.Sprintf("read cpu sample for node %d %+v", node.Id, data))
-			name := (*data)["node"]
-			if name != node.Name {
-				t.Fatal("get the wrong sample")
+			fmt.Println(data)
+			if nodeId, err := strconv.ParseUint(fmt.Sprintf("%v", (*data)["nodeId"]), 10, 64); err == nil {
+				if nodeId != node.Id {
+					t.Fatal("get the wrong sample")
+				}
+			} else {
+				t.Fatal(err)
 			}
 		} else {
 			t.Fatal(err)
