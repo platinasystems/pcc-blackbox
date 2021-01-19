@@ -25,21 +25,54 @@ func checkError(t *testing.T, err error) {
 }
 
 func testPreparePolicies(t *testing.T) {
-	// Clean policies
-	policies, err := Pcc.GetPolicies() // GET the policies
+	var (
+		defaultRack *scope2.Scope
+		roles       []pcc.Role
+		scopes      []scope2.Scope
+		err         error
+	)
+
+	// Set the default rack scope
+	scopes, err = Pcc.GetScopes()
 	checkError(t, err)
-	for i := range policies { // Delete an old policy
-		p := policies[i]
-		if p.Description == POLICY_BB_TEST {
-			fmt.Println("Deleting the policy", p.Description)
-			_, err = Pcc.DeletePolicy(p.Id)
+	nodes, err := Pcc.GetNodeIds()
+	checkError(t, err)
+
+	for i := range scopes {
+		s := scopes[i]
+		if s.Default && s.IsRack() {
+			defaultRack = &s
+			break
+		}
+	}
+
+	for i := range nodes {
+		nodeId := nodes[i]
+		node, err := Pcc.GetNode(nodeId)
+		checkError(t, err)
+		if *node.ScopeId != defaultRack.ID {
+			fmt.Printf("Assign the default rack scope to node %d:%s\n", nodeId, node.Name)
+			node.ScopeId = &defaultRack.ID
+			err = Pcc.UpdateNode(node)
+			checkError(t, err)
+		}
+	}
+
+	// Clean roles
+	roles, err = Pcc.GetNodeRoles()
+	checkError(t, err)
+	for i := range roles {
+		role := roles[i]
+		if role.Name == ROLE_BB_TEST {
+			fmt.Println("Deleting the role", role.Description)
+			_, err = Pcc.DeleteNodeRole(role.ID)
 			checkError(t, err)
 			break
 		}
 	}
 
 	// Clean scopes
-	scopes, err := Pcc.GetScopes()
+	scopes, err = Pcc.GetScopes()
 	checkError(t, err)
 	for i := range scopes {
 		scope := scopes[i]
@@ -51,14 +84,14 @@ func testPreparePolicies(t *testing.T) {
 		}
 	}
 
-	// Clean roles
-	roles, err := Pcc.GetNodeRoles()
+	// Clean policies
+	policies, err := Pcc.GetPolicies() // GET the policies
 	checkError(t, err)
-	for i := range roles {
-		role := roles[i]
-		if role.Name == ROLE_BB_TEST {
-			fmt.Println("Deleting the role", role.Description)
-			_, err = Pcc.DeleteNodeRole(role.ID)
+	for i := range policies { // Delete an old policy
+		p := policies[i]
+		if p.Description == POLICY_BB_TEST {
+			fmt.Println("Deleting the policy", p.Description)
+			_, err = Pcc.DeletePolicy(p.Id)
 			checkError(t, err)
 			break
 		}
@@ -177,7 +210,6 @@ func testPolicyScope(t *testing.T) {
 		s           scope2.Scope
 		err         error
 		application app.AppConfiguration
-		roleId      uint64
 		nodes       []uint64
 		inputs      []policy.PolicyInput
 	)
@@ -239,11 +271,6 @@ func testPolicyScope(t *testing.T) {
 	fmt.Printf("Removing all roles from the node %d\n", nodeId)
 	node.RoleIds = []uint64{}
 	err = Pcc.UpdateNode(node)
-	checkError(t, err)
-	roleId, err = Pcc.FindRoleId(pcc.ROLE_DEFAULT)
-	checkError(t, err)
-	fmt.Printf("Assigning the role %s with application %s to %s\n", s.Description, application.Name, node.Name)
-	err = setRolesToNodesAndCheck([]uint64{roleId}, pcc.ROLE_LLDPD, []uint64{nodeId}, 0)
 	checkError(t, err)
 
 	// TODO check for inputs parameters. Look at the default/ansible.log file
