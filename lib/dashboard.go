@@ -1,13 +1,11 @@
 package pcc
 
 import (
-	"fmt"
+	_ "fmt"
 
 	dashboardctl "github.com/platinasystems/tiles/pccserver/controllers"
 	"github.com/platinasystems/tiles/pccserver/pccobject"
 )
-
-const subEndpoint string = "pccserver/dashboard"
 
 type DashboardObj struct {
     dashboardctl.PccObjectOutput
