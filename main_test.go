@@ -81,7 +81,7 @@ func TestMain(m *testing.M) {
 
 var count uint
 var timeFormat = "Mon Jan 2 15:04:05 2006"
-
+/*
 // TestNodes can be used to
 // automatically config a cluser
 func TestNodes(t *testing.T) {
@@ -397,6 +397,16 @@ func TestRGW(t *testing.T) {
 	mayRun(t, "CEPH RADOS GATEWAY", func(t *testing.T) {
 		mayRun(t, "deployRadosGateway", deployRadosGateway)
 	})
+}
+
+*/
+
+func TestDashboard(t *testing.T) {
+    count++
+    fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+    mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
+        mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
+    })
 }
 
 func TestGen(t *testing.T) {
