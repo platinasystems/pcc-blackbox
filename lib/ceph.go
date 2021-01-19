@@ -83,7 +83,7 @@ var (
 	CEPH_POOL_DELETION_FAILED_NOTIFICATION         = "Unable to remove pool [%s]"
 	CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing Pool : [%s] from cluster [%s]"
 
-	CEPH_FS_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_COMPLETED)
+	CEPH_FS_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("FS: [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_COMPLETED)
 	CEPH_FS_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating FS : [%s] for cluster [%s]"
 	CEPH_FS_CREATION_FAILED_NOTIFICATION_1       = fmt.Sprintf("FS : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_FS_DEPLOY_STATUS_FAILED)
 	CEPH_FS_CREATION_FAILED_NOTIFICATION_2       = "Unable to Create FS : [%s] for cluster [%s]"
