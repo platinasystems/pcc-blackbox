@@ -1,24 +1,26 @@
 package pcc
 
 import (
-	_ "fmt"
+	 "fmt"
 
 	dashboardctl "github.com/platinasystems/tiles/pccserver/controllers"
 	"github.com/platinasystems/tiles/pccserver/pccobject"
 )
 
 type DashboardObj struct {
-    dashboardctl.PccObjectOutput
+    dashboardctl.PccObjectOutput	`json:"PccObjectOutput"`
 }
 
+/*
 type DashboardObjList struct {
     dashboardctl.PccObjectOutputList
-}
+}*/
+type DashboardObjList []DashboardObj
 
-func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *string) (objects *DashboardObjList, e error) {
+func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *string) (objects *[]dashboardctl.PccObjectOutput, e error) {
     // sort & pagination params may not be specified, i.e. the params are either nil or empty string
     var (
-		result DashboardObjList
+		result []dashboardctl.PccObjectOutput = make ([]dashboardctl.PccObjectOutput, 0)
 		err error
 	)
     endPoint := "pccserver/dashboard/objects"
@@ -36,8 +38,16 @@ func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *s
     return objects, err
 }
 
-func (client *PccClient) TestDashboardObjectById(id uint64) (*DashboardObj, error) {
-    return nil, nil
+func (client *PccClient) TestDashboardObjectById(id uint64) (obj *dashboardctl.PccObjectOutput, e error) {
+	endPoint := fmt.Sprintf("pccserver/dashboard/objects/%d", id);
+    var result dashboardctl.PccObjectOutput
+	var err error
+	if err = client.Get(endPoint, &result); err == nil {
+        obj = &result
+    } else {
+        obj = nil
+    }
+    return obj, err
 }
 
 func (client *PccClient) TestDashboardFilteredObjectList(sortParam *string, pageParam *string) (*DashboardObjList, error) {
@@ -47,8 +57,7 @@ func (client *PccClient) TestDashboardFilteredObjectList(sortParam *string, page
 }
 
 func (client *PccClient) TestDashboardAdvSearchedObjectList(sortParam *string, pageParam *string) (*DashboardObjList, error) {
-    // sort & pagination params may not be specified, i.e. the params are either nil or empty string
-
+    // sort & pagination params may not be specified, i.e. the params are either nil or empty string 
     return nil, nil
 }
 

@@ -14,6 +14,19 @@ func testDashboardGetAllPCCObjects(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 	} else {
-		fmt.Printf("Received # [%+v] objects", *pccObjects)
+		fmt.Printf("Received # [%d] objects\n", len(*pccObjects))
 	}
+	checkError(t, err)
+}
+
+func testDashboardGetPCCObjectById (t *testing.T) {
+    fmt.Println("Get PCCObject by Id")
+	pccObject, err := Pcc.TestDashboardObjectById(4)
+	_ = pccObject
+	if err != nil {
+       fmt.Println(err)  
+	} else {
+        fmt.Printf("Received # [%d] objects\n", 1)
+    }
+    checkError(t, err)	
 }
