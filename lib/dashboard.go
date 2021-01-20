@@ -146,3 +146,12 @@ func (client *PccClient) TestDashboardMetadataEnumStrings() (metadataStrings *da
     }
     return metadataStrings, err
 }
+
+func (client *PccClient) HelperGetIdAndNameOf(objects *[]dashboardctl.PccObjectOutput) string {
+    var output string = ""
+    for _, obj := range *objects {
+        output += fmt.Sprintf("{%d, %s}\n", obj.Id, obj.PccObjectName)
+    }
+    return output
+}
+

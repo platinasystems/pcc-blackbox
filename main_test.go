@@ -406,8 +406,10 @@ func TestDashboard(t *testing.T) {
     fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
     mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
         mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
-		mayRun(t,"testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
-		mayRun(t,"testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
+		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
+		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
     })
 }
 
