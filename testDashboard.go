@@ -97,3 +97,43 @@ func testDashboardGetParentObjectsByRandomId(t *testing.T) {
 
     checkError(t, err)
 }
+
+func testDashboardGetFilteredObjects(t *testing.T) {
+    fmt.Println("Get Objects filtered by health and type")
+    pccObjects, err := Pcc.TestDashboardFilteredObjectList("health", "OK", nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("1. Received [%d] PCC Objects with Health=OK\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardFilteredObjectList("health", "Warning", nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("2. Received [%d] PCC Objects with Health=Warning\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardFilteredObjectList("type", "node", nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("3. Received [%d] PCC Objects with Type=Node\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardFilteredObjectList("type", "cephcluster", nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("4. Received [%d] PCC Objects with Type=CephCluster\n", len(*pccObjects))
+    }
+    checkError(t, err)
+}
+
+func testDashboardGetAdvSearchedObjects(t *testing.T) {
+    fmt.Println("Get Objects matching search criteria")
+    pccObjects, err := Pcc.TestDashboardAdvSearchedObjectList("health:OK{X}type~ceph", nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("1. Received [%d] PCC Objects with Health=OK and Type contains 'Ceph'\n", len(*pccObjects))
+    }
+    checkError(t, err)
+}

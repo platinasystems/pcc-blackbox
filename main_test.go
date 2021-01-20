@@ -410,6 +410,8 @@ func TestDashboard(t *testing.T) {
 		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
 		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
+        mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
+        mayRun(t, "testDashboardGetAdvSearchedObjects", testDashboardGetAdvSearchedObjects)
     })
 }
 
