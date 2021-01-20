@@ -5,6 +5,7 @@ import (
     "math/rand"
     "testing"
     "time"
+	"net/url"
 )
 
 // get whole PCC ObjectsList
@@ -129,11 +130,37 @@ func testDashboardGetFilteredObjects(t *testing.T) {
 
 func testDashboardGetAdvSearchedObjects(t *testing.T) {
     fmt.Println("Get Objects matching search criteria")
-    pccObjects, err := Pcc.TestDashboardAdvSearchedObjectList("health:OK{X}type~ceph", nil, nil)
+    pccObjects, err := Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("health:OK{X}type~ceph"), nil, nil)
     if err != nil {
         fmt.Println(err)
     } else {
         fmt.Printf("1. Received [%d] PCC Objects with Health=OK and Type contains 'Ceph'\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("type:node{X}group~video"), nil, nil)
+    if err != nil {
+		fmt.Println(err)
+    } else {
+		fmt.Printf("2. Received [%d] PCC Objects with Type=Node and Group contains 'Video'\n", len(*pccObjects))
+	}
+	pageParams := "page=0&limit=25"
+    sortParams := "sortBy=Name&sortDir=asc"
+    pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("tag~storage{X}name~srv2"), &pageParams, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("3. Received [%d] PCC Objects with Tag contains Storage and Name contains 'srv2' with pagination=page=0&limit=25\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("any~avail{X}health:OK"), nil, &sortParams)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("4. Received [%d] PCC Objects with Any contains 'Avail' and Health=OK with sort by Name\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("name~srv4,tenantName~root"), &pageParams, &sortParams)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("5. Received [%d] PCC Objects with Name contains 'srv4' and Tenant=ROOT with pagination=page=0&limit=25 and sort by Name\n", len(*pccObjects))
     }
     checkError(t, err)
 }
