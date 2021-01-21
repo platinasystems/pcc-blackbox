@@ -81,7 +81,7 @@ func TestMain(m *testing.M) {
 
 var count uint
 var timeFormat = "Mon Jan 2 15:04:05 2006"
-/*
+
 // TestNodes can be used to
 // automatically config a cluser
 func TestNodes(t *testing.T) {
@@ -399,8 +399,7 @@ func TestRGW(t *testing.T) {
 	})
 }
 
-*/
-
+// Test functions for New Dashboard
 func TestDashboard(t *testing.T) {
     count++
     fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -412,6 +411,8 @@ func TestDashboard(t *testing.T) {
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
         mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
         mayRun(t, "testDashboardGetAdvSearchedObjects", testDashboardGetAdvSearchedObjects)
+        mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
+        mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
     })
 }
 

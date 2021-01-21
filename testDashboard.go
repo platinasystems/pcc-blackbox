@@ -5,7 +5,7 @@ import (
     "math/rand"
     "testing"
     "time"
-	"net/url"
+    "net/url"
 )
 
 // get whole PCC ObjectsList
@@ -66,7 +66,7 @@ func testDashboardGetChildrenObjectsByRandomId(t *testing.T) {
         childObjects, err := Pcc.TestDashboardChildrenObjectList(id, nil, nil)
         if err == nil {
             if len(*childObjects) != 0 {
-                fmt.Printf("Received [%d] Children Objects for PCC Object with id=[%d]:\n%s\n", len(*childObjects), id, Pcc.HelperGetIdAndNameOf(childObjects))
+                fmt.Printf("Received [%d] Children Objects for PCC Object with id=[%d]:\n%s\n", len(*childObjects), id, Pcc.HelperExtractIdAndNameOf(childObjects))
             } else {
                 fmt.Printf("PCC Object with id=[%d] has no children\n", id)
             }
@@ -89,7 +89,7 @@ func testDashboardGetParentObjectsByRandomId(t *testing.T) {
         parentObjects, err := Pcc.TestDashboardParentsObjectList(id, nil, nil)
         if err == nil {
             if len(*parentObjects) != 0 {
-                fmt.Printf("Received [%d] Parent Objects for PCC Object with id=[%d]:\n%s\n", len(*parentObjects), id, Pcc.HelperGetIdAndNameOf(parentObjects))
+                fmt.Printf("Received [%d] Parent Objects for PCC Object with id=[%d]:\n%s\n", len(*parentObjects), id, Pcc.HelperExtractIdAndNameOf(parentObjects))
             } else {
                 fmt.Printf("PCC Object with id=[%d] has no parents\n", id)
             }
@@ -138,11 +138,11 @@ func testDashboardGetAdvSearchedObjects(t *testing.T) {
     }
     pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("type:node{X}group~video"), nil, nil)
     if err != nil {
-		fmt.Println(err)
+        fmt.Println(err)
     } else {
-		fmt.Printf("2. Received [%d] PCC Objects with Type=Node and Group contains 'Video'\n", len(*pccObjects))
-	}
-	pageParams := "page=0&limit=25"
+        fmt.Printf("2. Received [%d] PCC Objects with Type=Node and Group contains 'Video'\n", len(*pccObjects))
+    }
+    pageParams := "page=0&limit=25"
     sortParams := "sortBy=Name&sortDir=asc"
     pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("tag~storage{X}name~srv2"), &pageParams, nil)
     if err != nil {
@@ -161,6 +161,34 @@ func testDashboardGetAdvSearchedObjects(t *testing.T) {
         fmt.Println(err)
     } else {
         fmt.Printf("5. Received [%d] PCC Objects with Name contains 'srv4' and Tenant=ROOT with pagination=page=0&limit=25 and sort by Name\n", len(*pccObjects))
+    }
+    pccObjects, err = Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("type~network{U}name~ceph"), &pageParams, &sortParams)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("6. Received [%d] PCC Objects with Type conatins Network and Name contains 'ceph'\n", len(*pccObjects))
+    }
+checkError(t, err)
+}
+
+func testDashboardGetAggrHealthCountByType(t *testing.T) {
+    fmt.Println("Get Aggregate Health Count grouped by Type")
+    health, err := Pcc.TestDashboardAggrHealthCountByType()
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("Received Aggregate Health Count grouped by Type:\n%s\n", Pcc.HelperExtractHealthByTypeFrom(health))
+    }
+    checkError(t, err)
+}
+
+func testDashboardGetMetadataEnumStrings(t *testing.T) {
+    fmt.Println("Get Dashboard Metadata Enum Strings")
+    metadata, err := Pcc.TestDashboardMetadataEnumStrings()
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("Received Dashboard Metadata Enum Strings:\n[%+v]\n", *metadata)
     }
     checkError(t, err)
 }

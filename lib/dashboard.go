@@ -147,7 +147,7 @@ func (client *PccClient) TestDashboardMetadataEnumStrings() (metadataStrings *da
     return metadataStrings, err
 }
 
-func (client *PccClient) HelperGetIdAndNameOf(objects *[]dashboardctl.PccObjectOutput) string {
+func (client *PccClient) HelperExtractIdAndNameOf(objects *[]dashboardctl.PccObjectOutput) string {
     var output string = ""
     for _, obj := range *objects {
         output += fmt.Sprintf("{%d, %s}\n", obj.Id, obj.PccObjectName)
@@ -155,3 +155,10 @@ func (client *PccClient) HelperGetIdAndNameOf(objects *[]dashboardctl.PccObjectO
     return output
 }
 
+func (client *PccClient) HelperExtractHealthByTypeFrom(health *pccobject.AggrHealthCountByType) string {
+    var output string = ""
+    for t, h := range *health {
+        output += fmt.Sprintf("{Type=%s, Total=%d, OK=%d, NotOK=%d, Warning=%d}\n", t, h.CountTotal, h.CountOK, h.CountNotOK, h.CountWarning)
+    }
+    return output
+}
