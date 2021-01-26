@@ -93,8 +93,6 @@ func TestNodes(t *testing.T) {
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
 		mayRun(t, "addInvaders", addClusterHeads)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		// mayRun(t, "installLLDP", updateNodes_installLLDP)
-		// mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "updateBmcInfo", updateBmcInfo)
 	})
@@ -105,7 +103,6 @@ func TestUsers(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "users", func(t *testing.T) {
 		mayRun(t, "addTenant", addTenant)
-		// mayRun(t, "addSite", addSite)
 	})
 }
 
@@ -138,7 +135,6 @@ func TestTenantMaaS(t *testing.T) {
 		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "addTenant", addTenant)
-		// mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 	})
 }
@@ -401,6 +397,23 @@ func TestRGW(t *testing.T) {
 	mayRun(t, "CEPH RADOS GATEWAY", func(t *testing.T) {
 		mayRun(t, "deployRadosGateway", deployRadosGateway)
 	})
+}
+
+// Test functions for New Dashboard
+func TestDashboard(t *testing.T) {
+    count++
+    fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+    mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
+        mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
+		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
+		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
+		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
+        mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
+        mayRun(t, "testDashboardGetAdvSearchedObjects", testDashboardGetAdvSearchedObjects)
+        mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
+        mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
+    })
 }
 
 func TestGen(t *testing.T) {

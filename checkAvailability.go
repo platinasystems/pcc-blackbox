@@ -94,20 +94,55 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 }
 
 // Remove the service and wait for the restore
-func checkRestore(service string, path string, node *pcc.NodeDetailed) error {
-	var ssh pcc.SSHHandler
-	fmt.Println(fmt.Sprintf("Stopping and removing the service %s from node %d %s %s ", service, node.Id, node.Name, node.Host))
-	if _, stderr, err := ssh.Run(node.Host, fmt.Sprintf("sudo rm -f /opt/platina/pcc/bin/%s && ps auxww | grep %s | grep -v grep | grep -v ansible | awk '{print $2}' | xargs sudo kill -9", path, path)); err == nil {
-		fmt.Println(fmt.Sprintf("The %s:%s was correctly killed and removed from node %d:%s", service, path, node.Id, node.Name))
+func checkRestore(service string, path string, node *pcc.NodeDetailed) (err error) {
+	var (
+		ssh      pcc.SSHHandler
+		execPath string
+		stdout   string
+		cmd      string
+	)
+	execPath = fmt.Sprintf("/opt/platina/pcc/bin/%v", path)
 
-		if check, _ := Pcc.WaitForInstallation(node.Id, 60*10, service, "", nil); check {
-			fmt.Println(fmt.Sprintf("The PCC restored the [%s] on the node [%d:%s]", service, node.Id, node.Name))
-			return nil
-		} else {
-			return fmt.Errorf("the PCC was not able to restore the [%s] on the node [%d:%s]", service, node.Id, node.Name)
-		}
-	} else {
-		fmt.Println(fmt.Sprintf("Error deleting the service %s\n%s", service, stderr))
-		return err
+	fmt.Printf("Stopping and removing the service %s from node %d %s %s\n",
+		service, node.Id, node.Name, node.Host)
+	cmd = fmt.Sprintf("sudo rm -f %s && sudo kill -9 `pidof %s`",
+		execPath, path)
+	if _, _, err = ssh.Run(node.Host, cmd); err != nil {
+		return
 	}
+	fmt.Printf("The %s:%s was correctly killed & removed from node %d:%s\n",
+		service, path, node.Id, node.Name)
+
+	time.Sleep(10 * time.Second)
+	timeout := time.After(10 * time.Minute)
+	tick := time.Tick(10 * time.Second)
+	done := false
+	cmd = fmt.Sprintf("if [ -f '%s' ]; then echo -n OK; fi", execPath)
+	for !done {
+		select {
+		case <-timeout:
+			err = fmt.Errorf("Timed out waiting for %v\n",
+				service)
+			return
+		case <-tick:
+			stdout, _, err = ssh.Run(node.Host, cmd)
+			if err != nil {
+				return
+			}
+			if stdout == "OK" {
+				fmt.Printf("Executable found: %s\n", path)
+				done = true
+			}
+		}
+	}
+
+	cmd = fmt.Sprintf("pidof %s", path)
+	stdout, _, err = ssh.Run(node.Host, cmd)
+	if err != nil {
+		err = fmt.Errorf("Could not find pid of %s\n", path)
+		return
+	}
+	fmt.Printf("pid of %s found %s", path, stdout)
+
+	return
 }
