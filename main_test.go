@@ -391,29 +391,21 @@ func TestAppCredentials(t *testing.T) {
 	})
 }
 
-func TestRGW(t *testing.T) {
-	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
-	mayRun(t, "CEPH RADOS GATEWAY", func(t *testing.T) {
-		mayRun(t, "deployRadosGateway", deployRadosGateway)
-	})
-}
-
 // Test functions for New Dashboard
 func TestDashboard(t *testing.T) {
-    count++
-    fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
-    mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
-        mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
+		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
 		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
 		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
-        mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
-        mayRun(t, "testDashboardGetAdvSearchedObjects", testDashboardGetAdvSearchedObjects)
-        mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
-        mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
-    })
+		mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
+		mayRun(t, "testDashboardGetAdvSearchedObjects", testDashboardGetAdvSearchedObjects)
+		mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
+		mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
+	})
 }
 
 func TestGen(t *testing.T) {
