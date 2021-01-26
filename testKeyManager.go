@@ -17,6 +17,7 @@ func testKMKeys(t *testing.T) {
 	)
 
 	alias := "key-bb-test"
+	description := "key-bb-test"
 
 	Pcc.DeleteKey(alias) // delete if exist
 	fileName := fmt.Sprintf("%s.pem", alias)
@@ -27,19 +28,18 @@ func testKMKeys(t *testing.T) {
 	}
 
 	fmt.Println("uploading the key", alias)
-	if key, err = Pcc.UploadKey(fileName, alias, pcc.PRIVATE_KEY, ""); err == nil { // TODO check if the key already exist
-		fmt.Println("Added the key", key)
+	if _, err = Pcc.UploadKey(fileName, alias, pcc.PRIVATE_KEY, description); err == nil { // TODO check if the key already exist
+		fmt.Println("Added the key", alias)
 	} else {
 		t.Fatal(err)
 	}
-	fmt.Println("uploaded the key", key.Id, key.Alias)
 
 	defer func() {
-		fmt.Println("deleting the key", key.Id, key.Alias)
-		Pcc.DeleteKey(key.Id) // delete at the end
+		fmt.Println("deleting the key", alias)
+		Pcc.DeleteKey(alias) // delete at the end
 	}()
 
-	fmt.Println("comparing the content for the key", key)
+	fmt.Println("comparing the content for the key", alias)
 	if content, err := Pcc.DownloadKey(alias, pcc.PRIVATE_KEY); err == nil { // compare the content
 		readFileAndCompare(t, content, fileName)
 	} else {
@@ -59,10 +59,10 @@ func testKMKeys(t *testing.T) {
 	}
 
 cont:
-	fmt.Println("getting the key", key.Alias)
-	if k, err := Pcc.GetSecurityKey(alias); err == nil {
-		if k.Tenant != key.Tenant || k.Alias != key.Alias || k.Description != key.Description || k.Protect != key.Protect {
-			t.Fatal("the describe returned some different values", key, k)
+	fmt.Println("getting the key", alias)
+	if key, err = Pcc.GetSecurityKey(alias); err == nil {
+		if alias != key.Alias || description != key.Description || key.Protect {
+			t.Fatal("the describe returned some different values", key)
 		}
 	} else {
 		t.Fatal(err)
@@ -82,11 +82,14 @@ cont:
 
 func testKMCertificates(t *testing.T) {
 	fmt.Printf("\n\nCERTIFICATES:\n")
-	var err error
+	var (
+		err  error
+		cert *pcc.Certificate
+	)
 
 	alias := "certificate-bb-test"
+	description := "blackbox certificate"
 	fmt.Println(fmt.Sprintf("looking for the certificate %s and deleting if exists", alias))
-	var cert pcc.Certificate
 	if items, err := Pcc.GetCertificates(); err == nil {
 		for _, c := range items {
 			if c.Alias == alias {
@@ -107,25 +110,40 @@ func testKMCertificates(t *testing.T) {
 	}
 
 	fmt.Println("uploading the certificate", fileName)
-	if cert, err = Pcc.UploadCert(fileName, alias, "", 0); err != nil {
+	if _, err = Pcc.UploadCert(fileName, alias, description, 0); err != nil {
 		t.Fatal(err)
 	}
 
-	fmt.Println("uploaded the certificate", cert.Id, cert.Alias)
+	fmt.Println("uploaded the certificate", alias)
+	if certs, err := Pcc.GetCertificates(); err == nil { // Look for the certificate
+		for i := range certs {
+			if certs[i].Alias == alias {
+				cert = &certs[i]
+				goto CONT
+			}
+		}
+		t.Fatal("unable to find the certificate")
+	} else {
+		t.Fatal(err)
+	}
+
+CONT:
 	defer func() {
-		fmt.Println("deleting the certificate", cert.Id, cert.Alias)
-		Pcc.DeleteCertificate(cert.Id) // delete at the end
+		if cert != nil {
+			fmt.Println("deleting the certificate", cert.Id, cert.Alias)
+			Pcc.DeleteCertificate(cert.Id) // delete at the end
+		}
 	}()
 
 	if c, err := Pcc.GetCertificate(cert.Id); err == nil {
-		if c.Id != cert.Id || c.Description != cert.Description || c.Tenant != cert.Tenant || c.Protect != cert.Protect {
+		if c.Alias != alias || c.Protect || c.Description != description {
 			t.Fatal("the describe returned some different values", c, cert)
 		}
 	} else {
 		t.Fatal(err)
 	}
 
-	fmt.Println("comparing the content for the certificate", cert)
+	fmt.Println("comparing the content for the certificate", *cert)
 	if content, err := Pcc.DownloadCertificate(cert.Id); err == nil { // compare the content
 		readFileAndCompare(t, content, fileName)
 	} else {

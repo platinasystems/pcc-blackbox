@@ -81,6 +81,7 @@ func (p *PccClient) GetSecurityKey(alias string) (secKey SecurityKey, err error)
 	return
 }
 
+// It is not returning a valid key
 func (p *PccClient) UpdateSecurityKey(secKey SecurityKey) (err error) {
 	err = p.Post("key-manager/keys/update", &secKey, &secKey)
 	return
@@ -101,6 +102,7 @@ func (p *PccClient) FindSecurityKey(alias string) (exist bool, secKey SecurityKe
 	return
 }
 
+// It is not returning a valid certificate
 func (p *PccClient) UploadCert(filePath string, label string, description string, keyId uint64) (certificate Certificate, err error) {
 	endPoint := fmt.Sprintf("key-manager/certificates/upload/%s", label)
 	m := map[string]string{"description": description}
