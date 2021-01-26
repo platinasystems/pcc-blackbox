@@ -36,7 +36,11 @@ func testKMKeys(t *testing.T) {
 
 	defer func() {
 		fmt.Println("deleting the key", alias)
-		Pcc.DeleteKey(alias) // delete at the end
+		err = Pcc.DeleteKey(alias) // delete at the end
+		if err != nil {
+			fmt.Printf("Delete key [%v] failed: %v\n", alias, err)
+			t.Fatal(err)
+		}
 	}()
 
 	fmt.Println("comparing the content for the key", alias)
@@ -93,7 +97,11 @@ func testKMCertificates(t *testing.T) {
 	if items, err := Pcc.GetCertificates(); err == nil {
 		for _, c := range items {
 			if c.Alias == alias {
-				Pcc.DeleteCertificate(c.Id)
+				err = Pcc.DeleteCertificate(c.Id)
+				if err != nil {
+					fmt.Printf("Delete cert failed: %v\n",
+						err)
+				}
 				break
 			}
 		}
@@ -131,7 +139,11 @@ CONT:
 	defer func() {
 		if cert != nil {
 			fmt.Println("deleting the certificate", cert.Id, cert.Alias)
-			Pcc.DeleteCertificate(cert.Id) // delete at the end
+			err = Pcc.DeleteCertificate(cert.Id) // delete at the end
+			if err != nil {
+				fmt.Printf("Delete cert failed: %v\n", err)
+				t.Fatal(err)
+			}
 		}
 	}()
 
