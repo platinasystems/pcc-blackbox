@@ -173,17 +173,14 @@ func TestNetCluster(t *testing.T) {
 	})
 }
 
-func TestCeph(t *testing.T) {
+// assumes TestNode has been run before
+func TestAddCeph(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "ceph", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "configNetworkIntefaces", configNetworkInterfaces)
-		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "addIpam", updateIpam)
+		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "testCeph", testCeph)
 	})
 }
