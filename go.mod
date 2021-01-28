@@ -14,7 +14,7 @@ require (
 	github.com/platinasystems/go-common v0.0.0-20210119093737-336007168a0c
 	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210119072102-cf518b96d3ae
 	github.com/platinasystems/test v1.8.6
-	github.com/platinasystems/tiles v1.3.1-rc1.0.20210124030432-a91dcd4ad409
+	github.com/platinasystems/tiles v1.3.1-rc1.0.20210127020224-ad07796a5e20
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3 // indirect

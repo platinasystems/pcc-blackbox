@@ -14,3 +14,8 @@ maas_pubkey
 test_ldap_crt
 test_portus_crt
 test_portus_key
+certificate-bb-test.crt
+certificate-bb-test.pem
+container-stats.txt
+key-bb-test.pem
+logs/
