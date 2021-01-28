@@ -68,7 +68,7 @@ var (
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_7 = "Creating network for ceph cluster"
 	CEPH_INSTALLATION_INTERMEDIATE_NOTIFICATION_8 = "Drive provisionig is finished"
 
-	CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION        = "Successfully deleted network for ceph cluster"
+	CEPH_UNINSTALLATION_SUCCESS_NOTIFICATION        = "Ceph cluster has been removed from DB"
 	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster [%+v] uninstallation failed"
 	CEPH_UNINSTALLATION_FAILED_NOTIFICATION_2       = "Unable to remove ceph cluster [%+v]"
 	CEPH_UNINSTALLATION_INTERMEDIATE_NOTIFICATION_1 = "Ceph un-installation started"
@@ -79,7 +79,7 @@ var (
 	CEPH_POOL_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_COMPLETED)
 	CEPH_POOL_CREATION_FAILED_NOTIFICATION         = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_FAILED)
 	CEPH_POOL_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating Pool : [%s] for cluster [%s]"
-	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from cluster"
+	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from DB"
 	CEPH_POOL_DELETION_FAILED_NOTIFICATION         = "Unable to remove pool [%s]"
 	CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing Pool : [%s] from cluster [%s]"
 
