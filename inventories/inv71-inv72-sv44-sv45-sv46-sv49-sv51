@@ -1,0 +1,1474 @@
+
+{
+    "Env": "",
+    "PccIp": "172.17.3.215",
+    "Invaders": [
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.72",
+            "BMCIp": "",
+            "BMCUser": "",
+            "BMCUsers": [
+                ""
+            ],
+            "BMCPass": "",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "xeth19",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:42",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth24",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:47",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth20",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:43",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth22",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:45",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth15",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3e",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth10",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:39",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth12",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3b",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth16",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3f",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:30",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth17",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:40",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth11",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3a",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth14",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3d",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth18",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:41",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eth0",
+                    "Cidrs": [
+                        "172.17.2.72/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "50:18:4c:00:39:2d",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth13",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:3c",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth2",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:31",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth21",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:44",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth23",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:46",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth26",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:49",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth27",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4a",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth3",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:32",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth25",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:48",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth29",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4c",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth28",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4b",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth9",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:38",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth8",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:37",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth32",
+                    "Cidrs": [
+                        "10.0.6.7/31"
+                    ],
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4f",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth30",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4d",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth4",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:33",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth31",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:4e",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth7",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:36",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth6",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:35",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth5",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:39:34",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                }
+            ]
+        },
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.71",
+            "BMCIp": "",
+            "BMCUser": "",
+            "BMCUsers": [
+                ""
+            ],
+            "BMCPass": "",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "xeth1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:28",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth24",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3f",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth10",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:31",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth12",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:33",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth14",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:35",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth20",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3b",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth22",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3d",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth16",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:37",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth18",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:39",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth11",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:32",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth19",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3a",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth13",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:34",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth15",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:36",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth17",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:38",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth27",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:42",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth30",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:45",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth21",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3c",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth23",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:3e",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth25",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:40",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth29",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:44",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp5s0",
+                    "Cidrs": null,
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "50:18:4c:00:38:25",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth2",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:29",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth32",
+                    "Cidrs": [
+                        "10.0.6.37/31"
+                    ],
+                    "Gateway": "10.0.6.36,20",
+                    "MacAddr": "50:18:4c:00:38:47",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth26",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:41",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "100000",
+                    "Autoneg": "false",
+                    "Fec": "rs",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth3",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2a",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth28",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:43",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth31",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:46",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth8",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2f",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth6",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2d",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth4",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2b",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth9",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:30",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth5",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2c",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "xeth7",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "50:18:4c:00:38:2e",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "none",
+                    "Media": "fiber",
+                    "Mtu": "1500"
+                }
+            ]
+        }
+    ],
+    "Servers": [
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.245",
+            "BMCIp": "172.17.3.245",
+            "BMCUser": "ADMIN",
+            "BMCUsers": [
+                "ADMIN"
+            ],
+            "BMCPass": "ADMIN",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "enp130s0d1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2a:a1",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2a:a0",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno3",
+                    "Cidrs": [
+                        "172.17.2.245/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "00:25:90:f4:3e:20",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                }
+            ]
+        },
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.246",
+            "BMCIp": "172.17.3.246",
+            "BMCUser": "ADMIN",
+            "BMCUsers": [
+                "ADMIN"
+            ],
+            "BMCPass": "ADMIN",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "enp130s0d1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2d:11",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno3",
+                    "Cidrs": [
+                        "172.17.2.246/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "00:25:90:f5:43:b0",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2d:10",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                }
+            ]
+        },
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.244",
+            "BMCIp": "172.17.3.244",
+            "BMCUser": "ADMIN",
+            "BMCUsers": [
+                "ADMIN"
+            ],
+            "BMCPass": "ADMIN",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "enp130s0",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:24:d1:00",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno3",
+                    "Cidrs": [
+                        "172.17.2.244/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "00:25:90:f3:91:80",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0d1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:24:d1:01",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                }
+            ]
+        },
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.139",
+            "BMCIp": "172.17.3.139",
+            "BMCUser": "ADMIN",
+            "BMCUsers": [
+                "ADMIN"
+            ],
+            "BMCPass": "ADMIN",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "eno1",
+                    "Cidrs": [
+                        "172.17.2.139/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "00:25:90:87:d7:b8",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno2",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "00:25:90:87:d7:b9",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno3",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "00:25:90:87:d7:ba",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0d1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2a:61",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:2a:60",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "eno4",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "00:25:90:87:d7:bb",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "DOWN",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                }
+            ]
+        },
+        {
+            "Id": 0,
+            "HostIp": "172.17.2.137",
+            "BMCIp": "172.17.3.137",
+            "BMCUser": "ADMIN",
+            "BMCUsers": [
+                "ADMIN"
+            ],
+            "BMCPass": "ADMIN",
+            "KeyAlias": [
+                "test_0"
+            ],
+            "NetInterfaces": [
+                {
+                    "Name": "eno1",
+                    "Cidrs": [
+                        "172.17.2.137/23"
+                    ],
+                    "Gateway": "172.17.2.1,3372220416",
+                    "MacAddr": "00:25:90:f4:28:4a",
+                    "IsManagement": true,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "",
+                    "Autoneg": "true",
+                    "Fec": "",
+                    "Media": "Twisted Pair",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:22:e0",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                },
+                {
+                    "Name": "enp130s0d1",
+                    "Cidrs": null,
+                    "Gateway": "",
+                    "MacAddr": "e4:1d:2d:1f:22:e1",
+                    "IsManagement": false,
+                    "ManagedByPcc": true,
+                    "AdminStatus": "UP",
+                    "Speed": "40000",
+                    "Autoneg": "false",
+                    "Fec": "",
+                    "Media": "Direct Attach Copper",
+                    "Mtu": "1500"
+                }
+            ]
+        }
+    ],
+    "DockerStats": {
+        "OutputFile": "",
+        "Period": 0
+    },
+    "AuthenticationProfile":{
+      "type":"LDAP",
+      "name":"portus_ldap",
+      "profile":{
+         "domain":"ldap1.lab.platinasystems.com",
+         "userIDAttribute":"cn",
+         "userBaseDN":"ou=QA,dc=platinasystems,dc=com",
+         "anonymousBind":false,
+         "bindDN":"cn=qa-ldap,ou=Service Accounts,ou=People,dc=platinasystems,dc=com",
+         "bindPassword":"49d46fbb55fe",
+         "encryptionPolicy":"simple_tls"
+      }
+    },
+    "SshConfiguration":{
+      "key":"/home/stig/.ssh/id_rsa_pcc3215",
+      "port":22,
+      "user":"pcc"
+    },
+    "PortusConfiguration":{
+      "fullyQualifiedDomainName":"portus.platinasystem.local",
+      "password":"12341234",
+      "secretKeyBase":"test123",
+      "adminState":"Enabled"
+    },
+    "CephConfiguration":{
+       "clusterName":"cephtest",
+       "highAvailability":false,
+       "numberOfNodes":3,
+       "publicNetwork":"10.0.201.192/26",
+       "clusterNetwork":"8.0.0.0/24",
+       "tests":{
+          "createCluster":true,
+          "createPools":true,
+           "createFS":true,
+          "deleteFS":false,
+          "deletePools":false,
+          "deleteCluster":false
+       }
+    },
+    "K8sAppConfiguration": {
+       "k8sClusterName": "k8stest",
+       "cephStorageRequired": true,
+       "apps": [
+           {
+                "appName": "nginxapp",
+                "appNamespace": "nginx",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "nginx"
+           },
+           {
+                "appName": "wordpress-mysql-stateful",
+                "appNamespace": "wordpress-cephfs",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "wordpress-cephfs",
+                "storageClassHelmConfig": [
+                    {
+                        "type": "cephfs",
+                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
+                    }
+                ],
+                "helmFilePath": "wordpressHelmValuesCephFS.txt"
+           },
+           {
+                "appName": "wordpress-mysql-stateful",
+                "appNamespace": "wordpress-cephrbd",
+                "gitUrl": "https://github.com/platinasystems/devops",
+                "gitRepoPath": "helm-charts",
+                "gitBranch": "master",
+                "label": "wordpress-cephrbd",
+                "storageClassHelmConfig": [
+                    {
+                        "type": "rbd",
+                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
+                    }
+                ],
+                "helmFilePath": "wordpressHelmValuesCephRBD.txt"
+            }
+        ],
+        "tests": {
+               "createK8sCluster": true,
+               "createK8sStorageClass": true,
+               "deployApp": true,
+               "undeployApp": true,
+               "deleteK8sStorageClass": true,
+               "deleteK8sCluster": false
+        }
+   },
+    "Availability": {
+        "FakeAddress": "",
+        "Inaccessible": "172.17.2.253"
+    },
+    "NetIpam": [
+        {
+            "Name": "control-cidr",
+            "Subnet": "10.0.201.192/26",
+            "PubAccess": true,
+            "Routed": true
+        },
+        {
+            "Name": "data-cidr",
+            "Subnet": "8.0.0.0/24",
+            "PubAccess": false,
+            "Routed": false
+        }
+    ],
+    "NetCluster": [
+        {
+            "Name": "my-net",
+            "ControlCIDR": "control-cidr",
+            "DataCIDR": "data-cidr",
+            "IgwPolicy": "upstream",
+            "Nodes": [
+                {
+                    "IpAddr": "172.17.2.72",
+                    "LocalAs": "64733",
+                    "BgpNeighbors": [
+                        {
+                            "NeighborIp": "10.0.6.6",
+                            "RemoteAs": "64608"
+                        }
+                    ]
+                },
+                {
+                    "IpAddr": "172.17.2.71",
+                    "LocalAs": "64733",
+                    "BgpNeighbors": [
+                        {
+                            "NeighborIp": "10.0.6.36",
+                            "RemoteAs": "64608"
+                        }
+                    ]
+                },
+                {
+                    "IpAddr": "172.17.2.245",
+                    "LocalAs": "",
+                    "BgpNeighbors": null
+                },
+                {
+                    "IpAddr": "172.17.2.246",
+                    "LocalAs": "",
+                    "BgpNeighbors": null
+                },
+                {
+                    "IpAddr": "172.17.2.244",
+                    "LocalAs": "",
+                    "BgpNeighbors": null
+                },
+                {
+                    "IpAddr": "172.17.2.139",
+                    "LocalAs": "",
+                    "BgpNeighbors": null
+                },
+                {
+                    "IpAddr": "172.17.2.137",
+                    "LocalAs": "",
+                    "BgpNeighbors": null
+                }
+            ]
+        }
+    ]
+}
