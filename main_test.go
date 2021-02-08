@@ -8,15 +8,15 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	db "github.com/platinasystems/go-common/database"
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/test"
 	"io/ioutil"
 	"os"
 	"runtime/debug"
 	"testing"
 	"time"
-
-	log "github.com/platinasystems/go-common/logs"
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
 )
 
 var envFile string = "testEnv.json"
@@ -57,6 +57,10 @@ func TestMain(m *testing.M) {
 	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
 
 	log.InitWithDefault(nil)
+
+	//connect to blackbox db
+	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
+	db.InitWithParams(params)
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",

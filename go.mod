@@ -11,7 +11,7 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20210205135804-2363e2ecc736
+	github.com/platinasystems/go-common v0.0.0-20210208084346-835b4d00b9ed
 	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210128083231-666ed67c4f41
 	github.com/platinasystems/test v1.8.6
 	github.com/platinasystems/tiles v1.3.1-rc1.0.20210205083750-d3bf9b6ee357
