@@ -46,6 +46,11 @@ func testCeph(t *testing.T) {
 				fmt.Println("Ceph FS creation test is skipped")
 			}
 		}
+	}
+}
+
+func testDeleteCeph(t *testing.T) {
+	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephUndeploy {
 			if run, ok := cephConfig.Tests[pcc.TestDeleteCephFS]; ok && run {
 				if t.Run("deleteCephFS", testDeleteCephFS) {
@@ -350,6 +355,14 @@ func deleteCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
 	if clusterId := cephConfig.GetCephClusterId(); clusterId != 0 {
 		for _, pools := range pcc.CephPools {
 			for pool, id := range pools {
+				if id == 0 {
+					cephPool, err := Pcc.GetCephPool(pool, clusterId)
+					id = cephPool.Id
+					if err != nil {
+						fmt.Printf("Failed to lookup pool [%v] : %v\n",
+							pool, err)
+					}
+				}
 				fmt.Printf("Ceph pool [%v] deletion is starting\n", pool)
 				err := cephConfig.PccClient.DeleteCephPool(id)
 				if err != nil {

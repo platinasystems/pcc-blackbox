@@ -139,15 +139,12 @@ func TestTenantMaaS(t *testing.T) {
 	})
 }
 
+// assumes TestNode has been run before
 func TestAddK8s(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "addIpam", updateIpam)
 		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
@@ -159,7 +156,6 @@ func TestDeleteK8s(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
-		mayRun(t, "deleteNetCluster", deleteNetCluster)
 	})
 }
 
@@ -182,6 +178,16 @@ func TestAddCeph(t *testing.T) {
 		mayRun(t, "addIpam", updateIpam)
 		mayRun(t, "addNetCluster", addNetCluster)
 		mayRun(t, "testCeph", testCeph)
+	})
+}
+
+// assumes TestNodes & TestAddCeph has been run
+func TestDeleteCeph(t *testing.T) {
+	count++
+	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	mayRun(t, "cephDelete", func(t *testing.T) {
+		mayRun(t, "getNodeList", getNodes)
+		mayRun(t, "testDeleteCeph", testDeleteCeph)
 	})
 }
 
@@ -234,9 +240,6 @@ func TestHardwareInventory(t *testing.T) {
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "hardwareinventory", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
-		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "testHardwareInventory", testHardwareInventory)
 	})
 }
