@@ -106,6 +106,7 @@ func TestUsers(t *testing.T) {
 	})
 }
 
+// assumes TestNodes has been run
 func TestMaaS(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -113,15 +114,12 @@ func TestMaaS(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "configServerInterfaces", configServerInterfaces)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 	})
 }
 
+// assumes TestNodes has been run
 func TestTenantMaaS(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -129,17 +127,13 @@ func TestTenantMaaS(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
-		mayRun(t, "configServerInterfaces", configServerInterfaces)
-		mayRun(t, "installLLDP", updateNodes_installLLDP)
 		mayRun(t, "installMAAS", updateNodes_installMAAS)
 		mayRun(t, "addTenant", addTenant)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 	})
 }
 
-// assumes TestNode has been run before
+// assumes TestNode & TestNetCluster has been run before
 func TestAddK8s(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -159,6 +153,7 @@ func TestDeleteK8s(t *testing.T) {
 	})
 }
 
+// assumes TestNodes has been run
 func TestNetCluster(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -169,7 +164,7 @@ func TestNetCluster(t *testing.T) {
 	})
 }
 
-// assumes TestNode has been run before
+// assumes TestNode & TestNetCluster has been run before
 func TestAddCeph(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -181,7 +176,7 @@ func TestAddCeph(t *testing.T) {
 	})
 }
 
-// assumes TestNodes & TestAddCeph has been run
+// assumes TestAddCeph has been run
 func TestDeleteCeph(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -191,6 +186,7 @@ func TestDeleteCeph(t *testing.T) {
 	})
 }
 
+// assumes TestAddCeph has been run
 func TestCephCache(t *testing.T) {
 	mayRun(t, "ceph-cache", func(t *testing.T) {
 		mayRun(t, "testCephCacheSetup", testCephCacheSetup)
@@ -225,9 +221,9 @@ func TestPortus(t *testing.T) {
 	})
 }
 
+// assumes TestPortus has been run
 func TestDelPortus(t *testing.T) {
 	count++
-	fmt.Printf("Environment:\n%v\n", Env)
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
@@ -235,6 +231,8 @@ func TestDelPortus(t *testing.T) {
 	})
 }
 
+// assumes TestNodes has been run
+// requires ipmitool installed on unit running test
 func TestHardwareInventory(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
@@ -258,7 +256,6 @@ func TestFull(t *testing.T) {
 		mayRun(t, "configServerInterfaces", configServerInterfaces)
 		mayRun(t, "reimageAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "addTenant", addTenant)
-		// mayRun(t, "addSite", addSite)
 		mayRun(t, "reimageTenantAllBrownNodes", reimageAllBrownNodes)
 		mayRun(t, "CreateK8sCluster", createK8sCluster)
 	})
@@ -321,14 +318,13 @@ func TestAvailability(t *testing.T) {
 	})
 }
 
+// assumes TestNodes has been run
 func TestGreenfield(t *testing.T) {
 	count++
 	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "GREENFIELD", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
-		mayRun(t, "addInvaders", addClusterHeads)
-		mayRun(t, "installLLDPOnInvaders", installLLDPOnInvaders)
 		mayRun(t, "installMAAS", installMAAS)
 		mayRun(t, "addGreenfieldNodes", addGreenfieldServers)
 		mayRun(t, "getNodeList", getNodes)
