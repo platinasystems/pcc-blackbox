@@ -14,6 +14,7 @@ import (
 	"testing"
 	"time"
 
+	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -56,7 +57,15 @@ func TestMain(m *testing.M) {
 	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
 	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
 
-	log.InitWithDefault(nil)
+	if _, err := os.Stat("logConfig.yml"); err == nil {
+		pcc.LoadLogConfig("logConfig.yml", "yml")
+		log.Init()
+	} else if os.IsNotExist(err) {
+		log.InitWithDefault(nil)
+	}
+
+	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
+	db.InitWithParams(params)
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",

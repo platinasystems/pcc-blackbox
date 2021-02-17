@@ -1,0 +1,23 @@
+logs:
+  appender:
+    stdout:
+      enabled: true
+      level: TRACE
+    default:
+      enabled: true
+      level: INFO
+      maxfilesize: 25MB
+      maxhistory: 1
+      totalsizecap: 400MB
+    detailed:
+      enabled: true
+      level: TRACE
+      maxfilesize: 25MB
+      maxhistory: 1
+      totalsizecap: 400MB
+    error:
+      enabled: true
+      level: ERROR
+      maxfilesize: 25MB
+      maxhistory: 1
+      totalsizecap: 400MB
