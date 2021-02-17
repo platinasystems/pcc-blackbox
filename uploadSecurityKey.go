@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -24,12 +25,14 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	assert := test.Assert{t}
 	f, err := os.OpenFile("maas_pubkey", os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
-		assert.Fatalf("Unable to create file:\n%v\n", err)
+		log.AuctaLogger.Errorf("Unable to create file:\n%v\n", err)
+		assert.FailNow()
 		return
 	}
 	_, err = f.Write([]byte(PUB_KEY))
 	if err != nil {
-		assert.Fatalf("Unable to write on disk:\n%v\n", err)
+		log.AuctaLogger.Errorf("Unable to write on disk:\n%v\n", err)
+		assert.FailNow()
 		return
 	}
 	f.Close()
@@ -39,13 +42,15 @@ func updateSecurityKey_MaaS(t *testing.T) {
 		description := "Don't be evil"
 		exist, err := Pcc.CheckKeyLabelExists(label)
 		if err != nil {
-			assert.Fatalf("%v\n", err)
+			log.AuctaLogger.Errorf("%v\n", err)
+			assert.FailNow()
 		}
 		if !exist {
 			_, err = Pcc.UploadKey("./maas_pubkey", label,
 				pcc.PUBLIC_KEY, description)
 			if err != nil {
-				assert.Fatalf("%v\n", err)
+				log.AuctaLogger.Errorf("%v\n", err)
+				assert.FailNow()
 				return
 			}
 			break
@@ -63,15 +68,17 @@ func delAllKeys(t *testing.T) {
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		assert.Fatalf("Failed to GetSecurityKeys: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetSecurityKeys: %v\n", err)
+		assert.FailNow()
 		return
 	}
 
 	for i := 0; i < len(secKeys); i++ {
 		err = Pcc.DeleteKey(secKeys[i].Alias)
 		if err != nil {
-			assert.Fatalf("Failed to delete key %v: %v\n",
+			log.AuctaLogger.Errorf("Failed to delete key %v: %v\n",
 				secKeys[i].Alias, err)
+			assert.FailNow()
 			return
 		}
 	}

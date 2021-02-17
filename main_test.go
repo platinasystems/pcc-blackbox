@@ -95,7 +95,7 @@ var timeFormat = "Mon Jan 2 15:04:05 2006"
 // automatically config a cluser
 func TestNodes(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)

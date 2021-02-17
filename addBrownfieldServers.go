@@ -1,8 +1,9 @@
 package main
 
 import (
-	"fmt"
 	"testing"
+
+	log "github.com/platinasystems/go-common/logs"
 )
 
 func addBrownfieldServers(t *testing.T) {
@@ -15,6 +16,6 @@ func addServer(t *testing.T) {
 		nodes = append(nodes, Env.Servers[i].node)
 	}
 
-	fmt.Printf("adding %d servers\n", len(nodes))
+	log.AuctaLogger.Infof("adding %d servers\n", len(nodes))
 	addNodesAndCheckStatus(t, nodes)
 }
