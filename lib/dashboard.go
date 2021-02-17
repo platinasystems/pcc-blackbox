@@ -2,6 +2,7 @@ package pcc
 
 import (
      "fmt"
+     "strings"
 
     dashboardctl "github.com/platinasystems/tiles/pccserver/controllers"
     "github.com/platinasystems/tiles/pccserver/pccobject"
@@ -10,10 +11,16 @@ import (
 // Are these wrapper types helpful? CHECK LATER...
 // >>>>>>
 type DashboardObj struct {
-    dashboardctl.PccObjectOutput    `json:"PccObjectOutput"`
+    dashboardctl.PccObjectOutput            `json:"PccObjectOutput"`
 }
 
 type DashboardObjList []DashboardObj
+
+type ConciseDashboardObj struct {
+    dashboardctl.ConcisePccObjectOutput     `json:"ConcisePccObjectOutput"`
+}
+
+type DashboardObjIndex []ConciseDashboardObj
 // <<<<<<
 
 func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *string) (objects *[]dashboardctl.PccObjectOutput, err error) {
@@ -22,11 +29,50 @@ func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *s
     var result []dashboardctl.PccObjectOutput = make([]dashboardctl.PccObjectOutput, 0)
 
     if sortParam != nil {
-        endPoint = endPoint + "?" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
     }
+
     if pageParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
     }
+
+    if err = client.Get(endPoint, &result); err == nil {
+        objects = &result
+    } else {
+        objects = nil
+    }
+    return objects, err
+}
+
+func (client *PccClient) TestDashboardConciseObjectList(sortParam *string, pageParam *string) (objects *[]dashboardctl.ConcisePccObjectOutput, err error) {
+    // sort & pagination params may not be specified, i.e. the params are either nil or empty string
+    endPoint := "pccserver/dashboard/objectsIndex"
+    var result = make([]dashboardctl.ConcisePccObjectOutput, 0)
+
+    if sortParam != nil {
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
+    }
+
+    if pageParam != nil {
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
+    }
+
     if err = client.Get(endPoint, &result); err == nil {
         objects = &result
     } else {
@@ -53,11 +99,21 @@ func (client *PccClient) TestDashboardFilteredObjectList(field string, value str
     var result []dashboardctl.PccObjectOutput = make([]dashboardctl.PccObjectOutput, 0)
 
     if sortParam != nil {
-        endPoint = endPoint + "?" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
     }
+
     if pageParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
     }
+
     if err = client.Get(endPoint, &result); err == nil {
         objects = &result
     } else {
@@ -67,16 +123,26 @@ func (client *PccClient) TestDashboardFilteredObjectList(field string, value str
 }
 
 func (client *PccClient) TestDashboardAdvSearchedObjectList(filter string, sortParam *string, pageParam *string) (objects *[]dashboardctl.PccObjectOutput, err error) {
-    // sort & pagination params may not be specified, i.e. the params are either nil or empty string 
+    // sort & pagination params may not be specified, i.e. the params are either nil or empty string
     endPoint := fmt.Sprintf("pccserver/dashboard/objects/search?filter=%s", filter)
     var result []dashboardctl.PccObjectOutput = make([]dashboardctl.PccObjectOutput, 0)
 
     if sortParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
     }
+
     if pageParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
     }
+
     if err = client.Get(endPoint, &result); err == nil {
         objects = &result
     } else {
@@ -91,11 +157,21 @@ func (client *PccClient) TestDashboardChildrenObjectList(id uint64, sortParam *s
     var result []dashboardctl.PccObjectOutput = make([]dashboardctl.PccObjectOutput, 0)
 
     if sortParam != nil {
-        endPoint = endPoint + "?" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
     }
+
     if pageParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
     }
+
     if err = client.Get(endPoint, &result); err == nil {
         objects = &result
     } else {
@@ -110,11 +186,21 @@ func (client *PccClient) TestDashboardParentsObjectList(id uint64, sortParam *st
     var result []dashboardctl.PccObjectOutput = make([]dashboardctl.PccObjectOutput, 0)
 
     if sortParam != nil {
-        endPoint = endPoint + "?" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *sortParam
+        } else {
+            endPoint = endPoint + "?" + *sortParam
+        }
     }
+
     if pageParam != nil {
-        endPoint = endPoint + "&" + endPoint
+        if strings.Contains(endPoint, "?") {
+            endPoint = endPoint + "&" + *pageParam
+        } else {
+            endPoint = endPoint + "?" + *pageParam
+        }
     }
+
     if err = client.Get(endPoint, &result); err == nil {
         objects = &result
     } else {
