@@ -6,6 +6,7 @@ package main
 
 import pcc "github.com/platinasystems/pcc-blackbox/lib"
 
+var runID string
 var Env testEnv
 var Pcc *pcc.PccClient
 var Nodes = make(map[uint64]*pcc.NodeDetailed)

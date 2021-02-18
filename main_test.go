@@ -8,16 +8,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/google/uuid"
+	_ "github.com/google/uuid"
+	db "github.com/platinasystems/go-common/database"
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
 	"io/ioutil"
 	"os"
 	"runtime/debug"
 	"testing"
 	"time"
-
-	db "github.com/platinasystems/go-common/database"
-	log "github.com/platinasystems/go-common/logs"
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
 )
 
 var envFile string = "testEnv.json"
@@ -66,6 +68,7 @@ func TestMain(m *testing.M) {
 
 	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
 	db.InitWithParams(params)
+	db.NewDBHandler().GetDM().AutoMigrate(&models.TestResult{})
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
@@ -81,6 +84,8 @@ func TestMain(m *testing.M) {
 		m.Run()
 		return
 	}
+
+	runID = uuid.New().String()
 
 	ecode = m.Run()
 
