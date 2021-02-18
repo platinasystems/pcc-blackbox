@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"testing"
+	"time"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -15,6 +17,9 @@ func getSecurityKeys(t *testing.T) {
 
 func getSecKeys(t *testing.T) {
 	test.SkipIfDryRun(t)
+	res := models.InitTestResult(runID)
+	defer res.SaveTestResult()
+	defer res.SetElapsedTime(time.Now(), "getSecKeys")
 	assert := test.Assert{t}
 
 	var (
@@ -24,7 +29,9 @@ func getSecKeys(t *testing.T) {
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		log.AuctaLogger.Errorf("Error in retrieving Security Keys: %v\n", err)
+		msg := fmt.Sprintf("Error in retrieving Security Keys: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 		return
 	}
@@ -34,6 +41,7 @@ func getSecKeys(t *testing.T) {
 		log.AuctaLogger.Infof("Mapping SecurityKey[%v]:%d - %v\n",
 			secKeys[i].Alias, secKeys[i].Id, secKeys[i].Description)
 	}
+	res.SetTestPass()
 }
 
 func getFirstKey() (sKey pcc.SecurityKey, err error) {

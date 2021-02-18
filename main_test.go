@@ -9,7 +9,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/google/uuid"
-	_ "github.com/google/uuid"
 	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"

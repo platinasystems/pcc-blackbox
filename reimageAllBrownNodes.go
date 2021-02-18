@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"strings"
 	"testing"
 	"time"
@@ -19,6 +20,9 @@ func reimageAllBrownNodes(t *testing.T) {
 
 func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
+	res := models.InitTestResult(runID)
+	defer res.SaveTestResult()
+	defer res.SetElapsedTime(time.Now(), "updateBmcInfo")
 	assert := test.Assert{t}
 
 	for _, i := range Env.Servers {
@@ -45,20 +49,28 @@ func updateBmcInfo(t *testing.T) {
 			addReq.Console = "ttyS1"
 
 			if err = Pcc.UpdateNode(&addReq); err != nil {
-				log.AuctaLogger.Errorf("Failed to update BMC info: %v\n", err)
+				msg := fmt.Sprintf("Failed to update BMC info: %v\n", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
 				assert.FailNow()
 				return
 			}
 		} else {
-			log.AuctaLogger.Errorf("Failed to get the key %v\n", err)
+			msg := fmt.Sprintf("Failed to get the key %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
 			assert.FailNow()
 			return
 		}
 	}
+	res.SetTestPass()
 }
 
 func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
+	res := models.InitTestResult(runID)
+	defer res.SaveTestResult()
+	defer res.SetElapsedTime(time.Now(), "reimageAllBrown")
 	assert := test.Assert{t}
 
 	fails := 0
@@ -80,7 +92,9 @@ func reimageAllBrown(t *testing.T) {
 
 		fmt.Println(request)
 		if err = Pcc.MaasDeploy(request); err != nil {
-			log.AuctaLogger.Errorf("MaasDeploy failed: %v\n", err)
+			msg := fmt.Sprintf("MaasDeploy failed: %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
 			assert.FailNow()
 		}
 
@@ -111,7 +125,9 @@ func reimageAllBrown(t *testing.T) {
 				if fails == 0 {
 					log.AuctaLogger.Infof("Brownfield re-image done\n")
 				} else {
-					log.AuctaLogger.Errorf("Brownfield re-image failed on %v nodes\n", fails)
+					msg := fmt.Sprintf("Brownfield re-image failed on %v nodes\n", fails)
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
 					assert.FailNow()
 				}
 				return
@@ -119,7 +135,9 @@ func reimageAllBrown(t *testing.T) {
 			time.Sleep(60 * time.Second)
 		}
 	} else {
-		log.AuctaLogger.Errorf("Failed to get the key %v\n", err)
+		msg := fmt.Sprintf("Failed to get the key %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
 }

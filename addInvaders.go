@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"strings"
 	"sync"
 	"testing"
@@ -30,7 +31,9 @@ func addInvaders(t *testing.T) {
 func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	var err error
 	test.SkipIfDryRun(t)
-
+	res := models.InitTestResult(runID)
+	defer res.SaveTestResult()
+	defer res.SetElapsedTime(time.Now(), "addNodesAndCheckStatus")
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
 		log.AuctaLogger.Infof("Checking %s installation for nodeId:%v from %s \n", app, nodeId, from.String())
@@ -80,7 +83,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 					time.Sleep(10 * time.Second)
 					if status, ignore = Pcc.GetProvisionStatus(node.Id); ignore == nil { // early check for add fail
 						if strings.Contains(status, "Add node failed") {
-							log.AuctaLogger.Errorf("%s for node %d", status, node.Id)
+							msg := fmt.Sprintf("%s for node %d", status, node.Id)
+							res.SetTestFailure(msg)
+							log.AuctaLogger.Error(msg)
 							t.FailNow()
 						}
 					}
@@ -91,7 +96,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 							return
 						case "", "NoRunningService": // wait for the next cycle
 						default:
-							log.AuctaLogger.Errorf("Unable to add the node %s", connection)
+							msg := fmt.Sprintf("Unable to add the node %s", connection)
+							res.SetTestFailure(msg)
+							log.AuctaLogger.Error(msg)
 							t.FailNow()
 
 						}
@@ -105,7 +112,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 					}
 
 					if time.Since(start) > timeout {
-						log.AuctaLogger.Errorf("timeout for node addition %d", node.Id)
+						msg := fmt.Sprintf("timeout for node addition %d", node.Id)
+						res.SetTestFailure(msg)
+						log.AuctaLogger.Error(msg)
 						t.FailNow()
 					}
 
@@ -114,7 +123,9 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 					}
 				}
 			} else {
-				log.AuctaLogger.Errorf("add node %s failed\n%v\n", node.Host, routineError)
+				msg := fmt.Sprintf("add node %s failed\n%v\n", node.Host, routineError)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
 				t.FailNow()
 			}
 		} else {
@@ -129,8 +140,10 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	wg.Wait() // wait for all addition
 
 	if err != nil {
-		log.AuctaLogger.Errorf("Error adding nodes %v", err)
+		msg := fmt.Sprintf("Error adding nodes %v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
 		t.FailNow()
 	}
-
+	res.SetTestPass()
 }
