@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	TestPass string = "pass"
-	TestFail string = "fail"
+	TestPass      string = "pass"
+	TestFail      string = "fail"
+	TestUndefined string = "undefined"
 )
 
 type TestResult struct {
@@ -22,7 +23,7 @@ type TestResult struct {
 }
 
 func InitTestResult(runID string) (res *TestResult) {
-	res = &TestResult{RunID: runID}
+	res = &TestResult{RunID: runID, Result: TestUndefined}
 	res.TestID = utility.GetTestID()
 	return
 }

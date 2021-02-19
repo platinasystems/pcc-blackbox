@@ -63,7 +63,7 @@ func configNetworkInterfaces(t *testing.T) {
 			log.AuctaLogger.Infof("SKIP interface %v for node %d\n", iface, id)
 		}
 		nodeIntfMap[id] = nodeIntfs
-		configNodeInterfaces(t, res, sever, id, node.HostIp, node.NetInterfaces, ifaces)
+		configNodeInterfaces(t, sever, id, node.HostIp, node.NetInterfaces, ifaces)
 	}
 
 	for i := range Env.Invaders {
@@ -137,8 +137,11 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	return
 }
 
-func configNodeInterfaces(t *testing.T, res *models.TestResult, skipManagement bool, nodeId uint64, HostIp string,
+func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, HostIp string,
 	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
+	res := models.InitTestResult(runID)
+	defer res.SaveTestResult()
+	defer res.SetElapsedTime(time.Now(), "configNodeInterfaces")
 	assert := test.Assert{t}
 	var (
 		iface        *pcc.InterfaceDetail
@@ -187,6 +190,7 @@ func configNodeInterfaces(t *testing.T, res *models.TestResult, skipManagement b
 		assert.FailNow()
 		return
 	}
+	res.SetTestPass()
 }
 
 func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
