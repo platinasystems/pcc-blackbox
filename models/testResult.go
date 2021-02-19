@@ -1,10 +1,12 @@
 package models
 
 import (
+	"testing"
+	"time"
+
 	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	"github.com/platinasystems/pcc-blackbox/utility"
-	"time"
 )
 
 const (
@@ -44,4 +46,12 @@ func (testResult *TestResult) SetElapsedTime(start time.Time, name string) {
 
 func (testResult *TestResult) SaveTestResult() {
 	db.NewDBHandler().GetDM().Create(testResult)
+}
+
+func (testResult *TestResult) CheckTestAndSave(t *testing.T, funcName string) {
+	if !t.Failed() {
+		testResult.SetTestPass()
+	}
+	testResult.SetElapsedTime(time.Now(), funcName)
+	testResult.SaveTestResult()
 }

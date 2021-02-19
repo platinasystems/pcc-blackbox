@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	"github.com/lib/pq"
 	log "github.com/platinasystems/go-common/logs"
@@ -20,9 +21,10 @@ func reimageAllBrownNodes(t *testing.T) {
 
 func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "updateBmcInfo")
+	defer res.CheckTestAndSave(t, "updateBmcInfo")
+
 	assert := test.Assert{t}
 
 	for _, i := range Env.Servers {
@@ -63,14 +65,14 @@ func updateBmcInfo(t *testing.T) {
 			return
 		}
 	}
-	res.SetTestPass()
 }
 
 func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "reimageAllBrown")
+	defer res.CheckTestAndSave(t, "reimageAllBrown")
+
 	assert := test.Assert{t}
 
 	fails := 0

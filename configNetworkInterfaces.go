@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"regexp"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -29,9 +30,10 @@ func configServerInterfaces(t *testing.T) {
 // FIXME lump the functions in an single one
 func configNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "configNetworkInterfaces")
+	defer res.CheckTestAndSave(t, "configNetworkInterfaces")
+
 	assert := test.Assert{t}
 
 	configureNode := func(node node, sever bool) {
@@ -72,7 +74,7 @@ func configNetworkInterfaces(t *testing.T) {
 	for i := range Env.Servers {
 		configureNode(Env.Servers[i].node, true)
 	}
-	res.SetTestPass()
+
 }
 
 func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface netInterface) (ifaceRequest pcc.InterfaceRequest) {
@@ -139,9 +141,10 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 
 func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, HostIp string,
 	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "configNodeInterfaces")
+	defer res.CheckTestAndSave(t, "configNodeInterfaces")
+
 	assert := test.Assert{t}
 	var (
 		iface        *pcc.InterfaceDetail
@@ -190,7 +193,7 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 		assert.FailNow()
 		return
 	}
-	res.SetTestPass()
+
 }
 
 func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
@@ -202,7 +205,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 
 	err = fmt.Errorf("config mismatch for %v", intfReq.Name)
 
-	fmt.Printf("  Validating config for %v\n", intfReq.Name)
+	log.AuctaLogger.Infof("  Validating config for %v\n", intfReq.Name)
 
 	// chop off ",<metric>"
 	rGateway := strings.Split(intfReq.Gateway, ",")
@@ -372,9 +375,10 @@ func serverConfigLoop(id uint64, serverIntfs []netInterface) (done bool, err err
 
 func verifyNetworkConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "verifyNetworkConfig")
+	defer res.CheckTestAndSave(t, "verifyNetworkConfig")
+
 	assert := test.Assert{t}
 
 	var serverMap = make(map[uint64][]netInterface)
@@ -427,14 +431,15 @@ func verifyNetworkConfig(t *testing.T) {
 			return
 		}
 	}
-	res.SetTestPass()
+
 }
 
 func verifyNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "verifyNetworkInterfaces")
+	defer res.CheckTestAndSave(t, "verifyNetworkInterfaces")
+
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
 
@@ -529,19 +534,20 @@ func verifyNetworkInterfaces(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-				res.SetTestPass()
+
 				return
 			}
 		}
 	}
-	res.SetTestPass()
+
 }
 
 func verifyNetworkUp(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "verifyNetworkUp")
+	defer res.CheckTestAndSave(t, "verifyNetworkUp")
+
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
 
@@ -635,10 +641,10 @@ func verifyNetworkUp(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-				res.SetTestPass()
+
 				return
 			}
 		}
 	}
-	res.SetTestPass()
+
 }

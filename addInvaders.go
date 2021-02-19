@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -31,9 +32,10 @@ func addInvaders(t *testing.T) {
 func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	var err error
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "addNodesAndCheckStatus")
+	defer res.CheckTestAndSave(t, "addNodesAndCheckStatus")
+
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
 		log.AuctaLogger.Infof("Checking %s installation for nodeId:%v from %s \n", app, nodeId, from.String())
@@ -145,5 +147,4 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
 	}
-	res.SetTestPass()
 }

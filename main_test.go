@@ -8,17 +8,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"os"
+	"runtime/debug"
+	"testing"
+	"time"
+
 	"github.com/google/uuid"
 	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
-	"io/ioutil"
-	"os"
-	"runtime/debug"
-	"testing"
-	"time"
 )
 
 var envFile string = "testEnv.json"

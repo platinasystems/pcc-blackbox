@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"os"
 	"testing"
-	"time"
+
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -24,9 +24,10 @@ type secKeyUploader struct {
 
 func updateSecurityKey_MaaS(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "updateSecurityKey_MaaS")
+	defer res.CheckTestAndSave(t, "updateSecurityKey_MaaS")
+
 	assert := test.Assert{t}
 	f, err := os.OpenFile("maas_pubkey", os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
@@ -69,14 +70,14 @@ func updateSecurityKey_MaaS(t *testing.T) {
 			break
 		}
 	}
-	res.SetTestPass()
 }
 
 func delAllKeys(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "delAllKeys")
+	defer res.CheckTestAndSave(t, "delAllKeys")
+
 	assert := test.Assert{t}
 	var (
 		secKeys []pcc.SecurityKey
@@ -103,5 +104,4 @@ func delAllKeys(t *testing.T) {
 			return
 		}
 	}
-	res.SetTestPass()
 }

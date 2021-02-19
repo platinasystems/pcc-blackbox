@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"testing"
-	"time"
+
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -18,9 +18,10 @@ func getNodes(t *testing.T) {
 
 func getAvailableNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "getAvailableNodes")
+	defer res.CheckTestAndSave(t, "getAvailableNodes")
+
 	assert := test.Assert{t}
 	if nodes, err := Pcc.GetNodes(); err == nil {
 		for i := 0; i < len(*nodes); i++ {
@@ -30,7 +31,6 @@ func getAvailableNodes(t *testing.T) {
 			NodebyHostIP[node.Host] = id
 			Env.setNodeId(node.Host, id)
 		}
-		res.SetTestPass()
 	} else {
 		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
 		res.SetTestFailure(msg)
@@ -41,9 +41,9 @@ func getAvailableNodes(t *testing.T) {
 
 func testNodeGroups(t *testing.T) {
 	test.SkipIfDryRun(t)
+
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "testNodeGroups")
+	defer res.CheckTestAndSave(t, "testNodeGroups")
 
 	assert := test.Assert{t}
 
@@ -115,5 +115,4 @@ func testNodeGroups(t *testing.T) {
 		assert.FailNow()
 		return
 	}
-	res.SetTestPass()
 }
