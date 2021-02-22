@@ -123,7 +123,7 @@ func TestUsers(t *testing.T) {
 // assumes TestNodes has been run
 func TestMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -136,7 +136,7 @@ func TestMaaS(t *testing.T) {
 // assumes TestNodes has been run
 func TestTenantMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)

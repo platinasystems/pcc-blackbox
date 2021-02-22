@@ -142,6 +142,7 @@ func reimageAllBrown(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
+	res.SetTestPass()
 }
 
 func removeIndex(i int, n []uint64) []uint64 {
