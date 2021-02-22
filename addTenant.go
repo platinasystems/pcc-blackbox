@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"testing"
-	"time"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -20,8 +19,7 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "addTenantA")
+	defer res.CheckTestAndSave(t, "addTenantA")
 
 	assert := test.Assert{t}
 	var (
@@ -255,15 +253,13 @@ func addTenantA(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
-	res.SetTestPass()
 }
 
 func delAllTenants(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "delAllTenants")
+	defer res.CheckTestAndSave(t, "delAllTenants")
 
 	assert := test.Assert{t}
 	var (
@@ -291,15 +287,13 @@ func delAllTenants(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
-	res.SetTestPass()
 }
 
 func delAllUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "delAllUsers")
+	defer res.CheckTestAndSave(t, "delAllUsers")
 
 	assert := test.Assert{t}
 	var (
@@ -328,5 +322,4 @@ func delAllUsers(t *testing.T) {
 		assert.FailNow()
 		return
 	}
-	res.SetTestPass()
 }

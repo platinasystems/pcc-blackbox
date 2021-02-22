@@ -20,8 +20,7 @@ func installMAAS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.SaveTestResult()
-	defer res.SetElapsedTime(time.Now(), "installMAAS")
+	defer res.CheckTestAndSave(t, "installMAAS")
 
 	var (
 		err    error
@@ -52,7 +51,6 @@ func installMAAS(t *testing.T) {
 		log.AuctaLogger.Error(err)
 		t.FailNow()
 	}
-	res.SetTestPass()
 }
 
 // FIXME move the wait to PccClient
