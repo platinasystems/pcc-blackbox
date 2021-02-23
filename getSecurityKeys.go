@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/platinasystems/pcc-blackbox/models"
 
@@ -19,7 +20,7 @@ func getSecKeys(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "getSecKeys")
+	defer res.CheckTestAndSave(t, time.Now(), "getSecKeys")
 
 	assert := test.Assert{t}
 

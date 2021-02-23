@@ -23,7 +23,7 @@ func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "updateBmcInfo")
+	defer res.CheckTestAndSave(t, time.Now(), "updateBmcInfo")
 
 	assert := test.Assert{t}
 
@@ -71,7 +71,7 @@ func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "reimageAllBrown")
+	defer res.CheckTestAndSave(t, time.Now(), "reimageAllBrown")
 
 	assert := test.Assert{t}
 
