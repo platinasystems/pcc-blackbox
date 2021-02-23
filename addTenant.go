@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -19,7 +20,7 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "addTenantA")
+	defer res.CheckTestAndSave(t, time.Now(), "addTenantA")
 
 	assert := test.Assert{t}
 	var (
@@ -259,7 +260,7 @@ func delAllTenants(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "delAllTenants")
+	defer res.CheckTestAndSave(t, time.Now(), "delAllTenants")
 
 	assert := test.Assert{t}
 	var (
@@ -293,7 +294,7 @@ func delAllUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "delAllUsers")
+	defer res.CheckTestAndSave(t, time.Now(), "delAllUsers")
 
 	assert := test.Assert{t}
 	var (

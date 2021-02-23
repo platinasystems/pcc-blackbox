@@ -249,7 +249,7 @@ func TestDelPortus(t *testing.T) {
 // requires ipmitool installed on unit running test
 func TestHardwareInventory(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "hardwareinventory", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testHardwareInventory", testHardwareInventory)
@@ -335,7 +335,7 @@ func TestAvailability(t *testing.T) {
 // assumes TestNodes has been run
 func TestGreenfield(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "GREENFIELD", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
