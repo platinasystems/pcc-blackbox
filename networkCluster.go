@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"regexp"
 	"testing"
 	"time"
@@ -16,11 +18,14 @@ var netClusterName string = "mynetcluster"
 func addNetCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "addNetCluster")
+
 	for _, netCluster := range Env.NetCluster {
 		netClusterId, err := Pcc.FindNetClusterId(netCluster.Name)
 		netClusterName = netCluster.Name
 		if err == nil {
-			fmt.Printf("Network cluster [%v] already exists [%v]\n",
+			log.AuctaLogger.Warnf("Network cluster [%v] already exists [%v]\n",
 				netCluster.Name, netClusterId)
 			continue
 		}
@@ -30,13 +35,19 @@ func addNetCluster(t *testing.T) {
 
 func deleteNetCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "deleteNetCluster")
 	assert := test.Assert{t}
 
 	for _, netCluster := range Env.NetCluster {
 		_, err := Pcc.FindNetClusterId(netCluster.Name)
 		if err != nil {
-			assert.Fatalf("Network cluster [%v] not found: %v\n",
+			msg := fmt.Sprintf("Network cluster [%v] not found: %v\n",
 				netCluster.Name, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			continue
 		}
 		netClusterName = netCluster.Name
@@ -47,6 +58,9 @@ func deleteNetCluster(t *testing.T) {
 
 func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	assert := test.Assert{t}
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "addNetClusterInternal")
 
 	var (
 		reqCluster    pcc.NetworkClusterReq
@@ -64,33 +78,49 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	case pcc.IGW_UPSTREAM:
 	case pcc.IGW_DEFAULT:
 	default:
-		assert.Fatal("Invalid IgwPolicy")
+		msg := "Invalid IgwPolicy"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	reqCluster.IgwPolicy = igwPolicy
 
 	controlCIDR = netCluster.ControlCIDR
 	if controlCIDR == "" {
-		assert.Fatal("No ControlCIDR defined")
+		msg := "No ControlCIDR defined"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	controlCIDRObj, err := Pcc.FindSubnetObj(controlCIDR)
 	if err != nil {
-		assert.Fatalf("ControlCIDR IPAM not found [%v]: %v\n",
+		msg := fmt.Sprintf("ControlCIDR IPAM not found [%v]: %v\n",
 			controlCIDR, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	reqCluster.ControlCIDRId = controlCIDRObj.Id
 
 	dataCIDR = netCluster.DataCIDR
 	if controlCIDR == "" {
-		assert.Fatal("No DataCIDR defined")
+		msg := "No DataCIDR defined"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	dataCIDRObj, err := Pcc.FindSubnetObj(dataCIDR)
 	if err != nil {
-		assert.Fatalf("dataCIDR IPAM not found [%v]: %v\n",
+
+		msg := fmt.Sprintf("dataCIDR IPAM not found [%v]: %v\n",
 			dataCIDR, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	reqCluster.DataCIDRId = dataCIDRObj.Id
@@ -103,7 +133,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		if digitCheck.MatchString(n.LocalAs) {
 			val, err := json.Number(n.LocalAs).Int64()
 			if err != nil {
-				fmt.Printf("Atoi convert failed: %v\n", err)
+				log.AuctaLogger.Warnf("Atoi convert failed: %v\n", err)
 				continue
 			}
 			val2 := uint64(val)
@@ -116,13 +146,13 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				nodes[i].BgpNeighbors[j].NeighborIp =
 					p.NeighborIp
 				if !digitCheck.MatchString(p.RemoteAs) {
-					fmt.Printf("Invalid RemoteAs [%v]\n",
+					log.AuctaLogger.Warnf("Invalid RemoteAs [%v]\n",
 						p.RemoteAs)
 					continue
 				}
 				val, err := json.Number(p.RemoteAs).Int64()
 				if err != nil {
-					fmt.Printf("Atoi convert failed: %v\n",
+					log.AuctaLogger.Warnf("Atoi convert failed: %v\n",
 						err)
 					continue
 				}
@@ -135,15 +165,22 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 
 	err = Pcc.AddNetCluster(&reqCluster)
 	if err != nil {
-		assert.Fatalf("AddNetCluster failed: %v\n", err)
+		msg := fmt.Sprintf("AddNetCluster failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	time.Sleep(1 * time.Second)
 	netClusterObj, err = Pcc.FindNetClusterName(reqCluster.Name)
 	if err != nil {
-		assert.Fatalf("Network cluster [%v]: %v\n",
+		msg := fmt.Sprintf("Network cluster [%v]: %v\n",
 			reqCluster.Name, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
+
 		return
 	}
 	netClusterId := netClusterObj.Id
@@ -153,16 +190,22 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	for !done {
 		select {
 		case <-timeout:
-			assert.Fatal("Timed out waiting for network cluster\n")
+			msg := "Timed out waiting for network cluster\n"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		case <-tick:
 			netClusterObj, err = Pcc.GetNetClusterId(netClusterId)
 			if err != nil {
-				assert.Fatalf("Network cluster [%v]: %v\n",
+				msg := fmt.Sprintf("Network cluster [%v]: %v\n",
 					reqCluster.Name, err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
-			fmt.Printf("deploy status [%v] %v%% health [%v]\n",
+			log.AuctaLogger.Infof("deploy status [%v] %v%% health [%v]\n",
 				netClusterObj.DeployStatus,
 				netClusterObj.ProgressPercentage,
 				netClusterObj.Health)
@@ -172,31 +215,46 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				done = true
 			case pcc.NETWORK_DEPLOY_STATUS_FAILED:
 				done = true
-				assert.Fatal("Network deploy failed\n")
+				msg := "Network deploy failed\n"
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 			default:
 			}
 		}
 	}
 
 	if netClusterObj.Health != pcc.NETWORK_HEALTH_OK {
-		assert.Fatalf("Network deploy %s\n", netClusterObj.Health)
+		msg := fmt.Sprintf("Network deploy %s\n", netClusterObj.Health)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func deleteNetClusterInternal(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "deleteNetClusterInternal")
 	assert := test.Assert{t}
 
 	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
 	if err != nil {
-		assert.Fatalf("FindNetClusterId failed: %v\n", err)
+		msg := fmt.Sprintf("FindNetClusterId failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	err = Pcc.DelNetClusterWait(netClusterId, false)
 	if err != nil {
-		assert.Fatalf("DelNetCluster failed: %v\n", err)
+		msg := fmt.Sprintf("DelNetCluster failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -205,27 +263,39 @@ func deleteNetClusterInternal(t *testing.T) {
 
 func delAllNetsCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "delAllNetsCluster")
 	assert := test.Assert{t}
 
 	netCluster, err := Pcc.GetNetCluster()
 	if err != nil {
-		assert.Fatalf("GetNetCluster failed: %v\n", err)
+		msg := fmt.Sprintf("GetNetCluster failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, nC := range netCluster {
-		fmt.Printf("delete net cluster [%v]\n", nC.Id)
+		log.AuctaLogger.Infof("delete net cluster [%v]\n", nC.Id)
 		err = Pcc.DelNetCluster(nC.Id, false)
 		if err != nil {
-			assert.Fatalf("DelNetCluster %v failed: %v\n",
+			msg := fmt.Sprintf("DelNetCluster %v failed: %v\n",
 				nC.Id, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 
 		err = Pcc.DelNetClusterWait(nC.Id, false)
 		if err != nil {
-			assert.Fatalf("DelNetCluster %v failed: %v\n",
+			msg := fmt.Sprintf("DelNetCluster %v failed: %v\n",
 				nC.Id, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}

@@ -150,7 +150,7 @@ func TestTenantMaaS(t *testing.T) {
 // assumes TestNode & TestNetCluster has been run before
 func TestAddK8s(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -161,7 +161,7 @@ func TestAddK8s(t *testing.T) {
 
 func TestDeleteK8s(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
 	})
@@ -170,7 +170,7 @@ func TestDeleteK8s(t *testing.T) {
 // assumes TestNodes has been run
 func TestNetCluster(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "netCluster", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -193,7 +193,7 @@ func TestAddCeph(t *testing.T) {
 // assumes TestAddCeph has been run
 func TestDeleteCeph(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "cephDelete", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testDeleteCeph", testDeleteCeph)
@@ -211,7 +211,7 @@ func TestCephCache(t *testing.T) {
 
 func TestK8sApp(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "K8sApp", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
