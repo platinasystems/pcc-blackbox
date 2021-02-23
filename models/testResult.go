@@ -48,10 +48,10 @@ func (testResult *TestResult) SaveTestResult() {
 	db.NewDBHandler().GetDM().Create(testResult)
 }
 
-func (testResult *TestResult) CheckTestAndSave(t *testing.T, funcName string) {
+func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time, funcName string) {
 	if !t.Failed() {
 		testResult.SetTestPass()
 	}
-	testResult.SetElapsedTime(time.Now(), funcName)
+	testResult.SetElapsedTime(start, funcName)
 	testResult.SaveTestResult()
 }

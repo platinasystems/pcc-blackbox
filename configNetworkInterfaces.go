@@ -32,7 +32,7 @@ func configNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "configNetworkInterfaces")
+	defer res.CheckTestAndSave(t, time.Now(), "configNetworkInterfaces")
 
 	assert := test.Assert{t}
 
@@ -143,7 +143,7 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "configNodeInterfaces")
+	defer res.CheckTestAndSave(t, time.Now(), "configNodeInterfaces")
 
 	assert := test.Assert{t}
 	var (
@@ -377,7 +377,7 @@ func verifyNetworkConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "verifyNetworkConfig")
+	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkConfig")
 
 	assert := test.Assert{t}
 
@@ -438,7 +438,7 @@ func verifyNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "verifyNetworkInterfaces")
+	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkInterfaces")
 
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
@@ -546,7 +546,7 @@ func verifyNetworkUp(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "verifyNetworkUp")
+	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkUp")
 
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
