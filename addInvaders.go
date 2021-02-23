@@ -34,7 +34,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "addNodesAndCheckStatus")
+	defer res.CheckTestAndSave(t, time.Now(), "addNodesAndCheckStatus")
 
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
