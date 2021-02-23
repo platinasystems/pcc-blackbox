@@ -295,7 +295,7 @@ func TestClean(t *testing.T) {
 
 func TestTunnel(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Info("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "TUNNEL", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
