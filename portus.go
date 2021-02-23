@@ -6,7 +6,9 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 )
 
@@ -36,32 +38,50 @@ func UploadSecurityPortusCert(t *testing.T) {
 
 func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "uploadSecurityKey_Portus")
+
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY,
 		pcc.PRIVATE_KEY, 0)
 	if err != nil {
-		assert.Fatalf(err.Error())
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "uploadCertificate_Portus")
+
 	assert := test.Assert{t}
 	var keyId uint64
 	exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
 	if err != nil {
-		fmt.Printf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
+		log.AuctaLogger.Errorf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
 	} else if exist {
 		keyId = privateKey.Id
 	}
 	err = CreateFileAndUpload(PORTUS_CERT_FILENAME, PORTUS_CERT, pcc.CERT, keyId)
 	if err != nil {
-		assert.Fatalf(err.Error())
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func installPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "installPortus")
+
 	assert := test.Assert{t}
 	var (
 		portusConfiguration pcc.PortusConfiguration
@@ -74,30 +94,30 @@ func installPortus(t *testing.T) {
 			portusConfiguration.Name = fmt.Sprintf("portus_%v", id)
 
 			if Env.AuthenticationProfile.Name == "" {
-				fmt.Println("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
+				log.AuctaLogger.Warnf("Authenticatiom Profile is not defined in the configuration file, Portus will be installed without it")
 			} else {
 				authProfile, err := Pcc.GetAuthProfileByName(CurrentAuthProfileName)
 				if err == nil {
 					portusConfiguration.AuthenticationProfileId = &authProfile.ID
 				} else {
-					fmt.Printf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
+					log.AuctaLogger.Warnf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
 				}
 			}
 
 			exist, certificate, err := Pcc.FindCertificate(PORTUS_CERT_FILENAME)
 			if err != nil {
-				fmt.Printf("Get certificate %s failed\n%v\n", PORTUS_CERT_FILENAME, err)
+				log.AuctaLogger.Errorf("Get certificate %s failed\n%v\n", PORTUS_CERT_FILENAME, err)
 			} else if exist {
 				portusConfiguration.RegistryCertId = &certificate.Id
 			}
 
-			fmt.Printf("Installing Portus on Node with id %v\n",
+			log.AuctaLogger.Infof("Installing Portus on Node with id %v\n",
 				node.Id)
 
 			err = Pcc.InstallPortusNode(portusConfiguration)
 			if err != nil {
-				fmt.Printf("Portus installation in %v failed\n%v\n", node.Host, err)
-				fmt.Printf("Trying in another node\n")
+				log.AuctaLogger.Warnf("Portus installation in %v failed\n%v\n", node.Host, err)
+				log.AuctaLogger.Warnf("Trying in another node\n")
 			} else {
 				PortusSelectedNodeIds = append(PortusSelectedNodeIds, node.Id)
 				break
@@ -105,22 +125,32 @@ func installPortus(t *testing.T) {
 		}
 	}
 	if len(PortusSelectedNodeIds) == 0 {
-		assert.Fatal("Failed to install Portus: No available nodes\n")
+		msg := "Failed to install Portus: No available nodes\n"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func checkPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkPortus")
+
 	assert := test.Assert{t}
 
 	for id, node := range Nodes {
 		if idInSlice(node.Id, PortusSelectedNodeIds) {
 			check, err := Pcc.WaitForInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, "", nil)
 			if err != nil {
-				assert.Fatalf("Portus installation has failed\n%v\n", err)
+				msg := fmt.Sprintf("Portus installation has failed\n%v\n", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 			}
 			if check {
-				fmt.Printf("Portus correctly installed on nodeId:%v\n", id)
+				log.AuctaLogger.Infof("Portus correctly installed on nodeId:%v\n", id)
 			}
 		}
 	}
@@ -128,6 +158,10 @@ func checkPortus(t *testing.T) {
 
 func delAllPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "delAllPortus")
+
 	assert := test.Assert{t}
 
 	var (
@@ -138,17 +172,23 @@ func delAllPortus(t *testing.T) {
 
 	portusConfigs, err = Pcc.GetPortusNodes()
 	if err != nil {
-		assert.Fatalf("Failed to get portus nodes: %v\n", err)
+		msg := fmt.Sprintf("Failed to get portus nodes: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, p := range portusConfigs {
-		fmt.Printf("Deleting Portus %v\n", p.Name)
+		log.AuctaLogger.Infof("Deleting Portus %v\n", p.Name)
 		id = p.ID
 		err = Pcc.DelPortusNode(id, true)
 		if err != nil {
-			assert.Fatalf("Failed to delete Portus %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete Portus %v: %v\n",
 				p.Name, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 		// wait till deleted
@@ -164,12 +204,18 @@ func delAllPortus(t *testing.T) {
 						done = true
 						continue
 					}
-					assert.Fatalf("Failed Get Portus: %v\n",
+					msg := fmt.Sprintf("Failed Get Portus: %v\n",
 						err)
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					assert.FailNow()
 					return
 				}
 			case <-timeout:
-				assert.Fatal("Timeout deleting Portus\n")
+				msg := fmt.Sprintf("Timeout deleting Portus\n")
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 			}
 		}
 	}

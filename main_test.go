@@ -222,7 +222,7 @@ func TestK8sApp(t *testing.T) {
 
 func TestPortus(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
@@ -238,7 +238,7 @@ func TestPortus(t *testing.T) {
 // assumes TestPortus has been run
 func TestDelPortus(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "delAllPortus", delAllPortus)
