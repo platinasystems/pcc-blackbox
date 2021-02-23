@@ -193,7 +193,7 @@ func TestAddCeph(t *testing.T) {
 // assumes TestAddCeph has been run
 func TestDeleteCeph(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "cephDelete", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testDeleteCeph", testDeleteCeph)
@@ -211,7 +211,7 @@ func TestCephCache(t *testing.T) {
 
 func TestK8sApp(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "K8sApp", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
