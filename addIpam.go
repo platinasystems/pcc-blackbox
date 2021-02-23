@@ -7,6 +7,7 @@ import (
 	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 	"testing"
+	"time"
 )
 
 func updateIpam(t *testing.T) {
@@ -18,7 +19,7 @@ func addIpam(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "addIpam")
+	defer res.CheckTestAndSave(t, time.Now(), "addIpam")
 	assert := test.Assert{t}
 
 	var (
@@ -110,7 +111,7 @@ func addIpamConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "addIpamConfig")
+	defer res.CheckTestAndSave(t, time.Now(), "addIpamConfig")
 	assert := test.Assert{t}
 
 	if len(Env.NetIpam) == 0 {
@@ -148,7 +149,7 @@ func delAllIpams(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, "delAllIpams")
+	defer res.CheckTestAndSave(t, time.Now(), "delAllIpams")
 	assert := test.Assert{t}
 
 	subs, err := Pcc.GetSubnetObj()
