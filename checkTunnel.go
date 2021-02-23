@@ -3,7 +3,9 @@ package main
 import (
 	"fmt"
 	"github.com/go-test/deep"
+	logs "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"strings"
 	"testing"
 	"time"
@@ -11,7 +13,11 @@ import (
 
 // Check if server is reaching the PCC through the tunnel
 func checkInvaderTunnels(t *testing.T) {
-	fmt.Println("\nTUNNEL: checking the tunnel addresses for the invaders")
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkInvaderTunnels")
+
+	logs.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the invaders")
 	if nodes, err := Pcc.GetInvaders(); err == nil {
 
 		for i := range *nodes {
@@ -23,22 +29,36 @@ func checkInvaderTunnels(t *testing.T) {
 			if node, err := Pcc.GetNodeFromDB(nodeId); err == nil { // Check the DB
 				address := node.TunnelServerAddress
 				if len(strings.TrimSpace(address)) == 0 {
-					t.Fatal(fmt.Sprintf("The tunnel address for the invader %d:%s is blank", nodeId, node.Name))
+					msg := fmt.Sprintf("The tunnel address for the invader %d:%s is blank", nodeId, node.Name)
+					res.SetTestFailure(msg)
+					logs.AuctaLogger.Error(msg)
+					t.FailNow()
 				} else {
-					fmt.Println(fmt.Sprintf("The invader %d:%s is reaching the PCC through the tunnel %s", nodeId, node.Name, address))
+					logs.AuctaLogger.Info(fmt.Sprintf("The invader %d:%s is reaching the PCC through the tunnel %s", nodeId, node.Name, address))
 				}
 			} else {
-				t.Fatal(err)
+				msg := fmt.Sprintf("%v", err)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 // Check if server is reaching the PCC through the cluster-head tunnel
 func checkServerTunnels(t *testing.T) {
-	fmt.Println("\nTUNNEL: checking the tunnel addresses for the servers")
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkServerTunnels")
+
+	logs.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the servers")
+
 	if invaders, err := Pcc.GetInvadersFromDB(); err == nil {
 		if nodes, err := Pcc.GetServers(); err == nil {
 		loopServer:
@@ -50,33 +70,51 @@ func checkServerTunnels(t *testing.T) {
 				if node, err := Pcc.GetNodeFromDB(nodeId); err == nil { // Check the DB. The address should be blank
 					address := node.TunnelServerAddress
 					if len(strings.TrimSpace(address)) != 0 {
-						t.Fatal(fmt.Sprintf("The tunnel address for the server %d:%s should be blank instead of %s", nodeId, node.Name, node.TunnelServerAddress))
+						msg := fmt.Sprintf("The tunnel address for the server %d:%s should be blank instead of %s", nodeId, node.Name, node.TunnelServerAddress)
+						res.SetTestFailure(msg)
+						logs.AuctaLogger.Error(msg)
+						t.FailNow()
 					}
 				} else {
-					t.Fatal(err)
+					msg := fmt.Sprintf("%v", err)
+					res.SetTestFailure(msg)
+					logs.AuctaLogger.Error(msg)
+					t.FailNow()
 				}
 
 				for j := range *invaders { // Check if the address is associated to one Invader
 					invader := (*invaders)[j]
 					if strings.Compare(address, invader.Host) == 0 {
-						fmt.Println(fmt.Sprintf("The node %d:%s is reaching the pcc through the invader %d:%s:%s", nodeId, node.Name, invader.Id, invader.Name, invader.Host))
+						logs.AuctaLogger.Info(fmt.Sprintf("The node %d:%s is reaching the pcc through the invader %d:%s:%s", nodeId, node.Name, invader.Id, invader.Name, invader.Host))
 						continue loopServer
 					}
 				}
-
-				t.Fatal(fmt.Sprintf("Unable to find the invader associated to the server %d:%s", nodeId, node.Name))
+				msg := fmt.Sprintf("Unable to find the invader associated to the server %d:%s", nodeId, node.Name)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			logs.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 // Check data received from the environment endpoint
 func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address string) {
-	fmt.Println(fmt.Sprintf("Tunnel: checking the tunnel address for the node %d:%s:%s", node.Id, node.Name, node.Host))
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkEnvironmentForNode")
+
+	logs.AuctaLogger.Info(fmt.Sprintf("Tunnel: checking the tunnel address for the node %d:%s:%s", node.Id, node.Name, node.Host))
 
 	if defaultEnv, err := Pcc.GetEnvironment(nil); err == nil {
 		defaultAddress := defaultEnv["servicePublicHost"]
@@ -85,16 +123,26 @@ func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address stri
 		if env, err := Pcc.GetEnvironment(&nodeId); err == nil { // Check the environment
 			hAddress := env["servicePublicHost"]
 			if diff := deep.Equal(defaultAddress, hAddress); diff == nil {
-				t.Fatal(fmt.Sprintf("The tunnel address should be different from the PCC address %v", defaultAddress))
+				msg := fmt.Sprintf("The tunnel address should be different from the PCC address %v", defaultAddress)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			} else {
-				fmt.Println(fmt.Sprintf("The node %d:%s is getting the address %v", nodeId, node.Name, hAddress))
+				logs.AuctaLogger.Info(fmt.Sprintf("The node %d:%s is getting the address %v", nodeId, node.Name, hAddress))
 				address = fmt.Sprintf("%v", hAddress)
 			}
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			logs.AuctaLogger.Error(msg)
+			t.FailNow()
+
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	return
@@ -102,17 +150,28 @@ func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address stri
 
 // Check if invader is reaching the PCC through the tunnel
 func checkTunnelConnection(t *testing.T) {
-	fmt.Println("\nTUNNEL: checking invaders connection")
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelConnection")
+
+	logs.AuctaLogger.Info("\nTUNNEL: checking invaders connection")
+
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {
 			node := (*nodes)[i]
 
 			if err = tunnelPing(&node, true); err != nil {
-				t.Fatal(err)
+				msg := fmt.Sprintf("%v", err)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
@@ -121,12 +180,12 @@ func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 	var ssh pcc.SSHHandler
 	if stdout, stderr, err := ssh.Run(node.Host, fmt.Sprintf("ping -c 3 %s", node.TunnelServerAddress)); err == nil {
 		if log {
-			fmt.Println(fmt.Sprintf("The node %d:%s is pinging the address %v\n%s", nodeId, node.Name, node.TunnelServerAddress, stdout))
+			logs.AuctaLogger.Info(fmt.Sprintf("The node %d:%s is pinging the address %v\n%s", nodeId, node.Name, node.TunnelServerAddress, stdout))
 		}
 		return nil
 	} else {
 		if log {
-			fmt.Println(fmt.Sprintf("Error pinging from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr))
+			logs.AuctaLogger.Error(fmt.Sprintf("Error pinging from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr))
 		}
 		return err
 	}
@@ -134,7 +193,11 @@ func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 
 // Check if invader is running the iptables rules
 func checkTunnelForwardingRules(t *testing.T) {
-	fmt.Println("\nTUNNEL: checking forwarding rules")
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelForwardingRules")
+
+	logs.AuctaLogger.Info("\nTUNNEL: checking forwarding rules")
 	var ssh pcc.SSHHandler
 
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
@@ -149,26 +212,37 @@ func checkTunnelForwardingRules(t *testing.T) {
 					rule := fmt.Sprintf("PREROUTING -p tcp -m tcp --dport %s -j DNAT --to-destination %s:%s", port, node.TunnelServerAddress, port)
 					for _, line := range lines {
 						if strings.Compare(strings.TrimSpace(line), rule) == 0 {
-							fmt.Println(fmt.Sprintf("Found the forward rule for port %s on invader %d:%s", port, nodeId, node.Name))
+							logs.AuctaLogger.Info(fmt.Sprintf("Found the forward rule for port %s on invader %d:%s", port, nodeId, node.Name))
 							continue loopPort
 						}
 					}
-
-					t.Fatal(fmt.Sprintf("Unable to find the forward rule for port %s on invader %d:%s. \nRules are:%s", port, nodeId, node.Name, stdout))
+					msg := fmt.Sprintf("Unable to find the forward rule for port %s on invader %d:%s. \nRules are:%s", port, nodeId, node.Name, stdout)
+					res.SetTestFailure(msg)
+					logs.AuctaLogger.Error(msg)
+					t.FailNow()
 				}
 			} else {
-				fmt.Println(fmt.Sprintf("Error getting iptables tule from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr))
-				t.Fatal(err)
+				msg := fmt.Sprintf("Error getting iptables tule from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 // Check if the PCC is able to restore the tunnel
 func checkTunnelRestore(t *testing.T) {
-	fmt.Println("\nTUNNEL: checking the restore for the invaders")
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelRestore")
+
+	logs.AuctaLogger.Info("\nTUNNEL: checking the restore for the invaders")
 	var ssh pcc.SSHHandler
 
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
@@ -178,26 +252,34 @@ func checkTunnelRestore(t *testing.T) {
 
 			tun := fmt.Sprintf("tun%d", node.Id)
 			if _, _, err := ssh.Run(node.Host, fmt.Sprintf("sudo ip link delete tun%d", node.Id)); err == nil {
-				fmt.Println(fmt.Sprintf("The node %d:%s tun device %s has been removed. Waiting for the restore", nodeId, node.Name, tun))
+				logs.AuctaLogger.Info(fmt.Sprintf("The node %d:%s tun device %s has been removed. Waiting for the restore", nodeId, node.Name, tun))
 
 			restoreLoop:
 				for i := 1; i <= 10; i++ {
 					time.Sleep(time.Second * time.Duration(15))
 					if err = tunnelPing(&node, false); err == nil {
-						fmt.Println(fmt.Sprintf("The PCC restored the tunnel %s on the invader %d:%s", tun, nodeId, node.Name))
+						logs.AuctaLogger.Warn(fmt.Sprintf("The PCC restored the tunnel %s on the invader %d:%s", tun, nodeId, node.Name))
 						break restoreLoop
 					}
 				}
 
 				if err != nil {
-					fmt.Println(fmt.Sprintf("The PCC was not able to restore the tunnel for the invader %d:%s", nodeId, node.Name))
-					t.Fatal(err)
+					msg := fmt.Sprintf("The PCC was not able to restore the tunnel for the invader %d:%s", nodeId, node.Name)
+					res.SetTestFailure(msg)
+					logs.AuctaLogger.Error(msg)
+					t.FailNow()
 				}
 			} else {
-				t.Fatal(err)
+				msg := fmt.Sprintf("%v", err)
+				res.SetTestFailure(msg)
+				logs.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		logs.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }

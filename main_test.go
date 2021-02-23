@@ -114,7 +114,7 @@ func TestNodes(t *testing.T) {
 
 func TestUsers(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "users", func(t *testing.T) {
 		mayRun(t, "addTenant", addTenant)
 	})
@@ -181,7 +181,7 @@ func TestNetCluster(t *testing.T) {
 // assumes TestNode & TestNetCluster has been run before
 func TestAddCeph(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "ceph", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
