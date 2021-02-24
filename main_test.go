@@ -277,7 +277,7 @@ func TestFull(t *testing.T) {
 
 func TestClean(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
@@ -322,7 +322,7 @@ func TestPolicy(t *testing.T) {
 
 func TestAvailability(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "AVAILABILITY", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -358,7 +358,7 @@ func TestConfigNetworkInterfaces(t *testing.T) {
 
 func TestMonitor(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "MONITOR", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -371,7 +371,7 @@ func TestMonitor(t *testing.T) {
 
 func TestUserManagement(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "USER-MANAGEMENT", func(t *testing.T) {
 		mayRun(t, "testUMRole", testUMRole)
 		mayRun(t, "testUMTenant", testUMTenant)

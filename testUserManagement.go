@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/security"
 	"testing"
 	"time"
@@ -20,6 +22,10 @@ func genericTest(
 	getItem func(id uint64) (*pcc.GenericModel, error),
 	deleteItem func(id uint64) error,
 	listItems func() ([]pcc.GenericModel, error)) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "genericTest")
+
 	var (
 		items []pcc.GenericModel
 		added *pcc.GenericModel
@@ -29,46 +35,65 @@ func genericTest(
 
 	if addItem != nil {
 		name := fmt.Sprintf("%s-%d", "bb_test", time.Now().Unix())
-		fmt.Println(fmt.Sprintf("adding the [%s] [%s]", item, name))
+		log.AuctaLogger.Infof(fmt.Sprintf("adding the [%s] [%s]", item, name))
 		if added, err = addItem(name, "blackbox test"); err == nil { // add the item
-			fmt.Println(fmt.Sprintf("added the [%s] [%v]", item, *added))
+			log.AuctaLogger.Infof(fmt.Sprintf("added the [%s] [%v]", item, *added))
 
 			if getItem != nil { // get an item and check if it is the same with added
 				if get, err = getItem(added.GetId()); err == nil {
 					if get.GetDescription() == added.GetDescription() && get.GetName() == added.GetName() {
-						fmt.Println(fmt.Sprintf("the fetched %s [%s] is ok", item, name))
+						log.AuctaLogger.Infof(fmt.Sprintf("the fetched %s [%s] is ok", item, name))
 					} else {
-						t.Fatal(fmt.Errorf("the %s %d is different than expected", item, added.GetId()))
+						msg := fmt.Sprintf("the %s %d is different than expected", item, added.GetId())
+						res.SetTestFailure(msg)
+						log.AuctaLogger.Error(msg)
+						t.FailNow()
 					}
 				} else {
-					t.Fatal(fmt.Sprintf("error getting the %s with id %d", item, added.GetId()), err)
+					msg := fmt.Sprintf("error getting the %s with id %d", item, added.GetId())
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					t.FailNow()
 				}
 			}
 
 			if deleteItem != nil { // delete the added item
 				if err = deleteItem(added.GetId()); err == nil {
-					fmt.Println(fmt.Sprintf("deleted the %s %d %s", item, added.GetId(), added.GetName()))
+					log.AuctaLogger.Infof(fmt.Sprintf("deleted the %s %d %s", item, added.GetId(), added.GetName()))
 				} else {
-					t.Fatal(fmt.Sprintf("error deleting the %s with id %d", item, added.GetId()), err)
+					msg := fmt.Sprintf("error getting the %s with id %d", item, added.GetId())
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					t.FailNow()
 				}
 			}
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	}
 
 	// get all items
 	if listItems != nil {
 		if items, err = listItems(); err == nil {
-			fmt.Println(fmt.Sprintf("found %d %s", len(items), item))
+			log.AuctaLogger.Info(fmt.Sprintf("found %d %s", len(items), item))
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	}
 }
 
 // add, get and delete an entity. get all entities
 func testUMEntity(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMEntity")
+
 	genericTest(t,
 		"entity",
 		func(name string, description string) (genericModel *pcc.GenericModel, err error) {
@@ -87,6 +112,10 @@ func testUMEntity(t *testing.T) {
 // add, get and delete a role. get all roles
 // test the deletion of a role still used
 func testUMRole(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMRole")
+
 	genericTest(t,
 		"role",
 		func(name string, description string) (genericModel *pcc.GenericModel, err error) {
@@ -106,16 +135,26 @@ func testUMRole(t *testing.T) {
 	if user, err := addTestUser(); err == nil {
 		defer Pcc.DelUser(user.UserName)
 		if errOk := Pcc.DeleteRole(user.Role.Id); errOk == nil {
-			t.Fatal(fmt.Sprintf("the role [%d] has been deleted", user.Role.Id))
+			msg := fmt.Sprintf("the role [%d] has been deleted", user.Role.Id)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		} else {
-			fmt.Println(fmt.Sprintf("the system does not allowed to delete the role [%d]. [%s]", user.Role.Id, errOk.Error()))
+			log.AuctaLogger.Infof(fmt.Sprintf("the system does not allowed to delete the role [%d]. [%s]", user.Role.Id, errOk.Error()))
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 func testUMOperation(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMOperation")
+
 	// Convert operation to Generic Model
 	convert := func(f func() ([]pcc.Operation, error)) (models []pcc.GenericModel, err error) {
 		if operations, e := f(); e == nil {
@@ -168,28 +207,44 @@ func addTestUser() (user *pcc.User, err error) {
 // add an existing user and check for the error.
 // get all users.
 func testUMUser(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMUser")
+
 	if added, err := addTestUser(); err == nil {
 		user2 := *added
-		fmt.Println(fmt.Sprintf("trying add the same user %s", user2.UserName))
+		log.AuctaLogger.Info(fmt.Sprintf("trying add the same user %s", user2.UserName))
 		if _, errOk := Pcc.AddUser(user2); errOk == nil {
-			t.Fatal("the duplicate user was added without issues")
+			msg := "the duplicate user was added without issues"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		} else {
-			fmt.Println(fmt.Sprintf("the system does not allowed to re-add the user [%s]. [%s]", added.UserName, errOk.Error()))
+			log.AuctaLogger.Info(fmt.Sprintf("the system does not allowed to re-add the user [%s]. [%s]", added.UserName, errOk.Error()))
 		}
 
 		if err = Pcc.DelUser(added.UserName); err == nil {
-			fmt.Println(fmt.Sprintf("deleted the user %d %s", added.Id, added.UserName))
+			log.AuctaLogger.Info(fmt.Sprintf("deleted the user %d %s", added.Id, added.UserName))
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	if users, err := Pcc.GetUsers(); err == nil {
-		fmt.Println(fmt.Sprintf("found %d users", len(users)))
+		log.AuctaLogger.Info(fmt.Sprintf("found %d users", len(users)))
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 }
@@ -197,77 +252,118 @@ func testUMUser(t *testing.T) {
 // add, get and delete a tenant. get all tenants
 // try to delete a tenant still used and check for the error
 func testUMTenant(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMTenant")
+
 	var err error
 
 	name := fmt.Sprintf("%s-%d", "bb_test", time.Now().Unix())
 	tenant := &(security.Tenant{Name: name, Description: "blackbox test"})
-	fmt.Println(fmt.Sprintf("adding the tenant %s", name))
+	log.AuctaLogger.Info(fmt.Sprintf("adding the tenant %s", name))
 	if tenant, err = Pcc.AddTenant(*tenant); err == nil {
-		fmt.Println(fmt.Sprintf("added the tenant %v", *tenant))
+		log.AuctaLogger.Info(fmt.Sprintf("added the tenant %v", *tenant))
 
 		if tenant, err = Pcc.GetTenant(tenant.ID); err == nil {
 			if tenant.Name == name {
-				fmt.Println(fmt.Sprintf("the fetched tenant %s is ok", name))
+				log.AuctaLogger.Info(fmt.Sprintf("the fetched tenant %s is ok", name))
 			} else {
-				t.Fatal(fmt.Sprintf("the tenant %d is different than expected", tenant.ID))
+				msg := fmt.Sprintf("the tenant %d is different than expected", tenant.ID)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 
 		if err = Pcc.DelTenant(tenant.ID); err == nil {
-			fmt.Println(fmt.Sprintf("deleted the tenant %d %s", tenant.ID, tenant.Name))
+			log.AuctaLogger.Info(fmt.Sprintf("deleted the tenant %d %s", tenant.ID, tenant.Name))
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	// get all tenants
 	if tenants, err := Pcc.GetTenants(); err == nil {
-		fmt.Println(fmt.Sprintf("found %d tenants", len(tenants)))
+		log.AuctaLogger.Info(fmt.Sprintf("found %d tenants", len(tenants)))
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	// test the deletion of a tenant still used
 	if user, err := addTestUser(); err == nil {
 		defer Pcc.DelUser(user.UserName)
 		if errOk := Pcc.DelTenant(user.Tenant.ID); errOk == nil {
-			t.Fatal(fmt.Sprintf("the tenant has been deleted [%d]", user.TenantId))
+			msg := fmt.Sprintf("the tenant has been deleted [%d]", user.TenantId)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		} else {
-			fmt.Println(fmt.Sprintf("the system does not allowed to delete the tenant [%d]. [%s]", user.TenantId, errOk.Error()))
+			log.AuctaLogger.Info(fmt.Sprintf("the system does not allowed to delete the tenant [%d]. [%s]", user.TenantId, errOk.Error()))
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 // add, get and delete an user space.
 func testUMUserSpace(t *testing.T) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testUMUserSpace")
+
 	scope := "bb-test"
 	content := "blackbox test"
 	if err := Pcc.SetUserSpace("bb-test", content); err == nil {
-		fmt.Println(fmt.Sprintf("added the user space [%s]", scope))
+		log.AuctaLogger.Info(fmt.Sprintf("added the user space [%s]", scope))
 
 		var get string
 		if get, err = Pcc.GetUserSpace(scope); err == nil {
 			if get == content {
-				fmt.Println(fmt.Sprintf("the fetched user space %s is ok", scope))
+				log.AuctaLogger.Info(fmt.Sprintf("the fetched user space %s is ok", scope))
 			} else {
-				t.Fatal(fmt.Sprintf("the user space %s is different than expected %s", scope, get))
+				msg := fmt.Sprintf("the user space %s is different than expected %s", scope, get)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 		if err = Pcc.DeleteUserSpace(scope); err == nil {
-			fmt.Println(fmt.Sprintf("deleted the user space %s", scope))
+			log.AuctaLogger.Info(fmt.Sprintf("deleted the user space %s", scope))
 		} else {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 }
