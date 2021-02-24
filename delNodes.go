@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 	"testing"
 	"time"
@@ -14,13 +16,23 @@ func delAllNodes(t *testing.T) {
 
 func delNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "delNodes")
+
 	if _, err := Pcc.DeleteNodes(true); err != nil {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 func validateDeleteNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "validateDeleteNodes")
 	assert := test.Assert{t}
 
 	// wait for node to be removed
@@ -39,19 +51,22 @@ func validateDeleteNodes(t *testing.T) {
 				delete(Nodes, k)
 			}
 		} else {
-			fmt.Printf("error getting nodes %v\n", err)
+			log.AuctaLogger.Errorf("error getting nodes %v\n", err)
 		}
 		if len(Nodes) == 0 {
-			fmt.Println("all nodes have been deleted")
+			log.AuctaLogger.Infof("all nodes have been deleted")
 			return
 		} else if len(Nodes) > 0 {
 			time.Sleep(5 * time.Second)
 		}
 		if time.Since(start) > timeout {
-			fmt.Printf("delAllNodes timeout\n")
+			log.AuctaLogger.Infof("delAllNodes timeout\n")
 			for _, node := range Nodes {
-				assert.Fatalf("node %v provisionStatus = %v was not "+
+				msg := fmt.Sprintf("node %v provisionStatus = %v was not "+
 					"deleted\n", node.Name, node.ProvisionStatus)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 			}
 
 			return

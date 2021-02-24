@@ -2,8 +2,11 @@ package main
 
 import (
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"os"
 	"testing"
+	"time"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -61,6 +64,9 @@ func CreateFileAndUpload(fileName string, key string, fileType string, keyId uin
 
 func delAllCerts(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "delAllCerts")
 	assert := test.Assert{t}
 
 	var (
@@ -71,17 +77,23 @@ func delAllCerts(t *testing.T) {
 
 	certificates, err = Pcc.GetCertificates()
 	if err != nil {
-		assert.Fatalf("Failed to get certificates: %v\n", err)
+		msg := fmt.Sprintf("Failed to get certificates: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, c := range certificates {
 		id = c.Id
-		fmt.Printf("Deleting certificate %v\n", c.Alias)
+		log.AuctaLogger.Infof("Deleting certificate %v\n", c.Alias)
 		err = Pcc.DeleteCertificate(id)
 		if err != nil {
-			assert.Fatalf("Failed to delete Certificate %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete Certificate %v: %v\n",
 				id, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}
