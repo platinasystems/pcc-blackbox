@@ -1,18 +1,21 @@
 package utility
 
 import (
-	log "github.com/platinasystems/go-common/logs"
 	"hash/fnv"
+	"path/filepath"
 	"runtime"
+	"strings"
+
+	log "github.com/platinasystems/go-common/logs"
 )
 
-func funcName() string {
-	pc, _, _, _ := runtime.Caller(3)
+func FuncName() string {
+	pc, _, _, _ := runtime.Caller(2)
 	nameFull := runtime.FuncForPC(pc).Name()
 	log.AuctaLogger.Infof("Function name: %s", nameFull)
-	//nameEnd := filepath.Ext(nameFull)
-	//name := strings.TrimPrefix(nameEnd, ".")
-	return nameFull
+	nameEnd := filepath.Ext(nameFull)
+	name := strings.TrimPrefix(nameEnd, ".")
+	return name
 }
 
 func hash(s string) uint32 {
@@ -22,6 +25,6 @@ func hash(s string) uint32 {
 }
 
 func GetTestID() uint32 {
-	name := funcName()
+	name := FuncName()
 	return hash(name)
 }

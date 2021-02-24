@@ -2,12 +2,16 @@ package main
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+	"time"
+
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/app"
 	"github.com/platinasystems/pcc-models/policy"
 	scope2 "github.com/platinasystems/pcc-models/scope"
-	"strings"
-	"testing"
 )
 
 const POLICY_BB_TEST = "blackbox-test-policy"
@@ -18,13 +22,19 @@ const ROLE_BB_TEST = "blackbox-role-test-policy"
 // TEST Policies
 ////
 
-func checkError(t *testing.T, err error) {
+func checkError(t *testing.T, res *models.TestResult, err error) {
 	if err != nil {
-		t.Fatal(err)
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
 func testPreparePolicies(t *testing.T) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testPreparePolicies")
+
 	var (
 		defaultRack *scope2.Scope
 		roles       []pcc.Role
@@ -34,10 +44,9 @@ func testPreparePolicies(t *testing.T) {
 
 	// Set the default rack scope
 	scopes, err = Pcc.GetScopes()
-	checkError(t, err)
+	checkError(t, res, err)
 	nodes, err := Pcc.GetNodeIds()
-	checkError(t, err)
-
+	checkError(t, res, err)
 	for i := range scopes {
 		s := scopes[i]
 		if s.Default && s.IsRack() {
@@ -49,50 +58,50 @@ func testPreparePolicies(t *testing.T) {
 	for i := range nodes {
 		nodeId := nodes[i]
 		node, err := Pcc.GetNode(nodeId)
-		checkError(t, err)
+		checkError(t, res, err)
 		if *node.ScopeId != defaultRack.ID {
-			fmt.Printf("Assign the default rack scope to node %d:%s\n", nodeId, node.Name)
+			log.AuctaLogger.Infof("Assign the default rack scope to node %d:%s\n", nodeId, node.Name)
 			node.ScopeId = &defaultRack.ID
 			err = Pcc.UpdateNode(node)
-			checkError(t, err)
+			checkError(t, res, err)
 		}
 	}
 
 	// Clean roles
 	roles, err = Pcc.GetNodeRoles()
-	checkError(t, err)
+	checkError(t, res, err)
 	for i := range roles {
 		role := roles[i]
 		if role.Name == ROLE_BB_TEST {
-			fmt.Println("Deleting the role", role.Description)
+			log.AuctaLogger.Infof("Deleting the role", role.Description)
 			_, err = Pcc.DeleteNodeRole(role.ID)
-			checkError(t, err)
+			checkError(t, res, err)
 			break
 		}
 	}
 
 	// Clean scopes
 	scopes, err = Pcc.GetScopes()
-	checkError(t, err)
+	checkError(t, res, err)
 	for i := range scopes {
 		scope := scopes[i]
 		if scope.Name == SCOPE_BB_TEST {
-			fmt.Println("Deleting the scope", scope.Description)
+			log.AuctaLogger.Infof("Deleting the scope", scope.Description)
 			_, err = Pcc.DeleteScope(scope.ID)
-			checkError(t, err)
+			checkError(t, res, err)
 			break
 		}
 	}
 
 	// Clean policies
 	policies, err := Pcc.GetPolicies() // GET the policies
-	checkError(t, err)
+	checkError(t, res, err)
 	for i := range policies { // Delete an old policy
 		p := policies[i]
 		if p.Description == POLICY_BB_TEST {
-			fmt.Println("Deleting the policy", p.Description)
+			log.AuctaLogger.Infof("Deleting the policy", p.Description)
 			_, err = Pcc.DeletePolicy(p.Id)
-			checkError(t, err)
+			checkError(t, res, err)
 			break
 		}
 	}
@@ -102,6 +111,10 @@ func testPreparePolicies(t *testing.T) {
 // Build a policy with inputs and Add it
 //
 func buildPolicy(t *testing.T) (*policy.Policy, *app.AppConfiguration) {
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "buildPolicy")
+
 	var (
 		err         error
 		p           *policy.Policy
@@ -110,9 +123,9 @@ func buildPolicy(t *testing.T) (*policy.Policy, *app.AppConfiguration) {
 		application *app.AppConfiguration
 	)
 
-	fmt.Println("Getting apps for building policy")
+	log.AuctaLogger.Infof("Getting apps for building policy")
 	apps, err = Pcc.GetApps() // GET the apps
-	checkError(t, err)
+	checkError(t, res, err)
 
 l1:
 	for i := range apps { // Build the inputs. Iterate the applications
@@ -138,7 +151,10 @@ l1:
 	}
 
 	if application == nil {
-		t.Fatal("Unable to find a valid application")
+		msg := "Unable to find a valid application"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 	p = addPolicy(t, application, nil, inputs)
 	return p, application
@@ -146,17 +162,20 @@ l1:
 
 // Add the policy to PCC
 func addPolicy(t *testing.T, application *app.AppConfiguration, scopes *[]uint64, inputs []policy.PolicyInput) *policy.Policy {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "addPolicy")
+
 	var err error
-	fmt.Println("\n--- ADD POLICY")
+	log.AuctaLogger.Infof("\n--- ADD POLICY")
 	p := policy.Policy{Description: POLICY_BB_TEST, AppId: application.ID, Inputs: inputs}
-	fmt.Printf("Adding the policy %s with inputs: %v\n", p.Description, p.Inputs)
+	log.AuctaLogger.Infof("Adding the policy %s with inputs: %v\n", p.Description, p.Inputs)
 	if scopes != nil {
-		fmt.Printf("Associate the policy %s to the scopes: %v\n", p.Description, p.ScopeIDs)
+		log.AuctaLogger.Infof("Associate the policy %s to the scopes: %v\n", p.Description, p.ScopeIDs)
 		p.ScopeIDs = *scopes
 	}
 	p, err = Pcc.AddPolicy(&p) // ADD a policy
-	checkError(t, err)
-	fmt.Printf("Added the policy %d %s\n\n", p.Id, p.Description)
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added the policy %d %s\n\n", p.Id, p.Description)
 	return &p
 }
 
@@ -164,7 +183,11 @@ func addPolicy(t *testing.T, application *app.AppConfiguration, scopes *[]uint64
 // add, get, update and delete a policy
 //
 func testPolicies(t *testing.T) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testPolicies")
+
 	defer testPreparePolicies(t)
+
 	var (
 		err    error
 		p      *policy.Policy
@@ -176,7 +199,7 @@ func testPolicies(t *testing.T) {
 	////
 	p, _ = buildPolicy(t)
 	p1, err = Pcc.GetPolicy(p.Id) // GET the policy
-	checkError(t, err)
+	checkError(t, res, err)
 
 	////
 	// Update the policy
@@ -184,27 +207,33 @@ func testPolicies(t *testing.T) {
 	p.Inputs = p1.Inputs[:len(p1.Inputs)-1] // Remove the last input
 	p.Id = p1.Id
 
-	fmt.Println("--- UPDATE POLICY")
-	fmt.Printf("Updating the policy %v\n\n", p)
+	log.AuctaLogger.Infof("--- UPDATE POLICY")
+	log.AuctaLogger.Infof("Updating the policy %v\n\n", p)
 	p2, err = Pcc.UpdatePolicy(p) // Update the policy
-	checkError(t, err)
+	checkError(t, res, err)
 
 	////
 	// Validate the policy
 	////
-	fmt.Println("--- GET POLICY")
+	log.AuctaLogger.Infof("--- GET POLICY")
 	p2, err = Pcc.GetPolicy(p.Id) // GET and check if update worked
-	checkError(t, err)
+	checkError(t, res, err)
 	if len(p1.Inputs) == len(p2.Inputs) {
-		t.Fatal("There was an error updating the policy")
+		msg := "There was an error updating the policy"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
-	fmt.Printf("Policy %d %s was correctly updated\n", p.Id, p.Description)
+	log.AuctaLogger.Infof("Policy %d %s was correctly updated\n", p.Id, p.Description)
 }
 
 //
 // Test policy-scope association
 //
 func testPolicyScope(t *testing.T) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testPolicyScope")
+
 	defer testPreparePolicies(t)
 	var (
 		s           scope2.Scope
@@ -220,17 +249,17 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Add the scope
 	////
-	fmt.Println("\n--- ADD SCOPE")
-	fmt.Printf("Creating the scope %s\n", s.Description)
+	log.AuctaLogger.Info("\n--- ADD SCOPE")
+	log.AuctaLogger.Infof("Creating the scope %s\n", s.Description)
 	s, err = Pcc.AddScope(&s)
-	checkError(t, err)
-	fmt.Printf("Added the scope %d %s\n\n", s.ID, s.Description)
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added the scope %d %s\n\n", s.ID, s.Description)
 
 	////
 	// Add the policy for LLDPD
 	////
 	applications, err := Pcc.GetApp(strings.ToLower(pcc.ROLE_LLDPD))
-	checkError(t, err)
+	checkError(t, res, err)
 	application = applications[0]
 
 	addInput := func(k string, v string) {
@@ -247,16 +276,16 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Assign the scope to the node
 	////
-	fmt.Println("\n--- ASSIGN SCOPE")
+	log.AuctaLogger.Info("\n--- ASSIGN SCOPE")
 	nodes, err = Pcc.GetNodeIds()
-	checkError(t, err)
+	checkError(t, res, err)
 	nodeId := nodes[0]
 	node, err := Pcc.GetNode(nodeId)
-	checkError(t, err)
+	checkError(t, res, err)
 	node.ScopeId = &s.ID
-	fmt.Printf("Assigning the scope %s to the node %s\n", s.Description, node.Name)
+	log.AuctaLogger.Infof("Assigning the scope %s to the node %s\n", s.Description, node.Name)
 	err = Pcc.UpdateNode(node)
-	checkError(t, err)
+	checkError(t, res, err)
 
 	// Remove the scope
 	defer func() {
@@ -267,11 +296,10 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Assign the default role to the node
 	////
-	fmt.Println("\n--- ASSIGN THE ROLE")
-	fmt.Printf("Removing all roles from the node %d\n", nodeId)
+	log.AuctaLogger.Info("\n--- ASSIGN THE ROLE")
+	log.AuctaLogger.Infof("Removing all roles from the node %d\n", nodeId)
 	node.RoleIds = []uint64{}
 	err = Pcc.UpdateNode(node)
-	checkError(t, err)
-
+	checkError(t, res, err)
 	// TODO check for inputs parameters. Look at the default/ansible.log file
 }

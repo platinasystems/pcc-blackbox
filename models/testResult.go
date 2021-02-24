@@ -18,7 +18,7 @@ const (
 type TestResult struct {
 	ID          uint
 	RunID       string
-	TestID      uint32
+	TestID      string
 	Result      string
 	FailureMsg  string
 	ElapsedTime time.Duration
@@ -26,7 +26,7 @@ type TestResult struct {
 
 func InitTestResult(runID string) (res *TestResult) {
 	res = &TestResult{RunID: runID, Result: TestUndefined}
-	res.TestID = utility.GetTestID()
+	res.TestID = utility.FuncName()
 	return
 }
 

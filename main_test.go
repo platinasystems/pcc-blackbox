@@ -310,7 +310,7 @@ func TestTunnel(t *testing.T) {
 
 func TestPolicy(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "POLICY", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -393,7 +393,7 @@ func TestKeyManager(t *testing.T) {
 
 func TestAppCredentials(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "APP CREDENTIALS", func(t *testing.T) {
 		mayRun(t, "testCreateCredendialMetadataProfile", testCreateCredendialMetadataProfile)
 		mayRun(t, "testUpdateCredendialMetadataProfile", testUpdateCredendialMetadataProfile)
@@ -404,7 +404,7 @@ func TestAppCredentials(t *testing.T) {
 // Test functions for New Dashboard
 func TestDashboard(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
 		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
