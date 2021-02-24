@@ -384,7 +384,7 @@ func TestUserManagement(t *testing.T) {
 
 func TestKeyManager(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "KEY-MANAGER", func(t *testing.T) {
 		mayRun(t, "testKMKeys", testKMKeys)
 		mayRun(t, "testKMCertificates", testKMCertificates)
