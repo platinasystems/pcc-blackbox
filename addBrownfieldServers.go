@@ -10,11 +10,12 @@ func addBrownfieldServers(t *testing.T) {
 }
 
 func addServer(t *testing.T) {
-	var nodes []node
+	var envNodes []node
+
 	for i := range Env.Servers {
-		nodes = append(nodes, Env.Servers[i].node)
+		envNodes = append(envNodes, Env.Servers[i].node)
 	}
 
-	fmt.Printf("adding %d servers\n", len(nodes))
-	addNodesAndCheckStatus(t, nodes)
+	fmt.Printf("adding %d servers\n", len(envNodes))
+	addNodesAndCheckStatus(t, envNodes)
 }

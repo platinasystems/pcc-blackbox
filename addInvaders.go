@@ -15,17 +15,18 @@ func addClusterHeads(t *testing.T) {
 }
 
 func addInvaders(t *testing.T) {
-	var nodes []node
+	var envNodes []node
+
 	for i := range Env.Invaders {
-		nodes = append(nodes, Env.Invaders[i].node)
+		envNodes = append(envNodes, Env.Invaders[i].node)
 	}
 
-	fmt.Printf("adding %d invaders\n", len(nodes))
-	addNodesAndCheckStatus(t, nodes)
+	fmt.Printf("adding %d invaders\n", len(envNodes))
+	addNodesAndCheckStatus(t, envNodes)
 }
 
 // add nodes fom list
-func addNodesAndCheckStatus(t *testing.T, nodes []node) {
+func addNodesAndCheckStatus(t *testing.T, envNodes []node) {
 	var err error
 	test.SkipIfDryRun(t)
 
@@ -43,7 +44,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	}
 
 	var wg sync.WaitGroup
-	wg.Add(len(nodes))
+	wg.Add(len(envNodes))
 
 	addNodeAndWait := func(n node, nodeNumbers int) { // add the node and wait for the services. FIXME add a channel for stopping on error
 		defer wg.Done()
@@ -67,7 +68,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 				waitInstallation(LLDP_TIMEOUT*time.Duration(nodeNumbers), LLDP_NOTIFICATION, node.Id, &eventsFrom)
 				waitInstallation(DEFAULT_TIMEOUT*time.Duration(nodeNumbers), SELF_HEAL_NOTIFICATION, node.Id, &eventsFrom)
 				start := time.Now()
-				timeout := time.Duration(300*len(nodes)) * time.Second
+				timeout := time.Duration(300*len(envNodes)) * time.Second
 				var (
 					connection         string
 					previousConnection string
@@ -119,8 +120,8 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 		}
 	}
 
-	for i := range nodes { // add nodes in parallel
-		go addNodeAndWait(nodes[i], len(nodes))
+	for i := range envNodes { // add nodes in parallel
+		go addNodeAndWait(envNodes[i], len(envNodes))
 	}
 
 	wg.Wait() // wait for all addition
