@@ -1,9 +1,13 @@
 package main
 
 import (
+	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 	"testing"
+	"time"
 )
 
 func updateNodes_installLLDP(t *testing.T) {
@@ -13,10 +17,17 @@ func updateNodes_installLLDP(t *testing.T) {
 // Install LLDP on all nodes
 func installLLDP(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "installLLDP")
+
 	if nodes, err := Pcc.GetNodeIds(); err == nil {
 		installLLDPOnNodes(nodes)
 	} else {
-		panic(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 
