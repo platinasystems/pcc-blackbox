@@ -58,18 +58,23 @@ func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
+	var nodeIdsAdded []uint64
+
 	fails := 0
 	if key, err := getFirstKey(); err == nil {
 		keys := []string{key.Alias}
 
 		nodesList := make([]uint64, len(Env.Servers))
 		for i, s := range Env.Servers {
-			nodesList[i] = NodebyHostIP[s.HostIp]
+			id := NodebyHostIP[s.HostIp]
+			nodesList[i] = id
+			nodeIdsAdded = append(nodeIdsAdded, id)
 		}
 
 		var request pcc.MaasRequest
 		request.Nodes = nodesList
 		request.Image = "centos78"
+		request.Image = "ubuntu-bionic"
 		request.Locale = "en-US"
 		request.Timezone = "PDT"
 		request.AdminUser = "admin"
@@ -109,6 +114,7 @@ func reimageAllBrown(t *testing.T) {
 				} else {
 					assert.Fatalf("Brownfield re-image failed on %v nodes\n", fails)
 				}
+				checkAddNodesStatus(t, nodeIdsAdded)
 				return
 			}
 			time.Sleep(60 * time.Second)
