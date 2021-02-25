@@ -17,5 +17,6 @@ func addServer(t *testing.T) {
 	}
 
 	fmt.Printf("adding %d servers\n", len(envNodes))
-	addNodesAndCheckStatus(t, envNodes)
+	nodesAdded := addEnvNodes(t, envNodes)
+	checkAddNodesStatus(t, nodesAdded)
 }
