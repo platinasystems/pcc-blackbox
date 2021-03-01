@@ -343,8 +343,10 @@ func (pcc *PccClient) UpdateNode(node *NodeDetailed) (err error) {
 
 // Update MaaS role
 func (pcc *PccClient) UpdateMaas(node *NodeDetailed) (err error) {
+	var timeout time.Duration = 1 * time.Minute
+
 	endpoint := fmt.Sprintf("pccserver/node/updateMaas/%v", node.Id)
-	err = pcc.Put(endpoint, node, node)
+	err = pcc.Put(endpoint, node, node, timeout)
 	return
 }
 
