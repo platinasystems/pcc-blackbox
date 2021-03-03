@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -9,8 +8,6 @@ import (
 	"math"
 	"os"
 
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
@@ -51,38 +48,6 @@ func authenticate() {
 	if Pcc, err = pcc.Authenticate(env.PccIp, credential); err != nil {
 		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
-}
-
-func storeContainerNames() (err error) {
-	cli, err := client.NewEnvClient()
-	if err != nil {
-		return
-	}
-
-	// This assumes that this is running on the same CPU
-	// as PCC blackbox.
-	containers, err := cli.ContainerList(context.Background(),
-		types.ContainerListOptions{})
-	if err != nil {
-		return
-	}
-
-	if len(containers) == 0 {
-		return
-	}
-
-	m := make(map[string]string)
-	for _, container := range containers {
-		m[container.ID[:12]] = container.Names[0][1:]
-	}
-
-	data, err := json.MarshalIndent(m, "", "    ")
-	if err != nil {
-		err = fmt.Errorf("Error marshal to json: %v\n", err)
-		return
-	}
-	err = ioutil.WriteFile(containerFile, data, 0644)
-	return
 }
 
 func readEnvFile() {
@@ -140,7 +105,7 @@ func main() {
 
 	readEnvFile()
 
-	err = storeContainerNames()
+	err = pcc.StoreContainerNames()
 	if err != nil {
 		panic(fmt.Errorf("Error storing containers %v", err))
 	}
