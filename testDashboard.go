@@ -8,6 +8,8 @@ import (
     "net/url"
 )
 
+type IdList []uint64
+
 // get whole PCC ObjectsList
 func testDashboardGetAllPCCObjects(t *testing.T) {
     fmt.Println("Get full PCC Objects list with no sort or pagination")
@@ -20,7 +22,17 @@ func testDashboardGetAllPCCObjects(t *testing.T) {
     checkError(t, err)
 }
 
-type IdList []uint64
+// get Index of PCC Objects (concise Objects List)
+func testDashboardGetAllConcisePCCObjects(t *testing.T) {
+    fmt.Println("Get Index of PCC Objects (concise format) with no sort or pagination")
+    pccObjectsIndex, err := Pcc.TestDashboardConciseObjectList(nil, nil)
+    if err != nil {
+        fmt.Println(err)
+    } else {
+        fmt.Printf("Received [%d] Concise PCC Objects\n", len(*pccObjectsIndex))
+    }
+    checkError(t, err)
+}
 
 func testDashboardGetPCCObjectByRandomId(t *testing.T) {
     fmt.Println("Get PCCObject by Random Id")

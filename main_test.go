@@ -394,7 +394,9 @@ func TestDashboard(t *testing.T) {
 	mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
 		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
-		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		// ** calling with a fixed id (hardcoded to 4 in the code, may return a Not Found
+        // ** Hence comment this test, as it is semantically equivalent to the objectByRandomId call above
+        // ** mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
 		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
 		mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
