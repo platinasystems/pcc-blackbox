@@ -19,7 +19,14 @@ func addClusterHeads(t *testing.T) {
 }
 
 func addInvaders(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "addInvaders")
+	CheckDependencies(t, res, Env.CheckInvaders)
+
 	var nodes []node
+
 	for i := range Env.Invaders {
 		nodes = append(nodes, Env.Invaders[i].node)
 	}

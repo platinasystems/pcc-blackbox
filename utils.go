@@ -1,6 +1,9 @@
 package main
 
 import (
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"testing"
 	"time"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -44,4 +47,14 @@ func getNodeFromEnv(id uint64) *node {
 	}
 
 	return nil
+}
+
+func CheckDependencies(t *testing.T, res *models.TestResult, dep ...func() error) {
+	for _, fn := range dep {
+		if err := fn(); err != nil {
+			log.AuctaLogger.Errorf("%s", err.Error())
+			res.SetTestSkipped(err.Error())
+			t.SkipNow()
+		}
+	}
 }

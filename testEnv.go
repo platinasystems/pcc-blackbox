@@ -1,6 +1,9 @@
 package main
 
-import pcc "github.com/platinasystems/pcc-blackbox/lib"
+import (
+	"errors"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+)
 
 // Note: The lib directory is intended to be the start of an SDK, so
 //       test configuration/infrastructure should NOT be in lib.
@@ -154,4 +157,18 @@ func (te *testEnv) IsNodeAlreadyAdded(host string) bool {
 	}
 
 	return false
+}
+
+func (te *testEnv) CheckInvaders() (err error) {
+	if !(len(te.Invaders) > 0) {
+		err = errors.New("there are no invaders in Env file")
+	}
+	return
+}
+
+func (te *testEnv) CheckServers() (err error) {
+	if !(len(te.Servers) > 0) {
+		err = errors.New("there are no servers in Env file")
+	}
+	return
 }

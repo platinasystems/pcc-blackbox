@@ -12,6 +12,7 @@ import (
 const (
 	TestPass      string = "pass"
 	TestFail      string = "fail"
+	TestSkipped   string = "skipped"
 	TestUndefined string = "undefined"
 )
 
@@ -39,6 +40,11 @@ func (testResult *TestResult) SetTestPass() {
 	testResult.Result = TestPass
 }
 
+func (testResult *TestResult) SetTestSkipped(failureMsg string) {
+	testResult.FailureMsg = failureMsg
+	testResult.Result = TestSkipped
+}
+
 func (testResult *TestResult) SetElapsedTime(start time.Time, name string) {
 	testResult.ElapsedTime = time.Since(start)
 	log.AuctaLogger.Infof("%s took %s", name, testResult.ElapsedTime)
@@ -49,7 +55,7 @@ func (testResult *TestResult) SaveTestResult() {
 }
 
 func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time, funcName string) {
-	if !t.Failed() {
+	if !t.Failed() && !t.Skipped() {
 		testResult.SetTestPass()
 	}
 	testResult.SetElapsedTime(start, funcName)

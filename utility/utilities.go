@@ -1,12 +1,11 @@
 package utility
 
 import (
+	log "github.com/platinasystems/go-common/logs"
 	"hash/fnv"
 	"path/filepath"
 	"runtime"
 	"strings"
-
-	log "github.com/platinasystems/go-common/logs"
 )
 
 func FuncName() string {

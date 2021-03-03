@@ -33,6 +33,7 @@ func configNetworkInterfaces(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "configNetworkInterfaces")
+	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers)
 
 	assert := test.Assert{t}
 
@@ -378,6 +379,7 @@ func verifyNetworkConfig(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkConfig")
+	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers)
 
 	assert := test.Assert{t}
 
@@ -534,7 +536,8 @@ func verifyNetworkInterfaces(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-
+				res.SetTestSkipped("No node to verify")
+				assert.SkipNow()
 				return
 			}
 		}
@@ -641,7 +644,8 @@ func verifyNetworkUp(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-
+				res.SetTestSkipped("No node to verify")
+				assert.SkipNow()
 				return
 			}
 		}
