@@ -67,6 +67,10 @@ func TestMain(m *testing.M) {
 	}
 
 	dockerStats = pcc.InitDockerStats(Env.DockerStats)
+	err = pcc.StoreContainerNames()
+	if err != nil {
+		fmt.Printf("Error storing containers: %v", err)
+	}
 	flag.Parse()
 	if *test.DryRun {
 		m.Run()
@@ -395,8 +399,8 @@ func TestDashboard(t *testing.T) {
 		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
 		// ** calling with a fixed id (hardcoded to 4 in the code, may return a Not Found
-        // ** Hence comment this test, as it is semantically equivalent to the objectByRandomId call above
-        // ** mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		// ** Hence comment this test, as it is semantically equivalent to the objectByRandomId call above
+		// ** mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
 		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
 		mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)
