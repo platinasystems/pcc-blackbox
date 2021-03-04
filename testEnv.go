@@ -160,8 +160,8 @@ func (te *testEnv) IsNodeAlreadyAdded(host string) bool {
 }
 
 func (netInt *netInterface) CheckNetInt() (err error) {
-	if netInt.Gateway == "" || netInt.MacAddr == "" || netInt.Speed == "" || netInt.Autoneg == "" || netInt.Mtu == "" {
-		err = errors.New("Error in configuration parameters (check: Gateway, MacAddr, Speed, Autoneg, Mtu)")
+	if netInt.MacAddr == "" || netInt.Speed == "" || netInt.Autoneg == "" || netInt.Mtu == "" {
+		err = errors.New("Error in configuration parameters (MacAddr, Speed, Autoneg, Mtu)")
 		return
 	}
 	if !(len(netInt.Cidrs) > 0) {
