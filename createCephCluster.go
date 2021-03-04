@@ -2,15 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/lib/pq"
-	log "github.com/platinasystems/go-common/logs"
-	"github.com/platinasystems/pcc-blackbox/lib"
-	model "github.com/platinasystems/pcc-blackbox/models"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/lib/pq"
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	m "github.com/platinasystems/pcc-blackbox/models"
+	model "github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 var (
@@ -22,6 +24,10 @@ var (
 )
 
 func testCeph(t *testing.T) {
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testCeph")
+	CheckDependencies(t, res, Env.CheckCephConfiguration)
+
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephDeploy {
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephCluster]; ok && run {
@@ -52,6 +58,10 @@ func testCeph(t *testing.T) {
 }
 
 func testDeleteCeph(t *testing.T) {
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCeph")
+	CheckDependencies(t, res, Env.CheckCephConfiguration)
+
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephUndeploy {
 			if run, ok := cephConfig.Tests[pcc.TestDeleteCephFS]; ok && run {

@@ -47,6 +47,7 @@ func addAuthProfile(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addAuthProfile")
+	CheckDependencies(t, res, Env.CheckAuthenticationProfile)
 
 	assert := test.Assert{t}
 
@@ -54,11 +55,6 @@ func addAuthProfile(t *testing.T) {
 		authProfile pcc.AuthenticationProfile
 	)
 
-	if Env.AuthenticationProfile.Name == "" {
-		log.AuctaLogger.Warn("Authenticatiom Profile is not defined in the" +
-			" configuration file\n")
-		return
-	}
 	authProfile = Env.AuthenticationProfile
 
 	exist, certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)

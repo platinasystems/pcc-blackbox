@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
-	"testing"
-	"time"
 )
 
 func updateIpam(t *testing.T) {
@@ -112,12 +113,9 @@ func addIpamConfig(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addIpamConfig")
-	assert := test.Assert{t}
+	CheckDependencies(t, res, Env.CheckNetIpams)
 
-	if len(Env.NetIpam) == 0 {
-		log.AuctaLogger.Info("IPAM: no subnets configured\n")
-		return
-	}
+	assert := test.Assert{t}
 
 	for _, ipam := range Env.NetIpam {
 		var sub pcc.SubnetObj

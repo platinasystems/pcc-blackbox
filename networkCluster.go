@@ -3,11 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	log "github.com/platinasystems/go-common/logs"
-	"github.com/platinasystems/pcc-blackbox/models"
 	"regexp"
 	"testing"
 	"time"
+
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -20,6 +21,7 @@ func addNetCluster(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addNetCluster")
+	CheckDependencies(t, res, Env.CheckNetClusters)
 
 	for _, netCluster := range Env.NetCluster {
 		netClusterId, err := Pcc.FindNetClusterId(netCluster.Name)
@@ -38,6 +40,8 @@ func deleteNetCluster(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "deleteNetCluster")
+	CheckDependencies(t, res, Env.CheckNetClusters)
+
 	assert := test.Assert{t}
 
 	for _, netCluster := range Env.NetCluster {

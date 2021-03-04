@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
-	log "github.com/platinasystems/go-common/logs"
-	model "github.com/platinasystems/pcc-blackbox/models"
 	"testing"
 	"time"
+
+	log "github.com/platinasystems/go-common/logs"
+	m "github.com/platinasystems/pcc-blackbox/models"
+	model "github.com/platinasystems/pcc-blackbox/models"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -19,6 +21,10 @@ var (
 
 // starting point for k8s app deployment/undeployment testing
 func testK8sApp(t *testing.T) {
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now(), "testK8sApp")
+	CheckDependencies(t, res, Env.CheckK8sAppConfiguration)
+
 	if t.Run("parseK8sAppConfig", parseK8sAppConfig) {
 		if appConfig.K8sCluster == nil {
 			if run, ok := appConfig.Tests[pcc.TestCreateK8sCluster]; ok && run {

@@ -21,6 +21,7 @@ func addTenantA(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addTenantA")
+	CheckDependencies(t, res, Env.CheckServers, Env.CheckPccIp)
 
 	assert := test.Assert{t}
 	var (

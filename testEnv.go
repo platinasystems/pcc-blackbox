@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -159,6 +160,12 @@ func (te *testEnv) IsNodeAlreadyAdded(host string) bool {
 	return false
 }
 
+func (te *testEnv) CheckPccIp() (err error) {
+	if te.PccIp == "" {
+		err = errors.New("No PccIp configuration in Env file")
+	}
+	return
+}
 func (netInt *netInterface) CheckNetInt() (err error) {
 	if netInt.MacAddr == "" || netInt.Speed == "" || netInt.Autoneg == "" || netInt.Mtu == "" {
 		err = errors.New("Error in configuration parameters (MacAddr, Speed, Autoneg, Mtu)")
@@ -297,6 +304,90 @@ func (te *testEnv) CheckNetClusters() (err error) {
 		if err != nil {
 			return
 		}
+	}
+	return
+}
+
+func (te *testEnv) CheckCephConfiguration() (err error) {
+	if te.CephConfiguration.NumberOfNodes == 0 ||
+		te.CephConfiguration.PublicNetwork == "" ||
+		te.CephConfiguration.ClusterNetwork == "" {
+		err = errors.New("Error in configuration parameters (check: CephConfiguration NumberOfNodes, CephConfiguration PublicNetwork, CephConfiguration ClusterNetwork)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckPortusConfiguration() (err error) {
+	if te.PortusConfiguration.FullyQualifiedDomainName == "" ||
+		te.PortusConfiguration.Password == "" ||
+		te.PortusConfiguration.SecretKeyBase == "" ||
+		te.PortusConfiguration.AdminState == "" {
+		err = errors.New("Error in configuration parameters (check: PortusConfiguration.FullyQualifiedDomainName " +
+			"PortusConfiguration.Password " +
+			"PortusConfiguration.SecretKeyBase " +
+			"PortusConfiguration.AdminState)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckAuthenticationProfile() (err error) {
+	if te.AuthenticationProfile.Name == "" ||
+		te.AuthenticationProfile.Type == "" {
+		err = errors.New("Error in configuration parameters (check: AuthenticationProfile.Type, AuthenticationProfile.Name, CephConfiguration ClusterNetwork)")
+		return
+	}
+	err = CheckLDAPConfiguration(&te.AuthenticationProfile.Profile)
+	return
+}
+
+func CheckLDAPConfiguration(profile *pcc.LDAPConfiguration) (err error) {
+	if profile.Domain == "" ||
+		profile.UserIDAttribute == "" ||
+		profile.UserBaseDN == "" ||
+		profile.AnonymousBind == nil ||
+		profile.BindDN == "" ||
+		profile.BindPassword == "" ||
+		profile.EncryptionPolicy == "" {
+		err = errors.New("Error in configuration parameters (check: " +
+			"Profile.UserIDAttribute " +
+			"Profile.Domain " +
+			"Profile.UserBaseDN " +
+			"Profile.AnonymousBind" +
+			"Profile.BindDN " +
+			"Profile.BindPassword " +
+			"Profile.EncryptionPolicy)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckK8sAppConfiguration() (err error) {
+	for _, app := range te.K8sAppConfiguration.Apps {
+		err = CheckApp(&app)
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func CheckApp(app *pcc.ConfigKApp) (err error) {
+	if app.AppName == " " ||
+		app.AppNamespace == " " ||
+		app.GitUrl == " " ||
+		app.GitRepoPath == " " ||
+		app.GitBranch == " " ||
+		app.Label == " " {
+		err = errors.New("Error in configuration parameters (check: " +
+			"app.AppName " +
+			"app.AppNamespace " +
+			"app.GitUrl " +
+			"app.GitRepoPath" +
+			"app.GitBranch " +
+			"app.Label)")
+		return
 	}
 	return
 }

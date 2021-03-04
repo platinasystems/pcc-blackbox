@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	log "github.com/platinasystems/go-common/logs"
 	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/tiles/pccserver/executor"
-	"testing"
-	"time"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -43,9 +44,8 @@ func createK8s_3nodes(t *testing.T) {
 
 	if (len(Env.Invaders) + len(Env.Servers)) < DIM {
 		msg := fmt.Sprintf("Needed at least %d nodes for creating a cluster", DIM)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		assert.FailNow()
+		res.SetTestSkipped(msg)
+		assert.SkipNow()
 	}
 
 	var j = 0
@@ -234,8 +234,9 @@ func addNodeK8sCluster(t *testing.T) {
 	}
 
 	if len(k8sAddDelNodes) == 0 {
-		log.AuctaLogger.Infof("No spare nodes to add to Kubernetes cluster %v\n",
-			id)
+		msg := fmt.Sprintf("No spare nodes to add to Kubernetes cluster %v\n", id)
+		res.SetTestSkipped(msg)
+		t.SkipNow()
 		return
 	}
 
