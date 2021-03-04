@@ -159,9 +159,62 @@ func (te *testEnv) IsNodeAlreadyAdded(host string) bool {
 	return false
 }
 
+func (netInt *netInterface) CheckNetInt() (err error) {
+	if netInt.Gateway == "" || netInt.MacAddr == "" || netInt.Speed == "" || netInt.Autoneg == "" || netInt.Mtu == "" {
+		err = errors.New("Error in configuration parameters (check: Gateway, MacAddr, Speed, Autoneg, Mtu)")
+		return
+	}
+	if !(len(netInt.Cidrs) > 0) {
+		err = errors.New("There are no Cidrs in Env File")
+		return
+	}
+	for _, cidr := range netInt.Cidrs {
+		if cidr == "" {
+			err = errors.New("Error in configuration parameters (check: cidr)")
+			return
+		}
+	}
+	return
+}
+
+func (node *node) CheckNode() (err error) {
+	if node.HostIp == "" || node.BMCIp == "" || node.BMCUser == "" || node.BMCPass == "" {
+		err = errors.New("Error in configuration parameters (check: HostIp, BMCIp, BMCUser, BMCPass)")
+		return
+	}
+	if !(len(node.BMCUsers) > 0) {
+		err = errors.New("There are no BMCUsers in Env File")
+		return
+	}
+	for _, BMCUser := range node.BMCUsers {
+		if BMCUser == "" {
+			err = errors.New("Error in configuration parameters (check: BMCUser)")
+			return
+		}
+	}
+	if !(len(node.NetInterfaces) > 0) {
+		err = errors.New("There are no NetInterfaces in Env File")
+		return
+	}
+	for _, netInt := range node.NetInterfaces {
+		err = netInt.CheckNetInt()
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
 func (te *testEnv) CheckInvaders() (err error) {
 	if !(len(te.Invaders) > 0) {
 		err = errors.New("there are no invaders in Env file")
+		return
+	}
+	for _, inv := range te.Invaders {
+		err = inv.CheckNode()
+		if err != nil {
+			return
+		}
 	}
 	return
 }
@@ -169,6 +222,81 @@ func (te *testEnv) CheckInvaders() (err error) {
 func (te *testEnv) CheckServers() (err error) {
 	if !(len(te.Servers) > 0) {
 		err = errors.New("there are no servers in Env file")
+		return
+	}
+	for _, serv := range te.Servers {
+		err = serv.CheckNode()
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (ipam *netIpam) CheckNetIpam() (err error) {
+	if ipam.Name == "" || ipam.Subnet == "" {
+		err = errors.New("Error in configuration parameters (check: ipam Name, ipam Subnet)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckNetIpams() (err error) {
+	if !(len(te.NetIpam) > 0) {
+		err = errors.New("there are no NetIpam in Env file")
+		return
+	}
+	for _, ipam := range te.NetIpam {
+		err = ipam.CheckNetIpam()
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (node *netNode) CheckNetNode() (err error) {
+	if node.IpAddr == "" || node.LocalAs == "" {
+		err = errors.New("Error in configuration parameters (check: netNode IpAddr, netNode LocalAs)")
+		return
+	}
+	for _, bgpNeigh := range node.BgpNeighbors {
+		if bgpNeigh.NeighborIp == "" || bgpNeigh.RemoteAs == "" {
+			err = errors.New("Error in configuration parameters (check: NeighborIp, RemoteAs)")
+			return
+		}
+	}
+	return
+}
+
+func (cluster *netCluster) CheckNetCluster() (err error) {
+	if cluster.Name == "" || cluster.ControlCIDR == "" || cluster.DataCIDR == "" || cluster.IgwPolicy == "" {
+		err = errors.New("Error in configuration parameters (check: netCluster Name, netCluster ControlCIDR, netCluster DataCIDR, netCluster IgwPolicy)")
+		return
+	}
+	if !(len(cluster.Nodes) > 0) {
+		err = errors.New("there are no NetCluster Nodes in Env file")
+		return
+	}
+	for _, node := range cluster.Nodes {
+		err = node.CheckNetNode()
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+func (te *testEnv) CheckNetClusters() (err error) {
+	if !(len(te.NetCluster) > 0) {
+		err = errors.New("there are no NetCluster in Env file")
+		return
+	}
+	for _, netCluster := range te.NetCluster {
+		err = netCluster.CheckNetCluster()
+		if err != nil {
+			return
+		}
 	}
 	return
 }
