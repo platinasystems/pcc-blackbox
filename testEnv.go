@@ -263,8 +263,8 @@ func (te *testEnv) CheckNetIpams() (err error) {
 }
 
 func (node *netNode) CheckNetNode() (err error) {
-	if node.IpAddr == "" || node.LocalAs == "" {
-		err = errors.New("Error in configuration parameters (check: netNode IpAddr, netNode LocalAs)")
+	if node.IpAddr == "" {
+		err = errors.New("Error in configuration parameters (check: netNode IpAddr)")
 		return
 	}
 	for _, bgpNeigh := range node.BgpNeighbors {
