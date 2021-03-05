@@ -1,30 +1,21 @@
-// Copyright © 2020 Platina Systems, Inc. All rights reserved.
+// Copyright © 2021 Platina Systems, Inc. All rights reserved.
 // Use of this source code is governed by the GPL-2 license described in the
 // LICENSE file.
 
 package main
 
 import (
-	"github.com/platinasystems/go-common/http"
-	"github.com/platinasystems/go-common/logs"
-
 	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
 	"time"
+
+	"github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
-type Credential struct {
-	UserName string `json:"username"`
-	Password string `json:"password"`
-}
-
-type PccClient struct {
-	pccIp      string
-	bearer     string
-	RestClient *http.PlatinaRestService
-}
+var Pcc *pcc.PccClient
 
 type TimeRange struct {
 	From uint64 `json:"from"`
@@ -43,71 +34,6 @@ type HistoricalOut map[string][]TimeSeriesElem
 type TimeSeriesElem struct {
 	Timestamp int64                    `json:"timestamp"`
 	Metrics   []map[string]interface{} `json:"metrics,omitempty"`
-}
-
-func (pcc *PccClient) getClient() (rc *http.PlatinaRestService) {
-	if pcc.RestClient == nil {
-		var prs http.PlatinaRestService
-		prc := http.PlatinaRestClient{Address: pcc.pccIp, Token: pcc.bearer, Port: 9999}
-		prs = &prc
-		rc = &prs
-	} else {
-		rc = pcc.RestClient
-	}
-
-	return
-}
-
-// GET
-func (pcc *PccClient) Get(endPoint string, out interface{}, options ...interface{}) (err error) {
-	err = (*pcc.getClient()).Get(endPoint, out, options...)
-	return
-}
-
-// DELETE
-func (pcc *PccClient) Delete(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
-	err = (*pcc.getClient()).Delete(endPoint, data, out, options...)
-	return
-}
-
-// POST
-func (pcc *PccClient) Post(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
-	err = (*pcc.getClient()).Post(endPoint, data, out, options...)
-	return
-}
-
-// PUT
-func (pcc *PccClient) Put(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
-	err = (*pcc.getClient()).Put(endPoint, data, out, options...)
-	return
-}
-
-// PUT one file (multipart/form-data)
-func (pcc *PccClient) PutFile(endPoint string, filePath string, fields map[string]string, out interface{}) (err error) { // FIXME all services should share the same structure
-	err = (*pcc.getClient()).PutFile(endPoint, filePath, fields, out)
-	return
-}
-
-// PUT one or more files (multipart/form-data)
-func (pcc *PccClient) PutFiles(method string, endPoint string, files map[string]string, fields map[string]string, out interface{}) (err error) { // FIXME all services should share the same structure
-	err = (*pcc.getClient()).PutFiles(method, endPoint, files, fields, out)
-	return
-}
-
-func (pcc *PccClient) GetFile(endPoint string) (content string, err error) {
-	content, err = (*pcc.getClient()).GetFile(endPoint)
-	return
-}
-
-func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
-	var out struct{ Token string }
-	rc := http.PlatinaRestClient{Address: PccIp, Port: 9999}
-	client := PccClient{pccIp: PccIp}
-	if err = rc.Post("security/auth", cred, &out); err == nil {
-		client.bearer = fmt.Sprintf("Bearer %s", out.Token)
-	}
-	pcc = &client
-	return
 }
 
 func pPrint(out interface{}) {
@@ -196,8 +122,9 @@ func main() {
 	var (
 		nodes, fields string
 		raw           bool
+		err           error
 	)
-	cred := Credential{
+	cred := pcc.Credential{
 		UserName: "admin",
 		Password: "admin",
 	}
@@ -234,7 +161,6 @@ func main() {
 		case "-p":
 			cred.Password = p
 		}
-
 	}
 
 	log.InitWithDefault(nil)
@@ -246,7 +172,7 @@ func main() {
 	if hasData {
 		data = os.Args[4]
 	}
-	pcc, err := Authenticate(addr, cred)
+	Pcc, err = pcc.Authenticate(addr, cred)
 	if err != nil {
 		fmt.Println("Authentication error:", err)
 		return
@@ -282,17 +208,18 @@ func main() {
 			//Fields:    strings.Fields(fields),
 		}
 		if raw {
-			pcc.Post(endpoint, &d, &out)
+			Pcc.Post(endpoint, &d, &out)
 		} else {
-			pcc.Post(endpoint, &d, &out2)
+			Pcc.Post(endpoint, &d, &out2)
 			out2.Print(strings.Fields(nodes), strings.Fields(fields))
 			return
 		}
 	case strings.EqualFold(cmd, "get"):
-		pcc.Get(endpoint, &out, nil)
+		Pcc.Get(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "post"):
-		pcc.Post(endpoint, &data, &out)
+		Pcc.Post(endpoint, &data, &out)
 	case strings.EqualFold(cmd, "put"):
+		Pcc.Put(endpoint, &data, &out)
 	}
 
 	pPrint(out)
