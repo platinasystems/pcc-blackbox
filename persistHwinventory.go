@@ -70,6 +70,7 @@ func checkHardWareInventory(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "checkHardWareInventory")
+	CheckDependencies(t, res, CheckNodes)
 
 	assert := test.Assert{t}
 	var (

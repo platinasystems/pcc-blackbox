@@ -163,15 +163,15 @@ func CheckNumNodes(numNodes int) (err error) {
 	return
 }
 
-func CheckCephClusterExists(te *testEnv) (err error) {
-	cephCluster, ok := Pcc.GetCephCluster(te.CephConfiguration.ClusterName)
+func CheckCephClusterExists() (err error) {
+	cephCluster, ok := Pcc.GetCephCluster(Env.CephConfiguration.ClusterName)
 	if ok != nil {
 		err = errors.New("Can't find a CephCluster with the provided ClusterName")
 		return
 	}
-	if cephCluster.ClusterNetwork == te.CephConfiguration.ClusterNetwork &&
-		cephCluster.PublicNetwork == te.CephConfiguration.PublicNetwork &&
-		len(cephCluster.Nodes) == te.CephConfiguration.NumberOfNodes {
+	if cephCluster.ClusterNetwork == Env.CephConfiguration.ClusterNetwork &&
+		cephCluster.PublicNetwork == Env.CephConfiguration.PublicNetwork &&
+		len(cephCluster.Nodes) == Env.CephConfiguration.NumberOfNodes {
 		err = errors.New("The CephCluster does not match the specified parameters")
 		return
 	}
@@ -183,8 +183,8 @@ func CheckCephClusterExists(te *testEnv) (err error) {
 	return
 }
 
-func CheckK8sClusterExists(k8sName string) (err error) {
-	k8sCluster, ok := Pcc.GetKubernetesClusterByName(k8sName)
+func CheckK8sClusterExists() (err error) {
+	k8sCluster, ok := Pcc.GetKubernetesClusterByName(k8sname)
 	if ok != nil {
 		err = errors.New("Can't find a k8sCluster with the provided ClusterName")
 		return
@@ -196,15 +196,15 @@ func CheckK8sClusterExists(k8sName string) (err error) {
 	return
 }
 
-func CheckNetClusterExists(te *testEnv, name string) (err error) {
-	networkCluster, ok := Pcc.FindNetClusterName(name)
+func CheckNetClusterExists() (err error) {
+	networkCluster, ok := Pcc.FindNetClusterName(netClusterName)
 	if ok != nil {
 		err = errors.New("Can't find a Network Cluster with the provided ClusterName")
 		return
 	}
 	var envCluster netCluster
-	for _, cluster := range te.NetCluster {
-		if cluster.Name == name {
+	for _, cluster := range Env.NetCluster {
+		if cluster.Name == k8sname {
 			envCluster = cluster
 			break
 		}
@@ -228,7 +228,7 @@ func CheckNetClusterExists(te *testEnv, name string) (err error) {
 			}
 		}
 		if !found {
-			msg := fmt.Sprintf("Node %s not found in the Network %s", envNode.IpAddr, name)
+			msg := fmt.Sprintf("Node %s not found in the Network %s", envNode.IpAddr, k8sname)
 			err = errors.New(msg)
 			return
 		}

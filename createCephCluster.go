@@ -26,7 +26,7 @@ var (
 func testCeph(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "testCeph")
-	CheckDependencies(t, res, Env.CheckCephConfiguration)
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckNetClusterExists, CheckNodes)
 
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephDeploy {
@@ -60,7 +60,7 @@ func testCeph(t *testing.T) {
 func testDeleteCeph(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCeph")
-	CheckDependencies(t, res, Env.CheckCephConfiguration)
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephUndeploy {

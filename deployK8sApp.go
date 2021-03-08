@@ -23,7 +23,7 @@ var (
 func testK8sApp(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "testK8sApp")
-	CheckDependencies(t, res, Env.CheckK8sAppConfiguration)
+	CheckDependencies(t, res, Env.CheckK8sAppConfiguration, CheckNetClusterExists)
 
 	if t.Run("parseK8sAppConfig", parseK8sAppConfig) {
 		if appConfig.K8sCluster == nil {

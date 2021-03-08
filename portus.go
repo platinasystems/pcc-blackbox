@@ -81,7 +81,7 @@ func installPortus(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "installPortus")
-	CheckDependencies(t, res, Env.CheckPortusConfiguration)
+	CheckDependencies(t, res, Env.CheckPortusConfiguration, CheckNodes)
 
 	assert := test.Assert{t}
 	var (

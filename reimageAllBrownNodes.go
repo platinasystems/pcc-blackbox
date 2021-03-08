@@ -24,7 +24,7 @@ func updateBmcInfo(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "updateBmcInfo")
-	CheckDependencies(t, res, Env.CheckServers)
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
 
 	assert := test.Assert{t}
 
@@ -73,6 +73,7 @@ func reimageAllBrown(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "reimageAllBrown")
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
 
 	assert := test.Assert{t}
 

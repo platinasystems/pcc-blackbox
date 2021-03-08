@@ -33,7 +33,7 @@ func configNetworkInterfaces(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "configNetworkInterfaces")
-	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers)
+	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers, CheckNodes)
 
 	assert := test.Assert{t}
 

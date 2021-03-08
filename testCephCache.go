@@ -28,6 +28,7 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 
 	res := model.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addCephCache")
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
 	var (
 		clusters []*models.CephCluster
@@ -122,6 +123,7 @@ func testCephCacheAdd(t *testing.T) {
 
 	res := model.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addIpam")
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
 	log.AuctaLogger.Info("\nCEPH CACHE: adding the cache")
 	var (
@@ -166,6 +168,7 @@ func testCephCacheDelete(t *testing.T) {
 
 	res := model.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "testCephCacheDelete")
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
 	log.AuctaLogger.Info("\nCEPH CACHE: adding the cache")
 	var (

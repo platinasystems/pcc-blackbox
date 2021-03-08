@@ -32,6 +32,8 @@ func createK8s_3nodes(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "createK8s_3nodes")
+	CheckDependencies(t, res, CheckNetClusterExists)
+
 	assert := test.Assert{t}
 
 	const DIM = 3
@@ -215,6 +217,8 @@ func addNodeK8sCluster(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addNodeK8sCluster")
+	CheckDependencies(t, res, CheckK8sClusterExists)
+
 	assert := test.Assert{t}
 
 	var (

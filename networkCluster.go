@@ -40,7 +40,7 @@ func deleteNetCluster(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "deleteNetCluster")
-	CheckDependencies(t, res, Env.CheckNetClusters)
+	CheckDependencies(t, res, Env.CheckNetClusters, CheckNetClusterExists)
 
 	assert := test.Assert{t}
 
