@@ -4,11 +4,10 @@ import (
 	"errors"
 	"fmt"
 	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
 	"testing"
 	"time"
-
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 func IsInvader(node *pcc.NodeDetailed) bool {
@@ -63,19 +62,15 @@ func CheckDependencies(t *testing.T, res *models.TestResult, dep ...func() error
 
 func CheckInvaders(nodes *[]pcc.NodeDetailed) (err error) {
 	for _, node := range Env.Invaders {
-		found := false
-		isOnline := false
+		ok := false
 		for i := 0; i < len(*nodes); i++ {
 			remoteNode := (*nodes)[i]
-			if node.HostIp == remoteNode.Host {
-				found = true
-				if remoteNode.Status == "OK" {
-					isOnline = true
-				}
+			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" && remoteNode.NodeStatus.ConnectionStatus == "online" {
+				ok = true
 				break
 			}
 		}
-		if !found || !isOnline {
+		if !ok {
 			msg := fmt.Sprintf("%s not found in PCC or not online", node.HostIp)
 			err = errors.New(msg)
 			return
@@ -88,7 +83,7 @@ func CountInvadersMatching(nodes *[]pcc.NodeDetailed) (numInvaders int) {
 	for _, node := range Env.Invaders {
 		for i := 0; i < len(*nodes); i++ {
 			remoteNode := (*nodes)[i]
-			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" {
+			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" && remoteNode.NodeStatus.ConnectionStatus == "online" {
 				numInvaders++
 			}
 		}
@@ -98,19 +93,15 @@ func CountInvadersMatching(nodes *[]pcc.NodeDetailed) (numInvaders int) {
 
 func CheckServers(nodes *[]pcc.NodeDetailed) (err error) {
 	for _, node := range Env.Servers {
-		found := false
-		isOnline := false
+		ok := false
 		for i := 0; i < len(*nodes); i++ {
 			remoteNode := (*nodes)[i]
-			if node.HostIp == remoteNode.Host {
-				found = true
-				if remoteNode.Status == "online" {
-					isOnline = true
-				}
+			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" && remoteNode.NodeStatus.ConnectionStatus == "online" {
+				ok = true
 				break
 			}
 		}
-		if !found || !isOnline {
+		if !ok {
 			msg := fmt.Sprintf("%s not found in PCC or not online", node.HostIp)
 			err = errors.New(msg)
 			return
@@ -123,7 +114,7 @@ func CountServersMatching(nodes *[]pcc.NodeDetailed) (numServers int) {
 	for _, node := range Env.Servers {
 		for i := 0; i < len(*nodes); i++ {
 			remoteNode := (*nodes)[i]
-			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" {
+			if node.HostIp == remoteNode.Host && remoteNode.Status == "OK" && remoteNode.NodeStatus.ConnectionStatus == "online" {
 				numServers++
 			}
 		}
@@ -167,6 +158,83 @@ func CheckNumNodes(numNodes int) (err error) {
 	} else {
 		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
 		err = errors.New(msg)
+		return
+	}
+	return
+}
+
+func CheckCephClusterExists(te *testEnv) (err error) {
+	cephCluster, ok := Pcc.GetCephCluster(te.CephConfiguration.ClusterName)
+	if ok != nil {
+		err = errors.New("Can't find a CephCluster with the provided ClusterName")
+		return
+	}
+	if cephCluster.ClusterNetwork == te.CephConfiguration.ClusterNetwork &&
+		cephCluster.PublicNetwork == te.CephConfiguration.PublicNetwork &&
+		len(cephCluster.Nodes) == te.CephConfiguration.NumberOfNodes {
+		err = errors.New("The CephCluster does not match the specified parameters")
+		return
+	}
+
+	if status, _ := Pcc.GetCephHealthStatusById(cephCluster.Id); status.Health == "HEALTH_ERR" {
+		err = errors.New("The CephCluster status is not OK")
+		return
+	}
+	return
+}
+
+func CheckK8sClusterExists(k8sName string) (err error) {
+	k8sCluster, ok := Pcc.GetKubernetesClusterByName(k8sName)
+	if ok != nil {
+		err = errors.New("Can't find a k8sCluster with the provided ClusterName")
+		return
+	}
+	if k8sCluster.HealthStatus != "good" {
+		err = errors.New("The K8sCluster status is not OK")
+		return
+	}
+	return
+}
+
+func CheckNetClusterExists(te *testEnv, name string) (err error) {
+	networkCluster, ok := Pcc.FindNetClusterName(name)
+	if ok != nil {
+		err = errors.New("Can't find a Network Cluster with the provided ClusterName")
+		return
+	}
+	var envCluster netCluster
+	for _, cluster := range te.NetCluster {
+		if cluster.Name == name {
+			envCluster = cluster
+			break
+		}
+	}
+	if envCluster.Name == "" {
+		err = errors.New("Can't find a Network Cluster with the provided ClusterName")
+		return
+	}
+	if envCluster.ControlCIDR != networkCluster.ControlCIDR ||
+		envCluster.DataCIDR != networkCluster.DataCIDR ||
+		envCluster.IgwPolicy != networkCluster.IgwPolicy {
+		err = errors.New("The network Cluster does not match the specified parameters")
+		return
+	}
+	for _, envNode := range envCluster.Nodes {
+		found := false
+		for _, node := range networkCluster.Nodes {
+			if envNode.IpAddr == node.ControlIP {
+				found = true
+				break
+			}
+		}
+		if !found {
+			msg := fmt.Sprintf("Node %s not found in the Network %s", envNode.IpAddr, name)
+			err = errors.New(msg)
+			return
+		}
+	}
+	if networkCluster.Health != "OK" {
+		err = errors.New("The Network Cluster status is not OK")
 		return
 	}
 	return
