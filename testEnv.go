@@ -309,10 +309,11 @@ func (te *testEnv) CheckNetClusters() (err error) {
 }
 
 func (te *testEnv) CheckCephConfiguration() (err error) {
-	if te.CephConfiguration.NumberOfNodes == 0 ||
+	if te.CephConfiguration.ClusterName == "" ||
+		te.CephConfiguration.NumberOfNodes < 3 ||
 		te.CephConfiguration.PublicNetwork == "" ||
 		te.CephConfiguration.ClusterNetwork == "" {
-		err = errors.New("Error in configuration parameters (check: CephConfiguration NumberOfNodes, CephConfiguration PublicNetwork, CephConfiguration ClusterNetwork)")
+		err = errors.New("Error in configuration parameters (check: CephConfiguration.ClusterName, CephConfiguration.NumberOfNodes, CephConfiguration.PublicNetwork, CephConfiguration.ClusterNetwork)")
 		return
 	}
 	return
@@ -387,6 +388,25 @@ func CheckApp(app *pcc.ConfigKApp) (err error) {
 			"app.GitRepoPath" +
 			"app.GitBranch " +
 			"app.Label)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckCephClusterExists() (err error) {
+	cephCluster, ok := Pcc.GetCephCluster(te.CephConfiguration.ClusterName)
+	if ok != nil {
+		err = errors.New("Can't find a CephCluster with the provided ClusterName")
+		return
+	}
+	if cephCluster.ClusterNetwork == te.CephConfiguration.ClusterNetwork &&
+		cephCluster.PublicNetwork == te.CephConfiguration.PublicNetwork &&
+		len(cephCluster.Nodes) == te.CephConfiguration.NumberOfNodes {
+		err = errors.New("The CephCluster does not match the specified parameters")
+		return
+	}
+	if cephCluster.Status != "OK" {
+		err = errors.New("The CephCluster status is not OK")
 		return
 	}
 	return
