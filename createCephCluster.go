@@ -26,7 +26,7 @@ var (
 func testCeph(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "testCeph")
-	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckNetClusterExists, CheckNodes)
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckNetClusterExists)
 
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephDeploy {

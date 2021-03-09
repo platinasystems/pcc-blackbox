@@ -21,7 +21,7 @@ func addNetCluster(t *testing.T) {
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now(), "addNetCluster")
-	CheckDependencies(t, res, Env.CheckNetClusters, CheckNodes)
+	CheckDependencies(t, res, Env.CheckNetClusters, CheckNodesNetCluster)
 
 	for _, netCluster := range Env.NetCluster {
 		netClusterId, err := Pcc.FindNetClusterId(netCluster.Name)

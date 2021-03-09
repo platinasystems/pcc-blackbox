@@ -163,15 +163,47 @@ func CheckNumNodes(numNodes int) (err error) {
 	return
 }
 
+func CheckNodesNetCluster() (err error) {
+	var envCluster netCluster
+	for _, cluster := range Env.NetCluster {
+		if cluster.Name == netClusterName {
+			envCluster = cluster
+			break
+		}
+	}
+	if envCluster.Name == "" {
+		err = errors.New("Can't find a Network Cluster with the provided ClusterName in the env file")
+		return
+	}
+	for _, envNode := range envCluster.Nodes {
+		nodeId, ok := Pcc.FindNodeAddress(envNode.IpAddr)
+		if ok != nil {
+			err = ok
+			return
+		}
+		node, ok := Pcc.GetNode(nodeId)
+		if ok != nil {
+			err = ok
+			return
+		}
+		if node.NodeStatus.ConnectionStatus != "online" {
+			msg := fmt.Sprintf("%s connection status not online", node.Host)
+			err = errors.New(msg)
+			return
+		}
+	}
+	return
+}
+
 func CheckCephClusterExists() (err error) {
 	cephCluster, ok := Pcc.GetCephCluster(Env.CephConfiguration.ClusterName)
 	if ok != nil {
 		err = errors.New("Can't find a CephCluster with the provided ClusterName")
 		return
 	}
-	if cephCluster.ClusterNetwork == Env.CephConfiguration.ClusterNetwork &&
-		cephCluster.PublicNetwork == Env.CephConfiguration.PublicNetwork &&
-		len(cephCluster.Nodes) == Env.CephConfiguration.NumberOfNodes {
+	if cephCluster.CephClusterConfig.ClusterNetwork != Env.CephConfiguration.ClusterNetwork ||
+		cephCluster.CephClusterConfig.PublicNetwork != Env.CephConfiguration.PublicNetwork ||
+		len(cephCluster.Nodes) != Env.CephConfiguration.NumberOfNodes {
 		err = errors.New("The CephCluster does not match the specified parameters")
 		return
 	}
@@ -213,8 +245,18 @@ func CheckNetClusterExists() (err error) {
 		err = errors.New("Can't find a Network Cluster with the provided ClusterName in the env file")
 		return
 	}
-	if envCluster.ControlCIDR != networkCluster.ControlCIDR ||
-		envCluster.DataCIDR != networkCluster.DataCIDR ||
+	controlSubnet, ok := Pcc.FindSubnetObj(envCluster.ControlCIDR)
+	if ok != nil {
+		err = ok
+		return
+	}
+	dataSubnet, ok := Pcc.FindSubnetObj(envCluster.DataCIDR)
+	if ok != nil {
+		err = ok
+		return
+	}
+	if string(controlSubnet.Subnet) != networkCluster.ControlCIDR ||
+		string(dataSubnet.Subnet) != networkCluster.DataCIDR ||
 		envCluster.IgwPolicy != networkCluster.IgwPolicy {
 		err = errors.New("The network Cluster does not match the specified parameters")
 		return
@@ -222,13 +264,18 @@ func CheckNetClusterExists() (err error) {
 	for _, envNode := range envCluster.Nodes {
 		found := false
 		for _, node := range networkCluster.Nodes {
-			if envNode.IpAddr == node.ControlIP {
+			remoteNode, ok := Pcc.GetNode(node.NodeId)
+			if ok != nil {
+				err = ok
+				return
+			}
+			if envNode.IpAddr == remoteNode.Host {
 				found = true
 				break
 			}
 		}
 		if !found {
-			msg := fmt.Sprintf("Node %s not found in the Network %s", envNode.IpAddr, k8sname)
+			msg := fmt.Sprintf("Node %s not found in the Network %s", envNode.IpAddr, netClusterName)
 			err = errors.New(msg)
 			return
 		}
