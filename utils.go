@@ -204,13 +204,13 @@ func CheckNetClusterExists() (err error) {
 	}
 	var envCluster netCluster
 	for _, cluster := range Env.NetCluster {
-		if cluster.Name == k8sname {
+		if cluster.Name == netClusterName {
 			envCluster = cluster
 			break
 		}
 	}
 	if envCluster.Name == "" {
-		err = errors.New("Can't find a Network Cluster with the provided ClusterName")
+		err = errors.New("Can't find a Network Cluster with the provided ClusterName in the env file")
 		return
 	}
 	if envCluster.ControlCIDR != networkCluster.ControlCIDR ||
