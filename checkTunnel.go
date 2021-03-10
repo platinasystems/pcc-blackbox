@@ -118,8 +118,7 @@ func checkTunnelConnection(t *testing.T) {
 
 func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 	nodeId := node.Id
-	var ssh pcc.SSHHandler
-	if stdout, stderr, err := ssh.Run(node.Host, fmt.Sprintf("ping -c 3 %s", node.TunnelServerAddress)); err == nil {
+	if stdout, stderr, err := Pcc.SSHHandler().Run(node.Host, fmt.Sprintf("ping -c 3 %s", node.TunnelServerAddress)); err == nil {
 		if log {
 			fmt.Println(fmt.Sprintf("The node %d:%s is pinging the address %v\n%s", nodeId, node.Name, node.TunnelServerAddress, stdout))
 		}
@@ -135,14 +134,12 @@ func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 // Check if invader is running the iptables rules
 func checkTunnelForwardingRules(t *testing.T) {
 	fmt.Println("\nTUNNEL: checking forwarding rules")
-	var ssh pcc.SSHHandler
-
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {
 			node := (*nodes)[i]
 			nodeId := node.Id
 
-			if stdout, stderr, err := ssh.Run(node.Host, "sudo iptables --list-rules PREROUTING -t nat"); err == nil {
+			if stdout, stderr, err := Pcc.SSHHandler().Run(node.Host, "sudo iptables --list-rules PREROUTING -t nat"); err == nil {
 				lines := strings.Split(stdout, `-A`)
 			loopPort:
 				for _, port := range []string{"8081", "9092", "9999"} {
@@ -169,15 +166,13 @@ func checkTunnelForwardingRules(t *testing.T) {
 // Check if the PCC is able to restore the tunnel
 func checkTunnelRestore(t *testing.T) {
 	fmt.Println("\nTUNNEL: checking the restore for the invaders")
-	var ssh pcc.SSHHandler
-
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {
 			node := (*nodes)[i]
 			nodeId := node.Id
 
 			tun := fmt.Sprintf("tun%d", node.Id)
-			if _, _, err := ssh.Run(node.Host, fmt.Sprintf("sudo ip link delete tun%d", node.Id)); err == nil {
+			if _, _, err := Pcc.SSHHandler().Run(node.Host, fmt.Sprintf("sudo ip link delete tun%d", node.Id)); err == nil {
 				fmt.Println(fmt.Sprintf("The node %d:%s tun device %s has been removed. Waiting for the restore", nodeId, node.Name, tun))
 
 			restoreLoop:

@@ -1,11 +1,5 @@
 package pcc
 
-import (
-	"fmt"
-	"github.com/jinzhu/gorm"
-	"strings"
-)
-
 type DBHandler struct {
 }
 
@@ -15,42 +9,4 @@ type DBConfiguration struct {
 	Name    string `"json:name"`
 	User    string `"json:user"`
 	Pwd     string `"json:pwd"`
-}
-
-var dbConfig *DBConfiguration
-var DB *gorm.DB
-
-func InitDB(c *DBConfiguration) {
-	if c == nil {
-		return
-	}
-
-	dbConfig = c
-
-	if len(strings.TrimSpace(dbConfig.Address)) > 0 {
-		fmt.Println("init database handler", dbConfig.Address, dbConfig.Port, dbConfig.Name)
-
-		psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
-			dbConfig.Address,
-			dbConfig.Port,
-			dbConfig.User,
-			dbConfig.Pwd,
-			dbConfig.Name)
-
-		db, err := gorm.Open("postgres", psqlInfo)
-		if err == nil {
-			db.DB()
-			db.DB().Ping()
-			db.DB().SetMaxIdleConns(10)
-			db.DB().SetMaxOpenConns(100)
-			DB = db
-		} else {
-			fmt.Errorf("unable to start database. Fatal Exception: [%+v]", err.Error())
-			panic(err)
-		}
-	}
-}
-
-func (dbh *DBHandler) getDB() *gorm.DB {
-	return DB
 }
