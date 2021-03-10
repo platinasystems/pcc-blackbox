@@ -240,3 +240,8 @@ func parseStats() {
 
 	return
 }
+
+func main() {
+
+	parseStats()
+}
