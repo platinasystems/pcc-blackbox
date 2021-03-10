@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func createSeed() (seed int64) {
+func CreateSeed() (seed int64) {
 	seed = time.Now().Unix()
-	log.AuctaLogger.Infof("Random seed: %d", seed)
+	log.AuctaLogger.Infof("Generated random seed: %d", seed)
 	return
 }
 
-func randomGenerator(seed int64) *rand.Rand {
+func RandomGenerator(seed int64) *rand.Rand {
 	return rand.New(rand.NewSource(seed))
 }

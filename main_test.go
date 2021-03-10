@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/platinasystems/pcc-blackbox/utility"
 	"io/ioutil"
 	"os"
 	"runtime/debug"
@@ -23,6 +24,11 @@ import (
 )
 
 var envFile string = "testEnv.json"
+var seed int64
+
+func init() {
+	flag.Int64Var(&seed, "seed", -1, "seed to initialize random generator")
+}
 
 func TestMain(m *testing.M) {
 	var (
@@ -69,6 +75,7 @@ func TestMain(m *testing.M) {
 	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
 	db.InitWithParams(params)
 	db.NewDBHandler().GetDM().AutoMigrate(&models.TestResult{})
+	db.NewDBHandler().GetDM().AutoMigrate(&models.RandomSeed{})
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
@@ -86,6 +93,13 @@ func TestMain(m *testing.M) {
 	}
 
 	runID = uuid.New().String()
+
+	if seed == -1 {
+		seed = utility.CreateSeed()
+	}
+	randomGenerator = utility.RandomGenerator(seed)
+	randomSeed := models.RandomSeed{RunID: runID, Seed: seed}
+	db.NewDBHandler().GetDM().Create(&randomSeed)
 
 	ecode = m.Run()
 
