@@ -1,0 +1,10 @@
+tests:
+  Test1:
+    - getNodes
+    - updateIpam
+    - addNetCluster
+  Test2:
+    - getNodes
+    - updateIpam
+    - addNetCluster
+    - testCeph

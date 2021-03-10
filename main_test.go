@@ -24,10 +24,16 @@ import (
 )
 
 var envFile string = "testEnv.json"
+var customTestsFileName string
 var seed int64
 
 func init() {
 	flag.Int64Var(&seed, "seed", -1, "seed to initialize random generator")
+	flag.StringVar(&customTestsFileName, "testfile", "testList.yml.example", "name of the file with a custom list of test")
+
+	nameToTestFunc = GetNameToTestFunc()
+	defaultTests = GetDefaultTestMap()
+
 }
 
 func TestMain(m *testing.M) {
@@ -430,6 +436,30 @@ func TestDashboard(t *testing.T) {
 		mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
 		mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
 	})
+}
+
+func TestCustom(t *testing.T) {
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+
+	customTests, err := utility.GetCustomTests(customTestsFileName)
+	if err != nil {
+		log.AuctaLogger.Errorf("%v", err)
+		t.SkipNow()
+	}
+
+	for testName, subtests := range customTests.TestList {
+		count++
+
+		if defaultSubtests, ok := defaultTests[testName]; ok {
+			subtests = defaultSubtests
+		}
+
+		mayRun(t, testName, func(t *testing.T) {
+			for _, subtest := range subtests {
+				mayRun(t, subtest, nameToTestFunc[subtest])
+			}
+		})
+	}
 }
 
 func TestGen(t *testing.T) {

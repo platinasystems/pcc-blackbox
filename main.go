@@ -7,6 +7,7 @@ package main
 import (
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"math/rand"
+	"testing"
 )
 
 var runID string
@@ -17,5 +18,7 @@ var SecurityKeys = make(map[string]*pcc.SecurityKey)
 var NodebyHostIP = make(map[string]uint64) // deprecated use Env
 var dockerStats *pcc.DockerStats
 var randomGenerator *rand.Rand
+var nameToTestFunc map[string]func(*testing.T)
+var defaultTests map[string][]string
 
 func main() {}
