@@ -53,16 +53,13 @@ func TestMain(m *testing.M) {
 			envFile, err.Error()))
 	}
 
-	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
-	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
-
 	log.InitWithDefault(nil)
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
 		Password: "admin",
 	}
-	if Pcc, err = pcc.Authenticate(Env.PccIp, credential); err != nil {
+	if Pcc, err = pcc.Init(Env.PccIp, credential, Env.DBConfiguration, Env.SshConfiguration); err != nil {
 		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
 

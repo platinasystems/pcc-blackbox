@@ -96,7 +96,6 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 // Remove the service and wait for the restore
 func checkRestore(service string, path string, node *pcc.NodeDetailed) (err error) {
 	var (
-		ssh      pcc.SSHHandler
 		execPath string
 		stdout   string
 		cmd      string
@@ -107,7 +106,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 		service, node.Id, node.Name, node.Host)
 	cmd = fmt.Sprintf("sudo rm -f %s && sudo kill -9 `pidof %s`",
 		execPath, path)
-	if _, _, err = ssh.Run(node.Host, cmd); err != nil {
+	if _, _, err = Pcc.SSHHandler().Run(node.Host, cmd); err != nil {
 		return
 	}
 	fmt.Printf("The %s:%s was correctly killed & removed from node %d:%s\n",
@@ -125,7 +124,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 				service)
 			return
 		case <-tick:
-			stdout, _, err = ssh.Run(node.Host, cmd)
+			stdout, _, err = Pcc.SSHHandler().Run(node.Host, cmd)
 			if err != nil {
 				return
 			}
@@ -137,7 +136,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 	}
 
 	cmd = fmt.Sprintf("pidof %s", path)
-	stdout, _, err = ssh.Run(node.Host, cmd)
+	stdout, _, err = Pcc.SSHHandler().Run(node.Host, cmd)
 	if err != nil {
 		err = fmt.Errorf("Could not find pid of %s\n", path)
 		return
