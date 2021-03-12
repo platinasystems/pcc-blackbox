@@ -10,6 +10,8 @@ import (
 	"github.com/platinasystems/pcc-blackbox/models"
 )
 
+type IdList []uint64
+
 // get whole PCC ObjectsList
 func testDashboardGetAllPCCObjects(t *testing.T) {
 	res := models.InitTestResult(runID)
@@ -25,7 +27,20 @@ func testDashboardGetAllPCCObjects(t *testing.T) {
 	checkError(t, res, err)
 }
 
-type IdList []uint64
+// get Index of PCC Objects (concise Objects List)
+func testDashboardGetAllConcisePCCObjects(t *testing.T) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	log.AuctaLogger.Infof("Get Index of PCC Objects (concise format) with no sort or pagination")
+	pccObjectsIndex, err := Pcc.TestDashboardConciseObjectList(nil, nil)
+	if err != nil {
+		log.AuctaLogger.Error(err.Error())
+	} else {
+		log.AuctaLogger.Infof("Received [%d] Concise PCC Objects\n", len(*pccObjectsIndex))
+	}
+	checkError(t, res, err)
+}
 
 func testDashboardGetPCCObjectByRandomId(t *testing.T) {
 	res := models.InitTestResult(runID)

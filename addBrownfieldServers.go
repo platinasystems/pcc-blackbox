@@ -20,11 +20,12 @@ func addServer(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckServers)
 
-	var nodes []node
+	var envNodes []node
 	for i := range Env.Servers {
-		nodes = append(nodes, Env.Servers[i].node)
+		envNodes = append(envNodes, Env.Servers[i].node)
 	}
 
-	log.AuctaLogger.Infof("adding %d servers\n", len(nodes))
-	addNodesAndCheckStatus(t, nodes)
+	log.AuctaLogger.Infof("adding %d servers\n", len(envNodes))
+	nodesAdded := addEnvNodes(t, envNodes)
+	checkAddNodesStatus(t, nodesAdded)
 }

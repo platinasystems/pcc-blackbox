@@ -199,7 +199,7 @@ func (pcc *PccClient) GetEnvironment(nodeID *uint64) (env map[string]interface{}
 // Fetch the node from the DB
 func (pcc *PccClient) GetNodeFromDB(nodeId uint64) (node *NodeDetailed, err error) {
 	var n NodeDetailed
-	if err = DB.Where("id = ?", fmt.Sprintf("%d", nodeId)).First(&n).Error; err == nil {
+	if err = pcc.DBHandler().FetchWhere(&n, "id = ?", nodeId); err == nil {
 		node = &n
 	} else {
 		log.AuctaLogger.Errorf("Not able to fetch the node", err)
@@ -210,7 +210,7 @@ func (pcc *PccClient) GetNodeFromDB(nodeId uint64) (node *NodeDetailed, err erro
 // Fetch the nodes from the DB
 func (pcc *PccClient) GetNodesFromDB() (nodes *[]NodeDetailed, err error) {
 	var n []NodeDetailed
-	if err = DB.Find(&n).Error; err == nil {
+	if err = pcc.DBHandler().FetchMany(&n); err == nil {
 		nodes = &n
 	} else {
 		log.AuctaLogger.Errorf("Not able to fetch the nodes", err)
@@ -221,7 +221,7 @@ func (pcc *PccClient) GetNodesFromDB() (nodes *[]NodeDetailed, err error) {
 // Fetch the invaders from the DB
 func (pcc *PccClient) GetInvadersFromDB() (nodes *[]NodeDetailed, err error) {
 	var n []NodeDetailed
-	if err = DB.Where("invader = true").Find(&n).Error; err == nil {
+	if err = pcc.DBHandler().FetchManyWhere(&n, "invader = true"); err == nil {
 		nodes = &n
 	} else {
 		log.AuctaLogger.Errorf("Not able to fetch the invader nodes", err)
@@ -232,7 +232,7 @@ func (pcc *PccClient) GetInvadersFromDB() (nodes *[]NodeDetailed, err error) {
 // Fetch the servers from the DB
 func (pcc *PccClient) GetServersFromDB() (nodes *[]NodeDetailed, err error) {
 	var n []NodeDetailed
-	if err = DB.Where("invader = false").Find(&n).Error; err == nil {
+	if err = pcc.DBHandler().FetchManyWhere(&n, "invader = false"); err == nil {
 		nodes = &n
 	} else {
 		log.AuctaLogger.Errorf("Not able to fetch the invader nodes", err)
@@ -344,8 +344,10 @@ func (pcc *PccClient) UpdateNode(node *NodeDetailed) (err error) {
 
 // Update MaaS role
 func (pcc *PccClient) UpdateMaas(node *NodeDetailed) (err error) {
+	var timeout time.Duration = 1 * time.Minute
+
 	endpoint := fmt.Sprintf("pccserver/node/updateMaas/%v", node.Id)
-	err = pcc.Put(endpoint, node, node)
+	err = pcc.Put(endpoint, node, node, timeout)
 	return
 }
 

@@ -12,8 +12,6 @@ import (
 
 var outEnv testEnv
 
-var nodes = make(map[uint64]*pcc.NodeDetailed)
-
 func addTestTestNode(testNode *pcc.NodeDetailed) {
 	var n node
 

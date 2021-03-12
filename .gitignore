@@ -17,5 +17,6 @@ test_portus_key
 certificate-bb-test.crt
 certificate-bb-test.pem
 container-stats.txt
+containers.json
 key-bb-test.pem
 logs/

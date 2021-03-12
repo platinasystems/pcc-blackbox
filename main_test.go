@@ -8,7 +8,6 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/platinasystems/pcc-blackbox/utility"
 	"io/ioutil"
 	"os"
 	"runtime/debug"
@@ -20,6 +19,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/pcc-blackbox/utility"
 	"github.com/platinasystems/test"
 )
 
@@ -75,9 +75,6 @@ func TestMain(m *testing.M) {
 			envFile, err.Error()))
 	}
 
-	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
-	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
-
 	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
 	db.InitWithParams(params)
 	db.NewDBHandler().GetDM().AutoMigrate(&models.TestResult{})
@@ -87,11 +84,15 @@ func TestMain(m *testing.M) {
 		UserName: "admin",
 		Password: "admin",
 	}
-	if Pcc, err = pcc.Authenticate(Env.PccIp, credential); err != nil {
+	if Pcc, err = pcc.Init(Env.PccIp, credential, Env.DBConfiguration, Env.SshConfiguration); err != nil {
 		panic(fmt.Errorf("Authentication error: %v\n", err))
 	}
 
 	dockerStats = pcc.InitDockerStats(Env.DockerStats)
+	err = pcc.StoreContainerNames()
+	if err != nil {
+		fmt.Printf("Error storing containers: %v", err)
+	}
 	flag.Parse()
 	if *test.DryRun {
 		m.Run()
@@ -428,7 +429,9 @@ func TestDashboard(t *testing.T) {
 	mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
 		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
-		mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
+		// ** calling with a fixed id (hardcoded to 4 in the code, may return a Not Found
+		// ** Hence comment this test, as it is semantically equivalent to the objectByRandomId call above
+		// ** mayRun(t, "testDashboardGetPCCObjectById", testDashboardGetPCCObjectById)
 		mayRun(t, "testDashboardGetChildrenObjectsByRandomId", testDashboardGetChildrenObjectsByRandomId)
 		mayRun(t, "testDashboardGetParentObjectsByRandomId", testDashboardGetParentObjectsByRandomId)
 		mayRun(t, "testDashboardGetFilteredObjects", testDashboardGetFilteredObjects)

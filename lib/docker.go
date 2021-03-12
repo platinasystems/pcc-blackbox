@@ -2,11 +2,17 @@ package pcc
 
 import (
 	"bufio"
+	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/KyleBanks/dockerstats"
-	log "github.com/platinasystems/go-common/logs"
+	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/KyleBanks/dockerstats"
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+	log "github.com/platinasystems/go-common/logs"
 )
 
 type DockerStatsConfig struct {
@@ -87,4 +93,38 @@ func (ds *DockerStats) Stop() {
 	defer ds.file.Close()
 	ds.writer.Flush()
 	ds.timer.Stop()
+}
+
+func StoreContainerNames() (err error) {
+	var containerFile string = "containers.json"
+
+	cli, err := client.NewEnvClient()
+	if err != nil {
+		return
+	}
+
+	// This assumes that this is running on the same CPU
+	// as PCC blackbox.
+	containers, err := cli.ContainerList(context.Background(),
+		types.ContainerListOptions{})
+	if err != nil {
+		return
+	}
+
+	if len(containers) == 0 {
+		return
+	}
+
+	m := make(map[string]string)
+	for _, container := range containers {
+		m[container.ID[:12]] = container.Names[0][1:]
+	}
+
+	data, err := json.MarshalIndent(m, "", "    ")
+	if err != nil {
+		err = fmt.Errorf("Error marshal to json: %v\n", err)
+		return
+	}
+	err = ioutil.WriteFile(containerFile, data, 0644)
+	return
 }

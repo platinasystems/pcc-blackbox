@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	"github.com/platinasystems/go-common/database"
 	"github.com/platinasystems/go-common/http"
 )
 
@@ -18,6 +19,8 @@ type PccClient struct {
 	pccIp      string
 	bearer     string
 	RestClient *http.PlatinaRestService
+	dbConfig   *DBConfiguration
+	sshConfig  *SshConfiguration
 }
 
 func (pcc *PccClient) getClient() (rc *http.PlatinaRestService) {
@@ -74,13 +77,37 @@ func (pcc *PccClient) GetFile(endPoint string) (content string, err error) {
 	return
 }
 
-func Authenticate(PccIp string, cred Credential) (pcc *PccClient, err error) {
+func (pcc *PccClient) SSHHandler() (ssh *SSHHandler) {
+	ssh = &SSHHandler{}
+	return
+}
+
+func (pcc *PccClient) DBHandler() *database.DatabaseHandler {
+	return database.NewDBHandler()
+}
+
+func Init(PccIp string, cred Credential, dbConfig *DBConfiguration, sshConfig *SshConfiguration) (pcc *PccClient, err error) {
 	var out struct{ Token string }
 	rc := http.PlatinaRestClient{Address: PccIp, Port: 9999}
 	client := PccClient{pccIp: PccIp}
 	if err = rc.Post("security/auth", cred, &out); err == nil {
 		client.bearer = fmt.Sprintf("Bearer %s", out.Token)
 	}
+	client.dbConfig = dbConfig
+	client.sshConfig = sshConfig
 	pcc = &client
+	if dbConfig != nil && dbConfig.Address != "" { // Init the DB handler
+		var param database.Params
+		param.Host = dbConfig.Address
+		param.Password = dbConfig.Pwd
+		param.Port = dbConfig.Port
+		param.DBname = dbConfig.Name
+		param.User = dbConfig.User
+		param.DBtype = "postgres"
+		database.InitWithParams(&param)
+	}
+	if sshConfig != nil && sshConfig.User != "" { // Init the SSH handler
+		InitSSH(sshConfig)
+	}
 	return
 }
