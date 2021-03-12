@@ -21,4 +21,5 @@ require (
 	github.com/spf13/viper v1.7.1
 	golang.org/x/crypto v0.0.0-20210218145215-b8e89b74b9df
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 )
