@@ -20,7 +20,7 @@ func addNetCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addNetCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckNetClusters, CheckNodesNetCluster)
 
 	for _, netCluster := range Env.NetCluster {
@@ -39,7 +39,7 @@ func deleteNetCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "deleteNetCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckNetClusters, CheckNetClusterExists)
 
 	assert := test.Assert{t}
@@ -64,7 +64,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	assert := test.Assert{t}
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addNetClusterInternal")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		reqCluster    pcc.NetworkClusterReq
@@ -241,7 +241,7 @@ func deleteNetClusterInternal(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "deleteNetClusterInternal")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
@@ -269,7 +269,7 @@ func delAllNetsCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllNetsCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	netCluster, err := Pcc.GetNetCluster()

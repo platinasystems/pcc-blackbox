@@ -20,7 +20,7 @@ func installMAAS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "installMAAS")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		err    error

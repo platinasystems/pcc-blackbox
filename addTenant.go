@@ -20,7 +20,7 @@ func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addTenantA")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckServers, Env.CheckPccIp)
 
 	assert := test.Assert{t}
@@ -261,7 +261,7 @@ func delAllTenants(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllTenants")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var (
@@ -295,7 +295,7 @@ func delAllUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllUsers")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var (

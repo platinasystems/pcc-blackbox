@@ -32,7 +32,7 @@ func configNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "configNetworkInterfaces")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers, CheckNodes)
 
 	assert := test.Assert{t}
@@ -144,7 +144,7 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 	serverInterfaces []netInterface, ifaces []*pcc.InterfaceDetail) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "configNodeInterfaces")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var (
@@ -313,7 +313,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	if len(desire6IpMap) != 0 {
 		log.AuctaLogger.Errorf("    Ipv6 mismatch ")
 		for k, _ := range desire6IpMap {
-			fmt.Printf("  %v\n", k)
+			log.AuctaLogger.Infof("  %v\n", k)
 		}
 		return
 	}
@@ -378,7 +378,7 @@ func verifyNetworkConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkConfig")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckInvaders, Env.CheckServers)
 
 	assert := test.Assert{t}
@@ -440,7 +440,7 @@ func verifyNetworkInterfaces(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkInterfaces")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
@@ -536,8 +536,8 @@ func verifyNetworkInterfaces(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-				res.SetTestSkipped("No node to verify")
-				assert.SkipNow()
+				//res.SetTestSkipped("No node to verify")
+				//assert.SkipNow()
 				return
 			}
 		}
@@ -549,7 +549,7 @@ func verifyNetworkUp(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "verifyNetworkUp")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var nodesToCheck = make(map[uint64]uint64, len(nodeIntfMap))
@@ -644,8 +644,8 @@ func verifyNetworkUp(t *testing.T) {
 				}
 			}
 			if len(nodesToCheck) == 0 {
-				res.SetTestSkipped("No node to verify")
-				assert.SkipNow()
+				//res.SetTestSkipped("No node to verify")
+				//assert.SkipNow()
 				return
 			}
 		}

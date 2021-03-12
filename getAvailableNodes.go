@@ -21,7 +21,7 @@ func getAvailableNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "getAvailableNodes")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	if nodes, err := Pcc.GetNodes(); err == nil {
@@ -44,7 +44,7 @@ func testNodeGroups(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testNodeGroups")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 

@@ -24,7 +24,7 @@ var metadataProfiles = make(map[uint64]*authentication.AuthProfile)
 //
 func getServiceParameters(t *testing.T, servicetype string, mandatory bool, str bool, numeric bool) (parameters map[string]models.ItemDescription) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "getServiceParameters")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		description authentication.AuthenticationServiceDescription
@@ -57,7 +57,7 @@ func getServiceParameters(t *testing.T, servicetype string, mandatory bool, str 
 //
 func createProfile(t *testing.T, servicetype string) (created authentication.AuthProfile) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "createProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		err        error
@@ -111,7 +111,7 @@ func createProfile(t *testing.T, servicetype string) (created authentication.Aut
 //
 func testCreateCredendialMetadataProfile(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCreateCredendialMetadataProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		types []string
@@ -136,7 +136,7 @@ func testCreateCredendialMetadataProfile(t *testing.T) {
 //
 func testUpdateCredendialMetadataProfile(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUpdateCredendialMetadataProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("\nAPP CREDENTIALS: updating the metadata profile")
 	var (
@@ -205,7 +205,7 @@ func testUpdateCredendialMetadataProfile(t *testing.T) {
 //
 func testDeleteCredendialMetadataProfile(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCredendialMetadataProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("\nAPP CREDENTIALS: deleting the metadata profile")
 	var err error

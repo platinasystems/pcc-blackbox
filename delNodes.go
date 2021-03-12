@@ -18,7 +18,7 @@ func delNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delNodes")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if _, err := Pcc.DeleteNodes(true); err != nil {
 		msg := fmt.Sprintf("%v", err)
@@ -32,7 +32,7 @@ func validateDeleteNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "validateDeleteNodes")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	// wait for node to be removed

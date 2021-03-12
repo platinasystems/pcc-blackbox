@@ -20,7 +20,7 @@ func addIpam(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addIpam")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -112,7 +112,7 @@ func addIpamConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addIpamConfig")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckNetIpams)
 
 	assert := test.Assert{t}
@@ -147,7 +147,7 @@ func delAllIpams(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllIpams")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	subs, err := Pcc.GetSubnetObj()

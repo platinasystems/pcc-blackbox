@@ -45,12 +45,19 @@ func TestMain(m *testing.M) {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, r)
 			ecode = 1
-			fmt.Println(string(debug.Stack()))
+			log.AuctaLogger.Info(string(debug.Stack()))
 		}
 		if ecode != 0 {
 			os.Exit(ecode)
 		}
 	}()
+
+	if _, err := os.Stat("logConfig.yml"); err == nil {
+		pcc.LoadLogConfig("logConfig.yml", "yml")
+		log.Init()
+	} else if os.IsNotExist(err) {
+		log.InitWithDefault(nil)
+	}
 
 	data, err := ioutil.ReadFile(envFile)
 	if err != nil {
@@ -70,13 +77,6 @@ func TestMain(m *testing.M) {
 
 	pcc.InitDB(Env.DBConfiguration)   // Init the DB handler
 	pcc.InitSSH(Env.SshConfiguration) // Init the SSH handler
-
-	if _, err := os.Stat("logConfig.yml"); err == nil {
-		pcc.LoadLogConfig("logConfig.yml", "yml")
-		log.Init()
-	} else if os.IsNotExist(err) {
-		log.InitWithDefault(nil)
-	}
 
 	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
 	db.InitWithParams(params)
@@ -110,7 +110,7 @@ func TestMain(m *testing.M) {
 	ecode = m.Run()
 
 	dockerStats.Stop()
-	fmt.Println("\n\nTEST COMPLETED")
+	log.AuctaLogger.Info("\n\nTEST COMPLETED")
 }
 
 var count uint
@@ -278,7 +278,7 @@ func TestHardwareInventory(t *testing.T) {
 
 func TestFull(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -369,7 +369,7 @@ func TestGreenfield(t *testing.T) {
 
 func TestConfigNetworkInterfaces(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "configureNetwork", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
@@ -481,7 +481,7 @@ func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
 }
 
 func uutInfo() {
-	fmt.Println("---")
-	defer fmt.Println("...")
-	fmt.Println("pcc instance unknown")
+	log.AuctaLogger.Info("---")
+	defer log.AuctaLogger.Info("...")
+	log.AuctaLogger.Info("pcc instance unknown")
 }

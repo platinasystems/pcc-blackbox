@@ -33,7 +33,7 @@ func checkError(t *testing.T, res *models.TestResult, err error) {
 
 func testPreparePolicies(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testPreparePolicies")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		defaultRack *scope2.Scope
@@ -113,7 +113,7 @@ func testPreparePolicies(t *testing.T) {
 func buildPolicy(t *testing.T) (*policy.Policy, *app.AppConfiguration) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "buildPolicy")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		err         error
@@ -163,7 +163,7 @@ l1:
 // Add the policy to PCC
 func addPolicy(t *testing.T, application *app.AppConfiguration, scopes *[]uint64, inputs []policy.PolicyInput) *policy.Policy {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addPolicy")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var err error
 	log.AuctaLogger.Infof("\n--- ADD POLICY")
@@ -184,7 +184,7 @@ func addPolicy(t *testing.T, application *app.AppConfiguration, scopes *[]uint64
 //
 func testPolicies(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testPolicies")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	defer testPreparePolicies(t)
 
@@ -232,7 +232,7 @@ func testPolicies(t *testing.T) {
 //
 func testPolicyScope(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testPolicyScope")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	defer testPreparePolicies(t)
 	var (

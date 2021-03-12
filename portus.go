@@ -40,7 +40,7 @@ func uploadSecurityKey_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "uploadSecurityKey_Portus")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(PORTUS_KEY_FILENAME, PORTUS_KEY,
@@ -57,7 +57,7 @@ func uploadCertificate_Portus(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "uploadCertificate_Portus")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var keyId uint64
@@ -80,7 +80,7 @@ func installPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "installPortus")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckPortusConfiguration, CheckNodes)
 
 	assert := test.Assert{t}
@@ -137,7 +137,7 @@ func checkPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkPortus")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 
@@ -161,7 +161,7 @@ func delAllPortus(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllPortus")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 

@@ -30,7 +30,7 @@ func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "uploadCertificate_AuthProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT, 0)
@@ -46,7 +46,7 @@ func addAuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addAuthProfile")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckAuthenticationProfile)
 
 	assert := test.Assert{t}
@@ -103,7 +103,7 @@ func delAllProfiles(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllProfiles")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 

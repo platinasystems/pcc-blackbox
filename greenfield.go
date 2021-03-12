@@ -15,7 +15,7 @@ import (
 func addGreenfieldServers(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addGreenfieldServers")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("\nGREENFIELD: executing the pxeboot for the servers")
 	var (

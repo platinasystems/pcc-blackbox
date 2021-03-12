@@ -13,7 +13,7 @@ import (
 // get whole PCC ObjectsList
 func testDashboardGetAllPCCObjects(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetAllPCCObjects")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get full PCC Objects list with no sort or pagination")
 	pccObjects, err := Pcc.TestDashboardObjectList(nil, nil)
@@ -29,7 +29,7 @@ type IdList []uint64
 
 func testDashboardGetPCCObjectByRandomId(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetPCCObjectByRandomId")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Infof("Get PCCObject by Random Id")
 	pccObjects, err := Pcc.TestDashboardObjectList(nil, nil)
@@ -51,7 +51,7 @@ func testDashboardGetPCCObjectByRandomId(t *testing.T) {
 
 func testDashboardGetPCCObjectById(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetPCCObjectById")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get PCCObject by Id")
 	pccObject, err := Pcc.TestDashboardObjectById(4)
@@ -66,7 +66,7 @@ func testDashboardGetPCCObjectById(t *testing.T) {
 
 func testDashboardGetChildrenObjectsByRandomId(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetChildrenObjectsByRandomId")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Children Objects by Random Id")
 	pccObjects, err := Pcc.TestDashboardObjectList(nil, nil)
@@ -92,7 +92,7 @@ func testDashboardGetChildrenObjectsByRandomId(t *testing.T) {
 
 func testDashboardGetParentObjectsByRandomId(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetParentObjectsByRandomId")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Parent Objects by Random Id")
 	pccObjects, err := Pcc.TestDashboardObjectList(nil, nil)
@@ -118,7 +118,7 @@ func testDashboardGetParentObjectsByRandomId(t *testing.T) {
 
 func testDashboardGetFilteredObjects(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetFilteredObjects")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Objects filtered by health and type")
 	pccObjects, err := Pcc.TestDashboardFilteredObjectList("health", "OK", nil, nil)
@@ -150,7 +150,7 @@ func testDashboardGetFilteredObjects(t *testing.T) {
 
 func testDashboardGetAdvSearchedObjects(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetAdvSearchedObjects")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Objects matching search criteria")
 	pccObjects, err := Pcc.TestDashboardAdvSearchedObjectList(url.QueryEscape("health:OK{X}type~ceph"), nil, nil)
@@ -196,7 +196,7 @@ func testDashboardGetAdvSearchedObjects(t *testing.T) {
 
 func testDashboardGetAggrHealthCountByType(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetAggrHealthCountByType")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Aggregate Health Count grouped by Type")
 	health, err := Pcc.TestDashboardAggrHealthCountByType()
@@ -210,7 +210,7 @@ func testDashboardGetAggrHealthCountByType(t *testing.T) {
 
 func testDashboardGetMetadataEnumStrings(t *testing.T) {
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDashboardGetMetadataEnumStrings")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("Get Dashboard Metadata Enum Strings")
 	metadata, err := Pcc.TestDashboardMetadataEnumStrings()

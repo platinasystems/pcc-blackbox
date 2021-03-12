@@ -31,7 +31,7 @@ func createK8s_3nodes(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "createK8s_3nodes")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, CheckNetClusterExists)
 
 	assert := test.Assert{t}
@@ -106,7 +106,7 @@ func validateK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "validateK8sCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -216,7 +216,7 @@ func addNodeK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addNodeK8sCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, CheckK8sClusterExists)
 
 	assert := test.Assert{t}
@@ -267,7 +267,7 @@ func deleteAllK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "deleteAllK8sCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	clusters, err := Pcc.GetKubernetes()

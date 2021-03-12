@@ -15,7 +15,7 @@ var optionalTopics = []string{"ceph-metrics", "varnishStats", "ksm", "flowStats"
 func testGetTopic(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testGetTopic")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if topics, err := Pcc.GetTopics(); err == nil {
 		if len(topics) == 0 {
@@ -38,7 +38,7 @@ func testGetTopic(t *testing.T) {
 func testGetTopicSchema(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testGetTopicSchema")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if topics, err := Pcc.GetTopics(); err == nil {
 	l1:
@@ -70,7 +70,7 @@ func testGetTopicSchema(t *testing.T) {
 func testMonitorSample(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testMonitorSample")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if nodes, err := Pcc.GetNodes(); err == nil {
 		node := (*nodes)[0]
@@ -108,7 +108,7 @@ func testMonitorSample(t *testing.T) {
 func testMonitorHistory(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testMonitorHistory")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	to := time.Now().Unix()
 	from := to - (1000 * 60 * 100)

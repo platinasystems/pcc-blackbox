@@ -3,6 +3,7 @@ package pcc
 import (
 	"fmt"
 	"github.com/jinzhu/gorm"
+	log "github.com/platinasystems/go-common/logs"
 	"strings"
 )
 
@@ -28,7 +29,7 @@ func InitDB(c *DBConfiguration) {
 	dbConfig = c
 
 	if len(strings.TrimSpace(dbConfig.Address)) > 0 {
-		fmt.Println("init database handler", dbConfig.Address, dbConfig.Port, dbConfig.Name)
+		log.AuctaLogger.Infof("init database handler", dbConfig.Address, dbConfig.Port, dbConfig.Name)
 
 		psqlInfo := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 			dbConfig.Address,
@@ -45,7 +46,7 @@ func InitDB(c *DBConfiguration) {
 			db.DB().SetMaxOpenConns(100)
 			DB = db
 		} else {
-			fmt.Errorf("unable to start database. Fatal Exception: [%+v]", err.Error())
+			log.AuctaLogger.Errorf("unable to start database. Fatal Exception: [%+v]", err.Error())
 			panic(err)
 		}
 	}

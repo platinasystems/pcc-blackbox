@@ -25,7 +25,7 @@ var (
 
 func testCeph(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCeph")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckNetClusterExists)
 
 	if t.Run("parseCephConfig", parseCephConfig) {
@@ -59,7 +59,7 @@ func testCeph(t *testing.T) {
 
 func testDeleteCeph(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCeph")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
 	if t.Run("parseCephConfig", parseCephConfig) {
@@ -93,7 +93,7 @@ func parseCephConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "parseCephConfig")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -126,7 +126,7 @@ func testCreateCephCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCreateCephCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -198,7 +198,7 @@ func testCreateCephPool(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCreateCephPool")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -259,7 +259,7 @@ func testCreateCephFS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCreateCephFS")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -326,7 +326,7 @@ func testDeleteCephFS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCephFS")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -371,7 +371,7 @@ func testDeleteCephPool(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCephPool")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -420,7 +420,7 @@ func testDeleteCephCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteCephCluster")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
@@ -455,7 +455,7 @@ func testVerifyCephFSCreation(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephFSCreation")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephFSCreation(cephConfig)
@@ -485,7 +485,7 @@ func testVerifyCephFSDeletion(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephFSDeletion")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephFSDeletion(cephConfig)
@@ -515,7 +515,7 @@ func testVerifyCephPoolCreation(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephPoolCreation")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephPoolCreation(cephConfig)
@@ -536,7 +536,7 @@ func verifyCephPoolCreation(cephConfig *pcc.CephConfiguration) (err error) {
 			_, errP := cephConfig.PccClient.GetCephPool(pool, cephConfig.ClusterId)
 			if errP != nil {
 				errMsg := fmt.Sprintf("Ceph pool [%v] creation failed..ERROR: %v", pool, errP)
-				fmt.Println(errMsg)
+				log.AuctaLogger.Error(errMsg)
 				errs = append(errs, errP)
 			} else {
 				s, errT := cephConfig.VerifyCeph(startTime, pcc.CEPH_POOL_CREATE_EVENT, pool)
@@ -561,7 +561,7 @@ func testVerifyCephPoolDeletion(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephPoolDeletion")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephPoolDeletion(cephConfig)
@@ -600,7 +600,7 @@ func testVerifyCephInstallation(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephInstallation")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephInstallation(cephConfig)
@@ -635,7 +635,7 @@ func testVerifyCephUninstallation(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyCephUninstallation")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephUninstallation(cephConfig)

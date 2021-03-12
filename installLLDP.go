@@ -19,7 +19,7 @@ func installLLDP(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "installLLDP")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if nodes, err := Pcc.GetNodeIds(); err == nil {
 		installLLDPOnNodes(nodes)

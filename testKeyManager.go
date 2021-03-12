@@ -15,7 +15,7 @@ import (
 func testKMKeys(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testKMKeys")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("\n\nKEYS:\n")
 	var (
@@ -124,7 +124,7 @@ cont:
 func testKMCertificates(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testKMCertificates")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Info("\n\nCERTIFICATES:\n")
 	var (
@@ -234,7 +234,7 @@ CONT:
 func readFileAndCompare(t *testing.T, content string, fileName string) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "readFileAndCompare")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if file, err := os.Open(fileName); err == nil {
 		defer file.Close()

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/KyleBanks/dockerstats"
+	log "github.com/platinasystems/go-common/logs"
 	"os"
 	"time"
 )
@@ -50,7 +51,7 @@ func InitDockerStats(config DockerStatsConfig) *DockerStats {
 					dockerStats.writer.Flush()
 				}
 			} else {
-				fmt.Println("error collecting docker stats", err)
+				log.AuctaLogger.Errorf("error collecting docker stats", err)
 			}
 
 			dockerStats.writer.Flush()

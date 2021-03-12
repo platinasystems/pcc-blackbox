@@ -15,7 +15,7 @@ import (
 func addUnreachableNode(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addUnreachableNode")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	address := Env.Availability.FakeAddress
 	if address == "" {
@@ -33,7 +33,7 @@ func addUnreachableNode(t *testing.T) {
 func addInaccessibleNode(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addInaccessibleNode")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	address := Env.Availability.Inaccessible
 	if address == "" {
@@ -84,7 +84,7 @@ func checkNodeConnectionStatus(status string, host string) (err error) {
 func checkAgentAndCollectorRestore(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkAgentAndCollectorRestore")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	log.AuctaLogger.Infof("\nAVAILABILITY: checking the agent/collector restore")
 	var wg sync.WaitGroup

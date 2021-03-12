@@ -27,7 +27,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "updateSecurityKey_MaaS")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	f, err := os.OpenFile("maas_pubkey", os.O_CREATE|os.O_RDWR, 0600)
@@ -77,7 +77,7 @@ func delAllKeys(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "delAllKeys")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var (

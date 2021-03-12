@@ -15,7 +15,7 @@ import (
 func checkInvaderTunnels(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkInvaderTunnels")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the invaders")
 	if nodes, err := Pcc.GetInvaders(); err == nil {
@@ -55,7 +55,7 @@ func checkInvaderTunnels(t *testing.T) {
 func checkServerTunnels(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkServerTunnels")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the servers")
 
@@ -112,7 +112,7 @@ func checkServerTunnels(t *testing.T) {
 func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address string) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkEnvironmentForNode")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info(fmt.Sprintf("Tunnel: checking the tunnel address for the node %d:%s:%s", node.Id, node.Name, node.Host))
 
@@ -152,7 +152,7 @@ func checkEnvironmentForNode(t *testing.T, node *pcc.NodeDetailed) (address stri
 func checkTunnelConnection(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelConnection")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info("\nTUNNEL: checking invaders connection")
 
@@ -195,7 +195,7 @@ func tunnelPing(node *pcc.NodeDetailed, log bool) error {
 func checkTunnelForwardingRules(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelForwardingRules")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info("\nTUNNEL: checking forwarding rules")
 	var ssh pcc.SSHHandler
@@ -240,7 +240,7 @@ func checkTunnelForwardingRules(t *testing.T) {
 func checkTunnelRestore(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkTunnelRestore")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	logs.AuctaLogger.Info("\nTUNNEL: checking the restore for the invaders")
 	var ssh pcc.SSHHandler

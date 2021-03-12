@@ -24,7 +24,7 @@ func genericTest(
 	listItems func() ([]pcc.GenericModel, error)) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "genericTest")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		items []pcc.GenericModel
@@ -92,7 +92,7 @@ func genericTest(
 func testUMEntity(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMEntity")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	genericTest(t,
 		"entity",
@@ -114,7 +114,7 @@ func testUMEntity(t *testing.T) {
 func testUMRole(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMRole")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	genericTest(t,
 		"role",
@@ -153,7 +153,7 @@ func testUMRole(t *testing.T) {
 func testUMOperation(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMOperation")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	// Convert operation to Generic Model
 	convert := func(f func() ([]pcc.Operation, error)) (models []pcc.GenericModel, err error) {
@@ -209,7 +209,7 @@ func addTestUser() (user *pcc.User, err error) {
 func testUMUser(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMUser")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	if added, err := addTestUser(); err == nil {
 		user2 := *added
@@ -254,7 +254,7 @@ func testUMUser(t *testing.T) {
 func testUMTenant(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMTenant")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var err error
 
@@ -328,7 +328,7 @@ func testUMTenant(t *testing.T) {
 func testUMUserSpace(t *testing.T) {
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUMUserSpace")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	scope := "bb-test"
 	content := "blackbox test"

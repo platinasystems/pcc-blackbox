@@ -22,7 +22,7 @@ func addInvaders(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addInvaders")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckInvaders)
 
 	var nodes []node
@@ -41,7 +41,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "addNodesAndCheckStatus")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	//Check Agent and collector installation function. FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
@@ -101,7 +101,7 @@ func addNodesAndCheckStatus(t *testing.T, nodes []node) {
 					if connection, ignore = Pcc.GetNodeConnectionStatus(node.Id); ignore == nil {
 						switch connection { // FIXME use models
 						case "online":
-							fmt.Printf("the node %d:%s is online\n", node.Id, node.Host)
+							log.AuctaLogger.Infof("the node %d:%s is online\n", node.Id, node.Host)
 							return
 						case "", "NoRunningService": // wait for the next cycle
 						default:

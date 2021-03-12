@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	"github.com/platinasystems/pcc-models/app"
 	"github.com/platinasystems/tiles/pccserver/models"
 )
@@ -40,7 +41,7 @@ func (p *PccClient) IsAppInstalled(nodeId uint64, appId string) (isInstalled boo
 			}
 		}
 	} else {
-		fmt.Printf("Failed to GetApps: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetApps: %v\n", err)
 	}
 	return
 }

@@ -28,7 +28,8 @@ func pxebootNode(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "pxebootNode")
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
 
 	assert := test.Assert{t}
 	var (
@@ -52,7 +53,7 @@ func checkNodeAdd(t *testing.T) {
 	assert := test.Assert{t}
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkNodeAdd")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	from := time.Now()
 	err := verifyAddNode(from, "nodeAdd")
@@ -69,7 +70,7 @@ func checkHardWareInventory(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkHardWareInventory")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, CheckNodes)
 
 	assert := test.Assert{t}
@@ -110,7 +111,7 @@ func checkStorage(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "checkStorage")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 
@@ -145,7 +146,7 @@ func powerCycleNode(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := models.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "powerCycleNode")
+	defer res.CheckTestAndSave(t, time.Now())
 
 	assert := test.Assert{t}
 	var (

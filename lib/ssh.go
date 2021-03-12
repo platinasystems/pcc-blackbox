@@ -3,6 +3,7 @@ package pcc
 import (
 	"bytes"
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	"golang.org/x/crypto/ssh"
 	"io/ioutil"
 	"strings"
@@ -27,7 +28,7 @@ func InitSSH(cfg *SshConfiguration) {
 	sshConfig = cfg
 
 	if len(strings.TrimSpace(sshConfig.User)) > 0 {
-		fmt.Println("init ssh handler", sshConfig.User, sshConfig.Key)
+		log.AuctaLogger.Infof("init ssh handler", sshConfig.User, sshConfig.Key)
 
 		if sshConfig.Port <= 0 {
 			sshConfig.Port = 22
@@ -56,7 +57,7 @@ func (sh *SSHHandler) Run(host string, command string) (stdout string, stderr st
 		session *ssh.Session
 	)
 
-	fmt.Println(fmt.Sprintf("Running command [%s] on host %s", command, host))
+	log.AuctaLogger.Infof(fmt.Sprintf("Running command [%s] on host %s", command, host))
 	if client, err = ssh.Dial("tcp", fmt.Sprintf("%s:%d", host, sshConfig.Port), sshConfig.SshClientConfig); err == nil {
 		defer client.Close()
 

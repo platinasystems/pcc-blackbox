@@ -22,7 +22,7 @@ var (
 // starting point for k8s app deployment/undeployment testing
 func testK8sApp(t *testing.T) {
 	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testK8sApp")
+	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckK8sAppConfiguration, CheckNetClusterExists)
 
 	if t.Run("parseK8sAppConfig", parseK8sAppConfig) {
@@ -99,7 +99,7 @@ func parseK8sAppConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "parseK8sAppConfig")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 	var (
 		identifier string
@@ -132,7 +132,7 @@ func testCreateStorageClass(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testCreateStorageClass")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	deployStartTime = time.Now()
@@ -196,7 +196,7 @@ func testDeployK8sApp(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeployK8sApp")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	deployStartTime = time.Now()
@@ -251,7 +251,7 @@ func testUndeployK8sApp(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testUndeployK8sApp")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	deployStartTime = time.Now()
@@ -288,7 +288,7 @@ func testDeleteStorageClass(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testDeleteStorageClass")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := deleteStorageClass(appConfig)
@@ -332,7 +332,7 @@ func testVerifyK8sAppDeployment(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyK8sAppDeployment")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyK8sAppDeployment(appConfig)
@@ -368,7 +368,7 @@ func testVerifyK8sAppUnDeployment(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyK8sAppUnDeployment")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyK8sAppUnDeployment(appConfig)
@@ -397,7 +397,7 @@ func testVerifyStorageClassCreation(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyStorageClassCreation")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyStorageClassCreation(appConfig)
@@ -439,7 +439,7 @@ func testVerifyStorageClassDeletion(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := model.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now(), "testVerifyStorageClassDeletion")
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyStorageClassDeletion(appConfig)

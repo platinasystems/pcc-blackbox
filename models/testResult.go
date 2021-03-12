@@ -22,7 +22,7 @@ type TestResult struct {
 	TestID      string
 	Result      string
 	FailureMsg  string
-	ElapsedTime time.Duration
+	ElapsedTime float64
 }
 
 func InitTestResult(runID string) (res *TestResult) {
@@ -46,7 +46,7 @@ func (testResult *TestResult) SetTestSkipped(failureMsg string) {
 }
 
 func (testResult *TestResult) SetElapsedTime(start time.Time, name string) {
-	testResult.ElapsedTime = time.Since(start)
+	testResult.ElapsedTime = time.Since(start).Seconds()
 	log.AuctaLogger.Infof("%s took %s", name, testResult.ElapsedTime)
 }
 
@@ -54,10 +54,10 @@ func (testResult *TestResult) SaveTestResult() {
 	db.NewDBHandler().GetDM().Create(testResult)
 }
 
-func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time, funcName string) {
+func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time) {
 	if !t.Failed() && !t.Skipped() {
 		testResult.SetTestPass()
 	}
-	testResult.SetElapsedTime(start, funcName)
+	testResult.SetElapsedTime(start, testResult.TestID)
 	testResult.SaveTestResult()
 }
