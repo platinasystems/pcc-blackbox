@@ -104,7 +104,7 @@ func Init(PccIp string, cred Credential, dbConfig *DBConfiguration, sshConfig *S
 		param.DBname = dbConfig.Name
 		param.User = dbConfig.User
 		param.DBtype = "postgres"
-		database.InitWithParams(&param)
+		database.InitWithParams(&param, true)
 	}
 	if sshConfig != nil && sshConfig.User != "" { // Init the SSH handler
 		InitSSH(sshConfig)

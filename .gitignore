@@ -20,3 +20,9 @@ container-stats.txt
 containers.json
 key-bb-test.pem
 logs/
+cmd/parseStats/parseStats
+cmd/scale/scale
+parseStats
+scale
+
+
