@@ -2,11 +2,14 @@ package main
 
 import (
 	"fmt"
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
 	"sync"
 	"testing"
 	"time"
+
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
 )
 
 func updateNodes_installMAAS(t *testing.T) {
@@ -15,6 +18,9 @@ func updateNodes_installMAAS(t *testing.T) {
 
 func installMAAS(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 
 	var (
 		err    error
@@ -26,16 +32,24 @@ func installMAAS(t *testing.T) {
 		if lldpId, err = Pcc.FindRoleId(pcc.ROLE_LLDP, pcc.ROLE_DEFAULT); err == nil {
 			if nodes, err := Pcc.GetInvaderIds(); err == nil {
 				if err = setRolesToNodesAndCheck([]uint64{lldpId, maasId}, "MAAS", nodes, MAAS_INSTALL_TIMEOUT); err != nil {
-					t.Fatal(err)
+					res.SetTestFailure(err.Error())
+					log.AuctaLogger.Error(err)
+					t.FailNow()
 				}
 			} else {
-				t.Fatal(err)
+				res.SetTestFailure(err.Error())
+				log.AuctaLogger.Error(err)
+				t.FailNow()
 			}
 		} else {
-			t.Fatal(err)
+			res.SetTestFailure(err.Error())
+			log.AuctaLogger.Error(err)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		res.SetTestFailure(err.Error())
+		log.AuctaLogger.Error(err)
+		t.FailNow()
 	}
 }
 
@@ -47,28 +61,28 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 		check        bool
 		wg           sync.WaitGroup
 	)
-	fmt.Printf("installing %s on nodes:%v\n", app, nodes)
+	log.AuctaLogger.Infof("installing %s on nodes:%v\n", app, nodes)
 	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
 		if len(installed) > 0 {
-			fmt.Printf("%s already installed on nodes %d\n", app, installed)
+			log.AuctaLogger.Warnf("%s already installed on nodes %d\n", app, installed)
 		}
 		if n := len(nodesToCheck); n > 0 {
 			if timeoutSec <= 0 {
 				timeoutSec = DEFAULT_TIMEOUT
 			}
-			timeout := time.Duration(timeoutSec*n)
+			timeout := time.Duration(timeoutSec * n)
 
 			wg.Add(n)
 			checkInstall := func(id uint64) {
 				defer wg.Done()
-				fmt.Printf("Checking %q installation for node: %d\n", app, id)
+				log.AuctaLogger.Infof("Checking %q installation for node: %d\n", app, id)
 
 				start := time.Now()
 				if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
 					err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
 					return
 				} else if check {
-					fmt.Printf("%s correctly installed on nodeId:%v\n", app, id)
+					log.AuctaLogger.Infof("%s correctly installed on nodeId:%v\n", app, id)
 				}
 			}
 

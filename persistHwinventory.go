@@ -7,7 +7,9 @@ import (
 	"testing"
 	"time"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 )
 
@@ -24,6 +26,11 @@ func testHardwareInventory(t *testing.T) {
 
 func pxebootNode(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
+
 	assert := test.Assert{t}
 	var (
 		err     error
@@ -32,8 +39,10 @@ func pxebootNode(t *testing.T) {
 	if len(Env.Servers) != 0 {
 		pxeboot, err = exec.Command("/bin/bash", "-c", "for cmd in 'chassis bootdev pxe' 'chassis power cycle'; do ipmitool -I lanplus -H "+Env.Servers[0].BMCIp+" -U ADMIN -P ADMIN $cmd; done").Output()
 		if err != nil {
-			assert.Fatalf("%v\n%v\n", string(pxeboot), err)
-			fmt.Printf("pxeboot failed %v\n%v\n", string(pxeboot), err)
+			msg := fmt.Sprintf("%v\n%v\n", string(pxeboot), err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}
@@ -43,17 +52,27 @@ func checkNodeAdd(t *testing.T) {
 	test.SkipIfDryRun(t)
 	assert := test.Assert{t}
 
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	from := time.Now()
 	err := verifyAddNode(from, "nodeAdd")
 	if err != nil {
-		fmt.Println("Node additon failed..ERROR:", err)
-		assert.Fatalf("Node addition failed")
+		msg := fmt.Sprintf("Node additon failed..ERROR:%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func checkHardWareInventory(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, CheckNodes)
+
 	assert := test.Assert{t}
 	var (
 		flag bool
@@ -62,7 +81,10 @@ func checkHardWareInventory(t *testing.T) {
 
 	hwInventory, err = Pcc.GetHardwareInventory()
 	if err != nil {
-		assert.Fatalf("GetHardwareInventory failed: %v\n", err)
+		msg := fmt.Sprintf("GetHardwareInventory failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -71,18 +93,26 @@ func checkHardWareInventory(t *testing.T) {
 			if server.BMCIp == hw.Bus.Bmc.Ipcfg.Ipaddress {
 				PxeBootSelectedNodeId = hw.NodeID
 				flag = true
-				fmt.Printf("Hardware inventory with node id %v persisted succesfully", PxeBootSelectedNodeId)
+				log.AuctaLogger.Infof("Hardware inventory with node id %v persisted succesfully", PxeBootSelectedNodeId)
 				break
 			}
 		}
 	}
 	if !flag {
-		assert.Fatalf("inventory for node with id %v not persisted in db", PxeBootSelectedNodeId)
+		msg := fmt.Sprintf("inventory for node with id %v not persisted in db", PxeBootSelectedNodeId)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
+
 func checkStorage(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 
 	var (
@@ -92,22 +122,32 @@ func checkStorage(t *testing.T) {
 
 	storage, err = Pcc.GetStorageNode(PxeBootSelectedNodeId)
 	if err != nil {
-		assert.Fatalf("GetStorageNode failed: %v\n", err)
+		msg := fmt.Sprintf("GetStorageNode failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	if len(storage.Children) != 0 {
-		fmt.Printf("inventory for node with id %v persisted in "+
+		log.AuctaLogger.Infof("inventory for node with id %v persisted in "+
 			"storage inventory", PxeBootSelectedNodeId)
 	} else {
-		assert.Fatalf("inventory for node with id %v not persisted "+
+		msg := fmt.Sprintf("inventory for node with id %v not persisted "+
 			"in storage inventory", PxeBootSelectedNodeId)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func powerCycleNode(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	var (
 		err        error
@@ -116,8 +156,10 @@ func powerCycleNode(t *testing.T) {
 	if len(Env.Servers) != 0 {
 		powerCycle, err = exec.Command("/bin/bash", "-c", "ipmitool -I lanplus -H "+Env.Servers[0].BMCIp+" -U ADMIN -P ADMIN chassis power cycle").Output()
 		if err != nil {
-			assert.Fatalf("%v\n%v\n", string(powerCycle), err)
-			fmt.Printf("power cycle failed %v\n%v\n", string(powerCycle), err)
+			msg := fmt.Sprintf("power cycle failed %v\n%v\n", string(powerCycle), err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}

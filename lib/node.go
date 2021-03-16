@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	"sync"
 	"time"
 
@@ -201,7 +202,7 @@ func (pcc *PccClient) GetNodeFromDB(nodeId uint64) (node *NodeDetailed, err erro
 	if err = pcc.DBHandler().FetchWhere(&n, "id = ?", nodeId); err == nil {
 		node = &n
 	} else {
-		fmt.Println("Not able to fetch the node", err)
+		log.AuctaLogger.Errorf("Not able to fetch the node", err)
 	}
 	return
 }
@@ -212,7 +213,7 @@ func (pcc *PccClient) GetNodesFromDB() (nodes *[]NodeDetailed, err error) {
 	if err = pcc.DBHandler().FetchMany(&n); err == nil {
 		nodes = &n
 	} else {
-		fmt.Println("Not able to fetch the nodes", err)
+		log.AuctaLogger.Errorf("Not able to fetch the nodes", err)
 	}
 	return
 }
@@ -223,7 +224,7 @@ func (pcc *PccClient) GetInvadersFromDB() (nodes *[]NodeDetailed, err error) {
 	if err = pcc.DBHandler().FetchManyWhere(&n, "invader = true"); err == nil {
 		nodes = &n
 	} else {
-		fmt.Println("Not able to fetch the invader nodes", err)
+		log.AuctaLogger.Errorf("Not able to fetch the invader nodes", err)
 	}
 	return
 }
@@ -234,7 +235,7 @@ func (pcc *PccClient) GetServersFromDB() (nodes *[]NodeDetailed, err error) {
 	if err = pcc.DBHandler().FetchManyWhere(&n, "invader = false"); err == nil {
 		nodes = &n
 	} else {
-		fmt.Println("Not able to fetch the invader nodes", err)
+		log.AuctaLogger.Errorf("Not able to fetch the invader nodes", err)
 	}
 	return
 }
@@ -297,7 +298,7 @@ func (pcc *PccClient) deleteNodes(nodes *[]NodeDetailed, wait bool) (err error) 
 							continue sleep
 						}
 					}
-					fmt.Println(fmt.Sprintf("Node %d has been deleted", nodeId))
+					log.AuctaLogger.Errorf(fmt.Sprintf("Node %d has been deleted", nodeId))
 				}
 				return
 			}
@@ -317,14 +318,14 @@ func (pcc *PccClient) AddNode(node *NodeDetailed) (err error) {
 
 // Delete a node
 func (pcc *PccClient) DeleteNode(id uint64) (err error) {
-	fmt.Println(fmt.Sprintf("deleting the node %d", id))
+	log.AuctaLogger.Infof(fmt.Sprintf("deleting the node %d", id))
 	err = pcc.Delete(fmt.Sprintf("pccserver/node/%d", id), nil, nil)
 	return
 }
 
 // Update a node
 func (pcc *PccClient) UpdateNode(node *NodeDetailed) (err error) {
-	fmt.Println(fmt.Sprintf("updating the node %d", node.Id))
+	log.AuctaLogger.Infof(fmt.Sprintf("updating the node %d", node.Id))
 	if len(node.RoleIds) > 0 { // FIXME fix pcc-side
 		m := make(map[uint64]bool)
 		for _, k := range node.RoleIds {
@@ -373,9 +374,9 @@ func (pcc *PccClient) AddRolesToNodes(nodes []uint64, roles []uint64) (installed
 					lock.Lock()
 					installed = append(installed, node.Id)
 					lock.Unlock()
-					fmt.Printf("roles %v already set on node:%v\n", roles, nodeId)
+					log.AuctaLogger.Infof("roles %v already set on node:%v\n", roles, nodeId)
 				} else {
-					fmt.Printf("setting roles %v on node %d\n", roles, nodeId)
+					log.AuctaLogger.Infof("setting roles %v on node %d\n", roles, nodeId)
 					lock.Lock()
 					installing = append(installing, nodeId)
 					lock.Unlock()

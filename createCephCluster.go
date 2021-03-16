@@ -2,13 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/lib/pq"
-	"github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
-	"github.com/platinasystems/tiles/pccserver/models"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/lib/pq"
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	m "github.com/platinasystems/pcc-blackbox/models"
+	model "github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
+	"github.com/platinasystems/tiles/pccserver/models"
 )
 
 var (
@@ -20,6 +24,10 @@ var (
 )
 
 func testCeph(t *testing.T) {
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckNetClusterExists)
+
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephDeploy {
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephCluster]; ok && run {
@@ -29,27 +37,31 @@ func testCeph(t *testing.T) {
 					}
 				}
 			} else {
-				fmt.Println("Ceph Cluster creation test is skipped")
+				log.AuctaLogger.Info("Ceph Cluster creation test is skipped")
 			}
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephPools]; ok && run {
 				if t.Run("createCephPool", testCreateCephPool) {
 					t.Run("verifyCephPoolCreation", testVerifyCephPoolCreation)
 				}
 			} else {
-				fmt.Println("Ceph Pools creation test is skipped")
+				log.AuctaLogger.Info("Ceph Pools creation test is skipped")
 			}
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephFS]; ok && run {
 				if t.Run("createCephFS", testCreateCephFS) {
 					t.Run("verifyCephFSCreation", testVerifyCephFSCreation)
 				}
 			} else {
-				fmt.Println("Ceph FS creation test is skipped")
+				log.AuctaLogger.Info("Ceph FS creation test is skipped")
 			}
 		}
 	}
 }
 
 func testDeleteCeph(t *testing.T) {
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
+
 	if t.Run("parseCephConfig", parseCephConfig) {
 		if isCephUndeploy {
 			if run, ok := cephConfig.Tests[pcc.TestDeleteCephFS]; ok && run {
@@ -57,21 +69,21 @@ func testDeleteCeph(t *testing.T) {
 					t.Run("verifyCephFSDeletion", testVerifyCephFSDeletion)
 				}
 			} else {
-				fmt.Println("Ceph FS deletion test is skipped")
+				log.AuctaLogger.Infof("Ceph FS deletion test is skipped")
 			}
 			if run, ok := cephConfig.Tests[pcc.TestDeleteCephPools]; ok && run {
 				if t.Run("deleteCephPool", testDeleteCephPool) {
 					t.Run("verifyCephPoolDeletion", testVerifyCephPoolDeletion)
 				}
 			} else {
-				fmt.Println("Ceph Pools deletion test is skipped")
+				log.AuctaLogger.Infof("Ceph Pools deletion test is skipped")
 			}
 			if run, ok := cephConfig.Tests[pcc.TestDeleteCephCluster]; ok && run {
 				if t.Run("deleteCephCluster", testDeleteCephCluster) {
 					t.Run("verifyCephUninstallation", testVerifyCephUninstallation)
 				}
 			} else {
-				fmt.Println("Ceph Cluster deletion test is skipped")
+				log.AuctaLogger.Info("Ceph Cluster deletion test is skipped")
 			}
 		}
 	}
@@ -79,6 +91,9 @@ func testDeleteCeph(t *testing.T) {
 
 func parseCephConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -100,20 +115,27 @@ func parseCephConfig(t *testing.T) {
 		err = fmt.Errorf("No unique identifier found")
 	}
 	if err != nil {
-		assert.Fatalf("%v", err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func testCreateCephCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := createCephCluster(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -123,7 +145,7 @@ func createCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 		createRequest pcc.CreateCephClusterRequest
 		clusterId     uint64
 	)
-	fmt.Println("Ceph cluster installation is starting")
+	log.AuctaLogger.Info("Ceph cluster installation is starting")
 	if createRequest, err = getCephCreateClusterRequest(cephConfig); err == nil {
 		//TODO: Delete existing ceph cluster with same name if any
 		clusterId, err = cephConfig.PccClient.CreateCephCluster(createRequest)
@@ -133,11 +155,11 @@ func createCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 				err = fmt.Errorf(errMsg)
 			} else {
 				cephClusterAlreadyExists = true
-				fmt.Printf("Ceph Cluster[%v] already exists\n", cephConfig.ClusterName)
+				log.AuctaLogger.Warnf("Ceph Cluster[%v] already exists\n", cephConfig.ClusterName)
 				err = nil
 			}
 		} else {
-			fmt.Println("Ceph cluster installation has started. Cluster id:", clusterId)
+			log.AuctaLogger.Infof("Ceph cluster installation has started. Cluster id:", clusterId)
 		}
 		if clusterId != 0 {
 			cephConfig.SetCephClusterId(clusterId)
@@ -174,14 +196,18 @@ func getCephCreateClusterRequest(cephConfig *pcc.CephConfiguration) (createReque
 
 func testCreateCephPool(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := createCephPool(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -194,11 +220,11 @@ func createCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
 		for t, pools := range pcc.CephPools {
 			for pool, _ := range pools {
 				if createRequest, err := getCephPoolCreateRequest(pool, clusterId); err == nil {
-					fmt.Printf("Ceph pool [%v] creation is starting\n", pool)
+					log.AuctaLogger.Infof("Ceph pool [%v] creation is starting\n", pool)
 					poolId, err = cephConfig.PccClient.CreateCephPool(createRequest)
 					if err != nil {
 						errMsg := fmt.Sprintf("Ceph pool [%v] creation failed..ERROR:%v", pool, err)
-						fmt.Println(errMsg)
+						log.AuctaLogger.Error(errMsg)
 						err = fmt.Errorf(errMsg)
 						errAggr = fmt.Errorf(fmt.Sprint(errAggr) + fmt.Sprintf("%v\n", err))
 						if poolId != 0 {
@@ -206,7 +232,7 @@ func createCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
 						}
 					} else {
 						pcc.CephPools[t][pool] = poolId
-						fmt.Printf("Ceph pool [%v] creation has started. poolId: %v\n", pool, poolId)
+						log.AuctaLogger.Infof("Ceph pool [%v] creation has started. poolId: %v\n", pool, poolId)
 					}
 				}
 			}
@@ -231,14 +257,18 @@ func getCephPoolCreateRequest(name string, clusterId uint64) (createRequest pcc.
 
 func testCreateCephFS(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := createCephFS(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -247,16 +277,15 @@ func createCephFS(cephConfig *pcc.CephConfiguration) (err error) {
 	var (
 		fsId uint64
 	)
-	fmt.Printf("Ceph FS [%v] creation is starting\n", pcc.CEPH_FS_NAME)
+	log.AuctaLogger.Infof("Ceph FS [%v] creation is starting\n", pcc.CEPH_FS_NAME)
 	if clusterId := cephConfig.GetCephClusterId(); clusterId != 0 {
 		if createRequest, err := getCephFSCreateRequest(cephConfig, pcc.CEPH_FS_NAME, clusterId); err == nil {
 			fsId, err = cephConfig.PccClient.CreateCephFS(createRequest)
 			if err != nil {
 				errMsg := fmt.Sprintf("Ceph FS [%v] creation failed..ERROR:%v", pcc.CEPH_FS_NAME, err)
-				fmt.Println(errMsg)
 				err = fmt.Errorf(errMsg)
 			} else {
-				fmt.Printf("Ceph FS [%v] creation has started. fsId: %v\n", pcc.CEPH_FS_NAME, fsId)
+				log.AuctaLogger.Infof("Ceph FS [%v] creation has started. fsId: %v\n", pcc.CEPH_FS_NAME, fsId)
 			}
 		}
 	} else {
@@ -295,20 +324,24 @@ func getCephFSCreateRequest(cephConfig *pcc.CephConfiguration, name string, clus
 
 func testDeleteCephFS(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := deleteCephFS(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func deleteCephFS(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Ceph FS [%v] deletion is starting\n", pcc.CEPH_FS_NAME)
+	log.AuctaLogger.Infof("Ceph FS [%v] deletion is starting\n", pcc.CEPH_FS_NAME)
 	time.Sleep(time.Second * 5)
 
 	if clusterId := cephConfig.GetCephClusterId(); clusterId != 0 {
@@ -322,7 +355,7 @@ func deleteCephFS(cephConfig *pcc.CephConfiguration) (err error) {
 				if err != nil {
 					err = fmt.Errorf("Ceph FS [%v] deletion failed..ERROR: %v", pcc.CEPH_FS_NAME, err)
 				} else {
-					fmt.Printf("Ceph FS [%v] deletion has started. fsId: %v\n", pcc.CEPH_FS_NAME, fsId)
+					log.AuctaLogger.Infof("Ceph FS [%v] deletion has started. fsId: %v\n", pcc.CEPH_FS_NAME, fsId)
 				}
 			} else {
 				err = fmt.Errorf("Ceph FS [%v] not found to delete", fsId)
@@ -336,20 +369,24 @@ func deleteCephFS(cephConfig *pcc.CephConfiguration) (err error) {
 
 func testDeleteCephPool(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := deleteCephPool(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func deleteCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
-	fmt.Println("Ceph pools deletion is starting")
+	log.AuctaLogger.Info("Ceph pools deletion is starting")
 	time.Sleep(time.Second * 5)
 
 	if clusterId := cephConfig.GetCephClusterId(); clusterId != 0 {
@@ -359,17 +396,17 @@ func deleteCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
 					cephPool, err := Pcc.GetCephPool(pool, clusterId)
 					id = cephPool.Id
 					if err != nil {
-						fmt.Printf("Failed to lookup pool [%v] : %v\n",
+						log.AuctaLogger.Errorf("Failed to lookup pool [%v] : %v\n",
 							pool, err)
 					}
 				}
-				fmt.Printf("Ceph pool [%v] deletion is starting\n", pool)
+				log.AuctaLogger.Infof("Ceph pool [%v] deletion is starting\n", pool)
 				err := cephConfig.PccClient.DeleteCephPool(id)
 				if err != nil {
 					err = fmt.Errorf("Ceph pool [%v] deletion failed..ERROR: %v", pool, err)
 					errAggr = fmt.Errorf(fmt.Sprint(errAggr) + fmt.Sprintf("%v\n", err))
 				} else {
-					fmt.Printf("Ceph pool [%v] deletion has started. poolId: %v\n", pool, id)
+					log.AuctaLogger.Infof("Ceph pool [%v] deletion has started. poolId: %v\n", pool, id)
 				}
 			}
 		}
@@ -381,20 +418,24 @@ func deleteCephPool(cephConfig *pcc.CephConfiguration) (errAggr error) {
 
 func testDeleteCephCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	startTime = time.Now()
 	err := deleteCephCluster(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func deleteCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Ceph cluster [%v] uninstallation is starting\n", cephConfig.ClusterName)
+	log.AuctaLogger.Infof("Ceph cluster [%v] uninstallation is starting\n", cephConfig.ClusterName)
 	time.Sleep(time.Second * 5)
 
 	if clusterId := cephConfig.GetCephClusterId(); clusterId != 0 {
@@ -402,7 +443,7 @@ func deleteCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 		if err != nil {
 			err = fmt.Errorf("Ceph cluster deletion failed..ERROR: %v", err)
 		} else {
-			fmt.Println("Ceph cluster uninstallation has started. Cluster id:", clusterId)
+			log.AuctaLogger.Infof("Ceph cluster uninstallation has started. Cluster id:", clusterId)
 		}
 	} else {
 		err = fmt.Errorf("No Ceph Cluster found")
@@ -412,65 +453,77 @@ func deleteCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 
 func testVerifyCephFSCreation(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephFSCreation(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func verifyCephFSCreation(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Verifying Ceph FS [%v] creation...Timeout:[%v sec]\n", pcc.CEPH_FS_NAME, pcc.CEPH_FS_CREATION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying Ceph FS [%v] creation...Timeout:[%v sec]\n", pcc.CEPH_FS_NAME, pcc.CEPH_FS_CREATION_TIMEOUT)
 
 	s, err := cephConfig.VerifyCeph(startTime, pcc.CEPH_FS_CREATE_EVENT, pcc.CEPH_FS_NAME)
 	if err != nil {
 		errMsg := fmt.Sprintf("Ceph FS [%v] creation verification failed...ERROR: %v", pcc.CEPH_FS_NAME, err)
 		err = fmt.Errorf("%v", errMsg)
 	} else {
-		fmt.Printf("Ceph FS [%v] created properly..[%v]\n", pcc.CEPH_FS_NAME, s.Msg)
+		log.AuctaLogger.Infof("Ceph FS [%v] created properly..[%v]\n", pcc.CEPH_FS_NAME, s.Msg)
 	}
 	return
 }
 
 func testVerifyCephFSDeletion(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephFSDeletion(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func verifyCephFSDeletion(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Verifying Ceph FS [%v] deletion...Timeout:[%v sec]\n", pcc.CEPH_FS_NAME, pcc.CEPH_FS_DELETION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying Ceph FS [%v] deletion...Timeout:[%v sec]\n", pcc.CEPH_FS_NAME, pcc.CEPH_FS_DELETION_TIMEOUT)
 
 	s, err := cephConfig.VerifyCeph(startTime, pcc.CEPH_FS_DELETE_EVENT, pcc.CEPH_FS_NAME)
 	if err != nil {
 		errMsg := fmt.Sprintf("Ceph FS [%v] deletion verification failed...ERROR: %v", pcc.CEPH_FS_NAME, err)
 		err = fmt.Errorf("%v", errMsg)
 	} else {
-		fmt.Printf("Ceph FS [%v] deleted properly..[%v]\n", pcc.CEPH_FS_NAME, s.Msg)
+		log.AuctaLogger.Infof("Ceph FS [%v] deleted properly..[%v]\n", pcc.CEPH_FS_NAME, s.Msg)
 	}
 	return
 }
 
 func testVerifyCephPoolCreation(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephPoolCreation(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -479,20 +532,20 @@ func verifyCephPoolCreation(cephConfig *pcc.CephConfiguration) (err error) {
 	var errs []error
 	for _, pools := range pcc.CephPools {
 		for pool, _ := range pools {
-			fmt.Printf("Verifying ceph pool [%v] creation...Timeout:[%v sec]\n", pool, pcc.CEPH_POOL_CREATION_TIMEOUT)
+			log.AuctaLogger.Infof("Verifying ceph pool [%v] creation...Timeout:[%v sec]\n", pool, pcc.CEPH_POOL_CREATION_TIMEOUT)
 			_, errP := cephConfig.PccClient.GetCephPool(pool, cephConfig.ClusterId)
 			if errP != nil {
 				errMsg := fmt.Sprintf("Ceph pool [%v] creation failed..ERROR: %v", pool, errP)
-				fmt.Println(errMsg)
+				log.AuctaLogger.Error(errMsg)
 				errs = append(errs, errP)
 			} else {
 				s, errT := cephConfig.VerifyCeph(startTime, pcc.CEPH_POOL_CREATE_EVENT, pool)
 				if errT != nil {
 					errMsg := fmt.Sprintf("Ceph pool [%v] creation verification failed...ERROR: %v", pool, errT)
-					fmt.Println(errMsg)
+					log.AuctaLogger.Error(errMsg)
 					errs = append(errs, errT)
 				} else {
-					fmt.Printf("Ceph pool [%v] created successfully..[%v]\n", pool, s.Msg)
+					log.AuctaLogger.Infof("Ceph pool [%v] created successfully..[%v]\n", pool, s.Msg)
 				}
 			}
 		}
@@ -506,13 +559,17 @@ func verifyCephPoolCreation(cephConfig *pcc.CephConfiguration) (err error) {
 
 func testVerifyCephPoolDeletion(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephPoolDeletion(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -521,14 +578,14 @@ func verifyCephPoolDeletion(cephConfig *pcc.CephConfiguration) (err error) {
 	var errs []error
 	for _, pools := range pcc.CephPools {
 		for pool, _ := range pools {
-			fmt.Printf("Verifying ceph pool [%v] deletion...Timeout:[%v sec]\n", pool, pcc.CEPH_POOL_CREATION_TIMEOUT)
+			log.AuctaLogger.Infof("Verifying ceph pool [%v] deletion...Timeout:[%v sec]\n", pool, pcc.CEPH_POOL_CREATION_TIMEOUT)
 			s, errT := cephConfig.VerifyCeph(startTime, pcc.CEPH_POOL_DELETE_EVENT, pool)
 			if errT != nil {
 				errMsg := fmt.Sprintf("Ceph pool [%v] deletion verification failed...ERROR: %v", pool, errT)
-				fmt.Println(errMsg)
+				log.AuctaLogger.Errorf(errMsg)
 				errs = append(errs, errT)
 			} else {
-				fmt.Printf("Ceph pool [%v] deleted successfully..[%v]\n", pool, s.Msg)
+				log.AuctaLogger.Infof("Ceph pool [%v] deleted successfully..[%v]\n", pool, s.Msg)
 			}
 		}
 	}
@@ -541,19 +598,23 @@ func verifyCephPoolDeletion(cephConfig *pcc.CephConfiguration) (err error) {
 
 func testVerifyCephInstallation(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephInstallation(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func verifyCephInstallation(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Verifying ceph cluster[%v] installation...Timeout:[%v sec]\n", cephConfig.ClusterName, pcc.CEPH_3_NODE_INSTALLATION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying ceph cluster[%v] installation...Timeout:[%v sec]\n", cephConfig.ClusterName, pcc.CEPH_3_NODE_INSTALLATION_TIMEOUT)
 	_, err = cephConfig.PccClient.GetCephCluster(cephConfig.ClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Ceph cluster[%v] installation verification failed...ERROR: %v", cephConfig.ClusterName, err)
@@ -564,7 +625,7 @@ func verifyCephInstallation(cephConfig *pcc.CephConfiguration) (err error) {
 			errMsg := fmt.Sprintf("Ceph cluster[%v] installation verification failed...ERROR: %v", cephConfig.ClusterName, err)
 			err = fmt.Errorf("%v", errMsg)
 		} else {
-			fmt.Printf("Ceph cluster [%v] deployed properly..[%v]\n", cephConfig.ClusterName, s.Msg)
+			log.AuctaLogger.Infof("Ceph cluster [%v] deployed properly..[%v]\n", cephConfig.ClusterName, s.Msg)
 		}
 	}
 	return
@@ -572,19 +633,23 @@ func verifyCephInstallation(cephConfig *pcc.CephConfiguration) (err error) {
 
 func testVerifyCephUninstallation(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := model.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	err := verifyCephUninstallation(cephConfig)
 	if err != nil {
-		errMsg := fmt.Sprintf("%v", err)
-		fmt.Println(errMsg)
-		assert.Fatalf(errMsg)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func verifyCephUninstallation(cephConfig *pcc.CephConfiguration) (err error) {
-	fmt.Printf("Verifying ceph cluster[%v] uninstallation...Timeout:[%v sec]\n", cephConfig.ClusterName, pcc.CEPH_3_NODE_UNINSTALLATION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying ceph cluster[%v] uninstallation...Timeout:[%v sec]\n", cephConfig.ClusterName, pcc.CEPH_3_NODE_UNINSTALLATION_TIMEOUT)
 	_, err = cephConfig.PccClient.GetCephCluster(cephConfig.ClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Ceph cluster[%v] uninstallation verification failed...ERROR: %v", cephConfig.ClusterName, err)
@@ -595,7 +660,7 @@ func verifyCephUninstallation(cephConfig *pcc.CephConfiguration) (err error) {
 			errMsg := fmt.Sprintf("Ceph cluster[%v] uninstallation failed...ERROR: %v\n", cephConfig.ClusterName, err)
 			err = fmt.Errorf("%v", errMsg)
 		} else {
-			fmt.Printf("Ceph cluster [%v] undeployed properly..[%v]\n", cephConfig.ClusterName, s.Msg)
+			log.AuctaLogger.Infof("Ceph cluster [%v] undeployed properly..[%v]\n", cephConfig.ClusterName, s.Msg)
 		}
 	}
 	return

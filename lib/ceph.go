@@ -482,3 +482,8 @@ func (p *PccClient) GetCephCaches() ([]*ceph3.CephCacheTier, error) {
 	err := p.Get("pccserver/storage/ceph/pool/caches", &r)
 	return r, err
 }
+
+func (p *PccClient) GetCephHealthStatusById(id uint64) (cephStatus models.CephHealthState, err error) {
+	err = p.Get(fmt.Sprintf("pccserver/storage/ceph/cluster/%d/state/health", id), &cephStatus)
+	return
+}

@@ -3,8 +3,11 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 )
 
@@ -15,6 +18,9 @@ func updateIpam(t *testing.T) {
 
 func addIpam(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -24,21 +30,27 @@ func addIpam(t *testing.T) {
 
 	subs, err := Pcc.GetSubnetObj()
 	if err != nil {
-		assert.Fatalf("Error getting subnetObjs: %v\n", err)
+		msg := fmt.Sprintf("Error getting subnetObjs: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, sub := range *subs {
 		if sub.UsedBy != "{}" {
-			fmt.Printf("IPAM [%v] in uses, not deleting\n",
+			log.AuctaLogger.Infof("IPAM [%v] in uses, not deleting\n",
 				sub.Name)
 			continue
 		}
-		fmt.Printf("delete IPAM %v [%v] [%v]\n",
+		log.AuctaLogger.Infof("delete IPAM %v [%v] [%v]\n",
 			sub.Id, sub.Name, sub.Subnet)
 		err = Pcc.DeleteSubnetObj(sub.Id)
 		if err != nil {
-			assert.Fatalf("Error deleting subnetObj: %v\n", err)
+			msg := fmt.Sprintf("Error deleting subnetObj: %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}
@@ -48,54 +60,69 @@ func addIpam(t *testing.T) {
 	addSubReq1.PubAccess = true
 	addSubReq1.Routed = true
 
-	fmt.Printf("Add IPAM  [%+v]\n", addSubReq1)
+	log.AuctaLogger.Infof("Add IPAM  [%+v]\n", addSubReq1)
 	err = Pcc.AddSubnetObj(&addSubReq1)
 	if err != nil {
-		assert.Fatalf("Error adding subnetObj: %v\n", err)
+		msg := fmt.Sprintf("Error adding subnetObj: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
-	fmt.Printf("After add [%+v]\n", addSubReq1)
+	log.AuctaLogger.Infof("After add [%+v]\n", addSubReq1)
 
 	newSub.Subnet = "1.1.1.0/25"
 	addSubReq1.Subnet = newSub.Subnet
 	err = Pcc.UpdateSubnetObj(&addSubReq1)
 	if err != nil {
-		assert.Fatalf("Error adding subnetObj: %v\n", err)
+		msg := fmt.Sprintf("Error adding subnetObj: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	if addSubReq1.Subnet != newSub.Subnet {
-		assert.Fatalf("Error updating subnetObj: %v\n", err)
+		msg := fmt.Sprintf("Error updating subnetObj: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	err = Pcc.DeleteSubnetObj(addSubReq1.Id)
 	if err != nil {
-		assert.Fatalf("Error deleting subnetObj: %v\n", err)
+		msg := fmt.Sprintf("Error deleting subnetObj: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	subs, err = Pcc.GetSubnetObj()
 	if err != nil {
-		assert.Fatalf("Error getting subnetObjs: %v\n", err)
+		msg := fmt.Sprintf("Error getting subnetObjs: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func addIpamConfig(t *testing.T) {
 	test.SkipIfDryRun(t)
-	assert := test.Assert{t}
 
-	if len(Env.NetIpam) == 0 {
-		fmt.Printf("IPAM: no subnets configured\n")
-		return
-	}
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckNetIpams)
+
+	assert := test.Assert{t}
 
 	for _, ipam := range Env.NetIpam {
 		var sub pcc.SubnetObj
 
 		oldSub, err := Pcc.FindSubnetObj(ipam.Name)
 		if err == nil {
-			fmt.Printf("IPAM  [%v] already exists\n", oldSub.Name)
+			log.AuctaLogger.Warn("IPAM  [%v] already exists\n", oldSub.Name)
 			continue
 		}
 		sub.Name = ipam.Name
@@ -103,32 +130,44 @@ func addIpamConfig(t *testing.T) {
 		sub.PubAccess = ipam.PubAccess
 		sub.Routed = ipam.Routed
 
-		fmt.Printf("Add IPAM  [%+v]\n", sub)
+		log.AuctaLogger.Infof("Add IPAM  [%+v]\n", sub)
 		err = Pcc.AddSubnetObj(&sub)
 		if err != nil {
-			assert.Fatalf("Error adding subnetObj: %v\n", err)
+			msg := fmt.Sprintf("Error adding subnetObj: %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
-		fmt.Printf("After add [%+v]\n", sub)
+		log.AuctaLogger.Infof("After add [%+v]\n", sub)
 	}
 }
 
 func delAllIpams(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	subs, err := Pcc.GetSubnetObj()
 	if err != nil {
-		assert.Fatalf("Error getting subnetObjs: %v\n", err)
+		msg := fmt.Sprintf("Error getting subnetObjs: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, sub := range *subs {
-		fmt.Printf("Delete IPAM %v [%v] [%v]\n",
+		log.AuctaLogger.Infof("Delete IPAM %v [%v] [%v]\n",
 			sub.Id, sub.Name, sub.Subnet)
 		err = Pcc.DeleteSubnetObj(sub.Id)
 		if err != nil {
-			assert.Fatalf("Error deleting subnetObj: %v\n", err)
+			msg := fmt.Sprintf("Error deleting subnetObj: %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}

@@ -21,6 +21,7 @@ type ConciseDashboardObj struct {
 }
 
 type DashboardObjIndex []ConciseDashboardObj
+
 // <<<<<<
 
 func (client *PccClient) TestDashboardObjectList(sortParam *string, pageParam *string) (objects *[]dashboardctl.PccObjectOutput, err error) {

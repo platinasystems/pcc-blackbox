@@ -12,6 +12,7 @@ import (
 	"github.com/KyleBanks/dockerstats"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	log "github.com/platinasystems/go-common/logs"
 )
 
 type DockerStatsConfig struct {
@@ -56,7 +57,7 @@ func InitDockerStats(config DockerStatsConfig) *DockerStats {
 					dockerStats.writer.Flush()
 				}
 			} else {
-				fmt.Println("error collecting docker stats", err)
+				log.AuctaLogger.Errorf("error collecting docker stats", err)
 			}
 
 			dockerStats.writer.Flush()

@@ -3,9 +3,12 @@ package main
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/mitchellh/mapstructure"
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 )
 
@@ -25,32 +28,42 @@ func UploadSecurityAuthProfileCert(t *testing.T) {
 
 func uploadCertificate_AuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	err := CreateFileAndUpload(LDAP_CERT_FILENAME, LDAP_CERT, pcc.CERT, 0)
 	if err != nil {
-		assert.Fatalf(err.Error())
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func addAuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckAuthenticationProfile)
+
 	assert := test.Assert{t}
 
 	var (
 		authProfile pcc.AuthenticationProfile
 	)
 
-	if Env.AuthenticationProfile.Name == "" {
-		fmt.Printf("Authenticatiom Profile is not defined in the" +
-			" configuration file\n")
-		return
-	}
 	authProfile = Env.AuthenticationProfile
 
 	exist, certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
-		assert.Fatalf("Get certificate %s failed\n%v\n",
+		msg := fmt.Sprintf("Get certificate %s failed\n%v\n",
 			LDAP_CERT_FILENAME, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	} else if exist {
 		if authProfile.Type == "LDAP" {
@@ -78,13 +91,20 @@ func addAuthProfile(t *testing.T) {
 
 	err = Pcc.AddAuthProfile(authProfile)
 	if err != nil {
-		assert.Fatalf("Error: %v\n", err)
+		msg := fmt.Sprintf("Error: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func delAllProfiles(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 
 	var (
@@ -95,17 +115,23 @@ func delAllProfiles(t *testing.T) {
 
 	authProfiles, err = Pcc.GetAuthProfiles()
 	if err != nil {
-		assert.Fatalf("Failed to get auth profiles: %v\n", err)
+		msg := fmt.Sprintf("Failed to get auth profiles: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, aP := range authProfiles {
 		id = aP.ID
-		fmt.Printf("Deleting auth profile %v\n", aP.Name)
+		log.AuctaLogger.Infof("Deleting auth profile %v\n", aP.Name)
 		err = Pcc.DelAuthProfile(id)
 		if err != nil {
-			assert.Fatalf("Failed to delete auth profile %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete auth profile %v: %v\n",
 				id, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 		}
 		// seems to be syncronous. API should document
 	}

@@ -2,9 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/platinasystems/tiles/pccserver/executor"
 	"testing"
 	"time"
+
+	log "github.com/platinasystems/go-common/logs"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/tiles/pccserver/executor"
 
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
@@ -26,7 +29,13 @@ var k8sAddDelNodes []pcc.K8sNodes
 
 func createK8s_3nodes(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, CheckNetClusterExists)
+
 	assert := test.Assert{t}
+
 	const DIM = 3
 	var (
 		err               error
@@ -36,7 +45,9 @@ func createK8s_3nodes(t *testing.T) {
 	)
 
 	if (len(Env.Invaders) + len(Env.Servers)) < DIM {
-		assert.Fatalf("Needed at least %d nodes for creating a cluster", DIM)
+		msg := fmt.Sprintf("Needed at least %d nodes for creating a cluster", DIM)
+		res.SetTestSkipped(msg)
+		assert.SkipNow()
 	}
 
 	var j = 0
@@ -66,7 +77,10 @@ func createK8s_3nodes(t *testing.T) {
 
 	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
 	if err != nil {
-		assert.Fatalf("FindNetClusterId failed: %v\n", err)
+		msg := fmt.Sprintf("FindNetClusterId failed: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -80,13 +94,19 @@ func createK8s_3nodes(t *testing.T) {
 	}
 	err = Pcc.CreateKubernetes(k8sRequest)
 	if err != nil {
-		assert.Fatalf("%v", err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
 
 func validateK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	var (
@@ -96,7 +116,10 @@ func validateK8sCluster(t *testing.T) {
 
 	id, err = Pcc.FindKubernetesId(k8sname)
 	if err != nil {
-		assert.Fatalf("Failed to find cluster %v: %v", k8sname, err)
+		msg := fmt.Sprintf("Failed to find cluster %v: %v", k8sname, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -107,13 +130,19 @@ func validateK8sCluster(t *testing.T) {
 	for !done {
 		select {
 		case <-timeout:
-			assert.Fatalf("Timed out waiting for Kubernetes")
+			msg := "Timed out waiting for Kubernetes"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		case <-tick:
 			status, percent, err := Pcc.GetKubernetesDeployStatus(id)
 			if err != nil {
-				assert.Fatalf("Failed to get deploy status "+
+				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v\n", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 
@@ -127,22 +156,27 @@ func validateK8sCluster(t *testing.T) {
 				// already at this state and only the percent
 				// changes.
 				if percent != last_percent {
-					fmt.Printf("Cluster %v = %v  %v%%\n",
+					log.AuctaLogger.Infof("Cluster %v = %v  %v%%\n",
 						id, status, percent)
 					last_percent = percent
 				}
 				if percent == 100 {
-					fmt.Println("Kubernetes cluster done")
+					log.AuctaLogger.Info("Kubernetes cluster done")
 					done = true
 				}
 			case pcc.K8S_DEPLOY_STATUS_FAILED:
-				assert.Fatalf("Kubernetes cluster install " +
-					"failed")
+				msg := "Kubernetes cluster install failed"
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 			case pcc.K8S_DEPLOY_APP_STATUS_PROGRESS:
-				fmt.Println("Kubernetes app progress")
+				log.AuctaLogger.Info("Kubernetes app progress")
 			default:
-				assert.Fatalf("Unexpected status - %v\n",
+				msg := fmt.Sprintf("Unexpected status - %v\n",
 					status)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		}
@@ -154,15 +188,21 @@ func validateK8sCluster(t *testing.T) {
 	for !done {
 		select {
 		case <-timeout:
-			assert.Fatalf("health check timed out\n")
+			msg := "health check timed out\n"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		case <-tick:
 			health, err := Pcc.GetKubernetesHealth(id)
 			if err != nil {
-				assert.Fatalf("Error geting K8s health\n")
+				msg := "Error geting K8s health\n"
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
-			fmt.Printf("Kubernetes health = %v\n", health)
+			log.AuctaLogger.Infof("Kubernetes health = %v\n", health)
 			if health == "good" {
 				done = true
 				return
@@ -174,6 +214,11 @@ func validateK8sCluster(t *testing.T) {
 
 func addNodeK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, CheckK8sClusterExists)
+
 	assert := test.Assert{t}
 
 	var (
@@ -185,13 +230,17 @@ func addNodeK8sCluster(t *testing.T) {
 
 	id, err = Pcc.FindKubernetesId(k8sname)
 	if err != nil {
-		assert.Fatalf("Failed to find cluster %v: %v", k8sname, err)
+		msg := fmt.Sprintf("Failed to find cluster %v: %v", k8sname, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	if len(k8sAddDelNodes) == 0 {
-		fmt.Printf("No spare nodes to add to Kubernetes cluster %v\n",
-			id)
+		msg := fmt.Sprintf("No spare nodes to add to Kubernetes cluster %v\n", id)
+		res.SetTestSkipped(msg)
+		t.SkipNow()
 		return
 	}
 
@@ -202,7 +251,10 @@ func addNodeK8sCluster(t *testing.T) {
 	}
 	err = Pcc.UpdateKubernetes(id, updateReq)
 	if err != nil {
-		assert.Fatalf("Failed to update cluster %v: %v", k8sname, err)
+		msg := fmt.Sprintf("Failed to update cluster %v: %v", k8sname, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
@@ -213,22 +265,31 @@ func deleteK8sCluster(t *testing.T) {
 
 func deleteAllK8sCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
 	assert := test.Assert{t}
 
 	clusters, err := Pcc.GetKubernetes()
 	if err != nil {
-		assert.Fatalf("Failed to get kubernetes clusters: %v\n", err)
+		msg := fmt.Sprintf("Failed to get kubernetes clusters: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for _, c := range clusters {
 		err := Pcc.DeleteKubernetes(c.ID, false)
 		if err != nil {
-			fmt.Printf("delete K8s cluster failed, try force: %v",
+			log.AuctaLogger.Warnf("delete K8s cluster failed, try force: %v",
 				err)
 			err := Pcc.DeleteKubernetes(c.ID, true)
 			if err != nil {
-				assert.Fatalf("force delete failed: %v", err)
+				msg := fmt.Sprintf("force delete failed: %v", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		}
@@ -239,14 +300,19 @@ func deleteAllK8sCluster(t *testing.T) {
 		for {
 			select {
 			case <-timeout:
-				assert.Fatalf("Time out deleting Kubernetes")
+				msg := "Time out deleting Kubernetes"
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			case <-tick:
 				var cluster pcc.K8sCluster
 				allClusters, err := Pcc.GetKubernetes()
 				if err != nil {
-					assert.Fatalf("get cluster failed: %v",
-						err)
+					msg := fmt.Sprintf("get cluster failed: %v", err)
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					assert.FailNow()
 					return
 				}
 				found := false
@@ -257,7 +323,7 @@ func deleteAllK8sCluster(t *testing.T) {
 					}
 				}
 				if !found {
-					fmt.Printf("K8s delete OK\n")
+					log.AuctaLogger.Info("K8s delete OK\n")
 					return
 				}
 				var percent int8
@@ -266,7 +332,7 @@ func deleteAllK8sCluster(t *testing.T) {
 					percent = task.Progress
 				}
 				if percent != last_percent {
-					fmt.Printf("delete status: %v  %v%%\n",
+					log.AuctaLogger.Infof("delete status: %v  %v%%\n",
 						cluster.DeployStatus, percent)
 					last_percent = percent
 				}

@@ -2,12 +2,15 @@ package main
 
 import (
 	"fmt"
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
-	"github.com/platinasystems/test"
 	"strings"
 	"sync"
 	"testing"
 	"time"
+
+	log "github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
 )
 
 func addClusterHeads(t *testing.T) {
@@ -15,18 +18,27 @@ func addClusterHeads(t *testing.T) {
 }
 
 func addInvaders(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckInvaders)
+
 	var envNodes []node
 
 	for i := range Env.Invaders {
 		envNodes = append(envNodes, Env.Invaders[i].node)
 	}
 
-	fmt.Printf("adding %d invaders\n", len(envNodes))
+	log.AuctaLogger.Infof("adding %d invaders\n", len(envNodes))
 	nodesAdded := addEnvNodes(t, envNodes)
 	checkAddNodesStatus(t, nodesAdded)
 }
 
 func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	var (
 		newNode *pcc.NodeDetailed
 		err     error
@@ -35,7 +47,7 @@ func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
 	for _, n := range envNodes {
 		if NodebyHostIP[n.HostIp] != 0 {
 			if Nodes[NodebyHostIP[n.HostIp]] != nil {
-				fmt.Printf("the node %s was already added\n",
+				log.AuctaLogger.Infof("the node %s was already added\n",
 					n.HostIp)
 				continue
 			}
@@ -47,15 +59,16 @@ func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
 
 		fmt.Printf("adding the node %s\n", newNode.Host)
 		if err = Pcc.AddNode(newNode); err != nil {
-			err = fmt.Errorf("add node %s failed: %v",
-				newNode.Host, err)
-			t.Fatal(err)
+			err = fmt.Errorf("add node %s failed: %v", newNode.Host, err)
+			res.SetTestFailure(err.Error())
+			log.AuctaLogger.Error(err.Error())
+			t.FailNow()
 			return
 		}
 		Nodes[newNode.Id] = newNode
 		NodebyHostIP[n.HostIp] = newNode.Id
 		nodesAdded = append(nodesAdded, newNode.Id)
-		fmt.Printf("Add id %d to Nodes. Mapping hostIP %v to id %d\n",
+		log.AuctaLogger.Infof("Add id %d to Nodes. Mapping hostIP %v to id %d\n",
 			newNode.Id, newNode.Host, newNode.Id)
 	}
 	return
@@ -65,6 +78,9 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 	var err error
 	test.SkipIfDryRun(t)
 
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	if len(nodeIdsAdded) < 1 {
 		return
 	}
@@ -72,16 +88,16 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 	//Check Agent and collector installation function.
 	// FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
-		fmt.Printf("Checking %s installation for nodeId:%v from %s \n",
+		log.AuctaLogger.Infof("Checking %s installation for nodeId:%v from %s \n",
 			app, nodeId, from.String())
 		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout,
 			app, "", from)
 		if waitErr != nil {
-			fmt.Printf("\n%v\n", waitErr)
+			log.AuctaLogger.Errorf("\n%v\n", waitErr)
 			err = waitErr
 		}
 		if check {
-			fmt.Printf("%s correctly installed on nodeId:%v\n",
+			log.AuctaLogger.Infof("%s correctly installed on nodeId:%v\n",
 				app, nodeId)
 		}
 	}
@@ -115,7 +131,9 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 				if strings.Contains(status, "Add node failed") {
 					err = fmt.Errorf("%s for node %d",
 						status, id)
-					t.Fatal(err)
+					res.SetTestFailure(err.Error())
+					log.AuctaLogger.Error(err.Error())
+					t.FailNow()
 					return
 				}
 			}
@@ -123,7 +141,7 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 			if ignore == nil {
 				switch connection { // FIXME use models
 				case "online":
-					fmt.Printf("the node %d:%s is %v\n",
+					log.AuctaLogger.Infof("the node %d:%s is %v\n",
 						id, host, connection)
 					return
 				case "", "NoRunningService":
@@ -131,19 +149,21 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 				default:
 					err = fmt.Errorf("Unable to add node %s",
 						connection)
-					t.Fatal(err)
+					res.SetTestFailure(err.Error())
+					log.AuctaLogger.Error(err.Error())
+					t.FailNow()
 					return
 				}
 				if previousConnection != "" &&
 					previousConnection != connection {
-					fmt.Printf("node %d:%s connection "+
+					log.AuctaLogger.Infof("node %d:%s connection "+
 						"status switched from %s to %s\n",
 						id, host, previousConnection,
 						connection)
 				}
 				previousConnection = connection
 			} else {
-				fmt.Printf("error getting the connection "+
+				log.AuctaLogger.Errorf("error getting the connection "+
 					"status for node %d:%s %v\n",
 					id, host, err)
 			}
@@ -151,7 +171,10 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 			if time.Since(start) > timeout {
 				err = fmt.Errorf("timeout for node addition %d",
 					id)
-				t.Fatal(err)
+				res.SetTestFailure(err.Error())
+				log.AuctaLogger.Error(err.Error())
+				t.FailNow()
+				return
 			}
 
 			if err != nil {
@@ -167,8 +190,11 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 	wg.Wait() // wait for all addition
 
 	if err != nil {
-		fmt.Println(fmt.Sprintf("Error adding nodes %v", err))
-		t.Fatal(err)
+		log.AuctaLogger.Error(fmt.Sprintf("Error adding nodes %v", err))
+		res.SetTestFailure(err.Error())
+		log.AuctaLogger.Error(err.Error())
+		t.FailNow()
+		return
 	}
 
 }

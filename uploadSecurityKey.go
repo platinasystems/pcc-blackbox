@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
+	"github.com/platinasystems/pcc-blackbox/models"
+
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -21,15 +25,25 @@ type secKeyUploader struct {
 
 func updateSecurityKey_MaaS(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	f, err := os.OpenFile("maas_pubkey", os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
-		assert.Fatalf("Unable to create file:\n%v\n", err)
+		msg := fmt.Sprintf("Unable to create file:\n%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	_, err = f.Write([]byte(PUB_KEY))
 	if err != nil {
-		assert.Fatalf("Unable to write on disk:\n%v\n", err)
+		msg := fmt.Sprintf("Unable to write on disk:\n%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	f.Close()
@@ -39,13 +53,19 @@ func updateSecurityKey_MaaS(t *testing.T) {
 		description := "Don't be evil"
 		exist, err := Pcc.CheckKeyLabelExists(label)
 		if err != nil {
-			assert.Fatalf("%v\n", err)
+			msg := fmt.Sprintf("%v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 		}
 		if !exist {
 			_, err = Pcc.UploadKey("./maas_pubkey", label,
 				pcc.PUBLIC_KEY, description)
 			if err != nil {
-				assert.Fatalf("%v\n", err)
+				msg := fmt.Sprintf("%v\n", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 			break
@@ -55,6 +75,10 @@ func updateSecurityKey_MaaS(t *testing.T) {
 
 func delAllKeys(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	var (
 		secKeys []pcc.SecurityKey
@@ -63,15 +87,21 @@ func delAllKeys(t *testing.T) {
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		assert.Fatalf("Failed to GetSecurityKeys: %v\n", err)
+		msg := fmt.Sprintf("Failed to GetSecurityKeys: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	for i := 0; i < len(secKeys); i++ {
 		err = Pcc.DeleteKey(secKeys[i].Alias)
 		if err != nil {
-			assert.Fatalf("Failed to delete key %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete key %v: %v\n",
 				secKeys[i].Alias, err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}

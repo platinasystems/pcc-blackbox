@@ -1,8 +1,13 @@
 package main
 
 import (
+	"fmt"
 	"testing"
+	"time"
 
+	"github.com/platinasystems/pcc-blackbox/models"
+
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -14,6 +19,10 @@ func getNodes(t *testing.T) {
 
 func getAvailableNodes(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	if nodes, err := Pcc.GetNodes(); err == nil {
 		for i := 0; i < len(*nodes); i++ {
@@ -24,12 +33,19 @@ func getAvailableNodes(t *testing.T) {
 			Env.setNodeId(node.Host, id)
 		}
 	} else {
-		assert.Fatalf("Error getting nodes: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func testNodeGroups(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 
 	var req pcc.NodeGroupRequest
@@ -39,14 +55,20 @@ func testNodeGroups(t *testing.T) {
 
 	err := Pcc.AddNodeGroup(&req)
 	if err != nil {
-		assert.Fatalf("Error AddNodeGroup: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 	id := req.Id
 
 	group, err := Pcc.GetNodeGroupId(id)
 	if err != nil {
-		assert.Fatalf("Error GetNodeGroupId: %v\n", err)
+		msg := fmt.Sprintf("Error GetNodeGroupId: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -55,13 +77,19 @@ func testNodeGroups(t *testing.T) {
 	group.Description = newDescription
 	err = Pcc.UpdateNodeGroup(&group)
 	if err != nil {
-		assert.Fatalf("Error UpdateNodeGroupId: %v\n", err)
+		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	groups, err := Pcc.GetNodeGroups()
 	if err != nil {
-		assert.Fatalf("Error GetNodeGroups: %v\n", err)
+		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Errorf("Error GetNodeGroups: %v\n", err)
+		assert.FailNow()
 		return
 	}
 	found := false
@@ -74,13 +102,18 @@ func testNodeGroups(t *testing.T) {
 		}
 	}
 	if !found {
-		assert.Fatalf("Error finding updated group\n")
+		msg := "Error finding updated group\n"
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
 	err = Pcc.DeleteNodeGroup(group.ID)
 	if err != nil {
-		assert.Fatalf("Error DeleteNodeGroup: %v\n", err)
+		msg := fmt.Sprintf("Error DeleteNodeGroup: %v\n", err)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	log "github.com/platinasystems/go-common/logs"
 	"strconv"
 	"strings"
 
@@ -23,7 +24,7 @@ func addTestTestNode(testNode *pcc.NodeDetailed) {
 
 	ifaces, err := Pcc.GetIfacesByNodeId(testNode.Id)
 	if err != nil {
-		fmt.Printf("error node %v: %v\n", testNode.Id, err)
+		log.AuctaLogger.Errorf("error node %v: %v\n", testNode.Id, err)
 		return
 	}
 
@@ -74,7 +75,7 @@ func addTestTestNode(testNode *pcc.NodeDetailed) {
 func addTestIpam() {
 	subnets, err := Pcc.GetSubnetObj()
 	if err != nil {
-		fmt.Printf("Failed to GetSubnetObj: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetSubnetObj: %v\n", err)
 		return
 	}
 	if len(*subnets) == 0 {
@@ -94,7 +95,7 @@ func addTestIpam() {
 func addTestNetCluster() {
 	netClusters, err := Pcc.GetNetCluster()
 	if err != nil {
-		fmt.Printf("Failed to GetSubnetObj: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetSubnetObj: %v\n", err)
 		return
 	}
 	if len(netClusters) == 0 {
@@ -116,7 +117,7 @@ func addTestNetCluster() {
 			var n netNode
 			tmpNode, err := Pcc.GetNode(node.NodeId)
 			if err != nil {
-				fmt.Printf("GetNode failed %v: %v\n",
+				log.AuctaLogger.Errorf("GetNode failed %v: %v\n",
 					node.NodeId, err)
 				continue
 			}
@@ -148,7 +149,7 @@ func genEnv() {
 
 	nodes, err := Pcc.GetNodesDetail()
 	if err != nil {
-		fmt.Printf("Failed to GetNodes: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetNodes: %v\n", err)
 		return
 	}
 	for _, testNode := range nodes {
@@ -160,8 +161,8 @@ func genEnv() {
 
 	data, err := json.MarshalIndent(outEnv, "", "    ")
 	if err == nil {
-		fmt.Printf("\n%v\n", string(data))
+		log.AuctaLogger.Infof("\n%v\n", string(data))
 	} else {
-		fmt.Printf("Error marshal to json: %v\n", err)
+		log.AuctaLogger.Errorf("Error marshal to json: %v\n", err)
 	}
 }

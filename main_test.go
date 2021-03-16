@@ -14,12 +14,27 @@ import (
 	"testing"
 	"time"
 
+	"github.com/google/uuid"
+	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/pcc-blackbox/utility"
 	"github.com/platinasystems/test"
 )
 
 var envFile string = "testEnv.json"
+var customTestsFileName string
+var seed int64
+
+func init() {
+	flag.Int64Var(&seed, "seed", -1, "seed to initialize random generator")
+	flag.StringVar(&customTestsFileName, "testfile", "testList.yml.example", "name of the file with a custom list of test")
+
+	nameToTestFunc = GetNameToTestFunc()
+	defaultTests = GetDefaultTestMap()
+
+}
 
 func TestMain(m *testing.M) {
 	var (
@@ -30,12 +45,19 @@ func TestMain(m *testing.M) {
 		if r := recover(); r != nil {
 			fmt.Fprintln(os.Stderr, r)
 			ecode = 1
-			fmt.Println(string(debug.Stack()))
+			log.AuctaLogger.Info(string(debug.Stack()))
 		}
 		if ecode != 0 {
 			os.Exit(ecode)
 		}
 	}()
+
+	if _, err := os.Stat("logConfig.yml"); err == nil {
+		pcc.LoadLogConfig("logConfig.yml", "yml")
+		log.Init()
+	} else if os.IsNotExist(err) {
+		log.InitWithDefault(nil)
+	}
 
 	data, err := ioutil.ReadFile(envFile)
 	if err != nil {
@@ -53,7 +75,15 @@ func TestMain(m *testing.M) {
 			envFile, err.Error()))
 	}
 
-	log.InitWithDefault(nil)
+	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
+	dbh := db.InitWithParams(params, false)
+	if dbh == nil {
+		log.AuctaLogger.Errorf("No database handler initialized")
+	} else {
+		models.DBh = dbh
+		dbh.GetDM().AutoMigrate(&models.TestResult{})
+		dbh.GetDM().AutoMigrate(&models.RandomSeed{})
+	}
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
@@ -74,10 +104,20 @@ func TestMain(m *testing.M) {
 		return
 	}
 
+	runID = uuid.New().String()
+
+	if seed == -1 {
+		seed = utility.CreateSeed()
+	}
+	randomGenerator = utility.RandomGenerator(seed)
+	randomSeed := models.RandomSeed{RunID: runID, Seed: seed}
+	if dbh != nil {
+		dbh.Insert(&randomSeed)
+	}
 	ecode = m.Run()
 
 	dockerStats.Stop()
-	fmt.Println("\n\nTEST COMPLETED")
+	log.AuctaLogger.Info("\n\nTEST COMPLETED")
 }
 
 var count uint
@@ -87,7 +127,7 @@ var timeFormat = "Mon Jan 2 15:04:05 2006"
 // automatically config a cluser
 func TestNodes(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -101,7 +141,7 @@ func TestNodes(t *testing.T) {
 
 func TestUsers(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "users", func(t *testing.T) {
 		mayRun(t, "addTenant", addTenant)
 	})
@@ -110,7 +150,7 @@ func TestUsers(t *testing.T) {
 // assumes TestNodes has been run
 func TestMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -123,7 +163,7 @@ func TestMaaS(t *testing.T) {
 // assumes TestNodes has been run
 func TestTenantMaaS(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -137,7 +177,7 @@ func TestTenantMaaS(t *testing.T) {
 // assumes TestNode & TestNetCluster has been run before
 func TestAddK8s(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -148,7 +188,7 @@ func TestAddK8s(t *testing.T) {
 
 func TestDeleteK8s(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
 	})
@@ -157,7 +197,7 @@ func TestDeleteK8s(t *testing.T) {
 // assumes TestNodes has been run
 func TestNetCluster(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "netCluster", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -168,7 +208,7 @@ func TestNetCluster(t *testing.T) {
 // assumes TestNode & TestNetCluster has been run before
 func TestAddCeph(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "ceph", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -180,7 +220,7 @@ func TestAddCeph(t *testing.T) {
 // assumes TestAddCeph has been run
 func TestDeleteCeph(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "cephDelete", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testDeleteCeph", testDeleteCeph)
@@ -198,7 +238,7 @@ func TestCephCache(t *testing.T) {
 
 func TestK8sApp(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "K8sApp", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addIpam", updateIpam)
@@ -209,7 +249,7 @@ func TestK8sApp(t *testing.T) {
 
 func TestPortus(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getNodesList", getNodes)
 		mayRun(t, "addBrownfieldNodes", addBrownfieldServers)
@@ -225,7 +265,7 @@ func TestPortus(t *testing.T) {
 // assumes TestPortus has been run
 func TestDelPortus(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "portus", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "delAllPortus", delAllPortus)
@@ -236,7 +276,7 @@ func TestDelPortus(t *testing.T) {
 // requires ipmitool installed on unit running test
 func TestHardwareInventory(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "hardwareinventory", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "testHardwareInventory", testHardwareInventory)
@@ -245,7 +285,7 @@ func TestHardwareInventory(t *testing.T) {
 
 func TestFull(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "getSecKeys", getSecKeys)
@@ -264,7 +304,7 @@ func TestFull(t *testing.T) {
 
 func TestClean(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "nodes", func(t *testing.T) {
 		mayRun(t, "getAvailableNodes", getAvailableNodes)
 		mayRun(t, "deleteK8sCluster", deleteK8sCluster)
@@ -282,7 +322,7 @@ func TestClean(t *testing.T) {
 
 func TestTunnel(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Info("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "TUNNEL", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -297,7 +337,7 @@ func TestTunnel(t *testing.T) {
 
 func TestPolicy(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "POLICY", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -309,7 +349,7 @@ func TestPolicy(t *testing.T) {
 
 func TestAvailability(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "AVAILABILITY", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -322,7 +362,7 @@ func TestAvailability(t *testing.T) {
 // assumes TestNodes has been run
 func TestGreenfield(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "GREENFIELD", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "updateSecurityKey", updateSecurityKey_MaaS)
@@ -336,7 +376,7 @@ func TestGreenfield(t *testing.T) {
 
 func TestConfigNetworkInterfaces(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "configureNetwork", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "configNetworkInterfaces", configNetworkInterfaces)
@@ -345,7 +385,7 @@ func TestConfigNetworkInterfaces(t *testing.T) {
 
 func TestMonitor(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "MONITOR", func(t *testing.T) {
 		mayRun(t, "getNodeList", getNodes)
 		mayRun(t, "addInvaders", addClusterHeads)
@@ -358,7 +398,7 @@ func TestMonitor(t *testing.T) {
 
 func TestUserManagement(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "USER-MANAGEMENT", func(t *testing.T) {
 		mayRun(t, "testUMRole", testUMRole)
 		mayRun(t, "testUMTenant", testUMTenant)
@@ -371,7 +411,7 @@ func TestUserManagement(t *testing.T) {
 
 func TestKeyManager(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "KEY-MANAGER", func(t *testing.T) {
 		mayRun(t, "testKMKeys", testKMKeys)
 		mayRun(t, "testKMCertificates", testKMCertificates)
@@ -380,7 +420,7 @@ func TestKeyManager(t *testing.T) {
 
 func TestAppCredentials(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "APP CREDENTIALS", func(t *testing.T) {
 		mayRun(t, "testCreateCredendialMetadataProfile", testCreateCredendialMetadataProfile)
 		mayRun(t, "testUpdateCredendialMetadataProfile", testUpdateCredendialMetadataProfile)
@@ -391,7 +431,7 @@ func TestAppCredentials(t *testing.T) {
 // Test functions for New Dashboard
 func TestDashboard(t *testing.T) {
 	count++
-	fmt.Printf("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
 	mayRun(t, "DASHBOARD REST API", func(t *testing.T) {
 		mayRun(t, "testDashboardGetAllPCCObjects", testDashboardGetAllPCCObjects)
 		mayRun(t, "testDashboardGetPCCObjectByRandomId", testDashboardGetPCCObjectByRandomId)
@@ -405,6 +445,30 @@ func TestDashboard(t *testing.T) {
 		mayRun(t, "testDashboardGetAggrHealthCountByType", testDashboardGetAggrHealthCountByType)
 		mayRun(t, "testDashboardGetMetadataEnumStrings", testDashboardGetMetadataEnumStrings)
 	})
+}
+
+func TestCustom(t *testing.T) {
+	log.AuctaLogger.Infof("Iteration %v, %v\n", count, time.Now().Format(timeFormat))
+
+	customTests, err := utility.GetCustomTests(customTestsFileName)
+	if err != nil {
+		log.AuctaLogger.Errorf("%v", err)
+		t.SkipNow()
+	}
+
+	for testName, subtests := range customTests.TestList {
+		count++
+
+		if defaultSubtests, ok := defaultTests[testName]; ok {
+			subtests = defaultSubtests
+		}
+
+		mayRun(t, testName, func(t *testing.T) {
+			for _, subtest := range subtests {
+				mayRun(t, subtest, nameToTestFunc[subtest])
+			}
+		})
+	}
 }
 
 func TestGen(t *testing.T) {
@@ -426,7 +490,7 @@ func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
 }
 
 func uutInfo() {
-	fmt.Println("---")
-	defer fmt.Println("...")
-	fmt.Println("pcc instance unknown")
+	log.AuctaLogger.Info("---")
+	defer log.AuctaLogger.Info("...")
+	log.AuctaLogger.Info("pcc instance unknown")
 }

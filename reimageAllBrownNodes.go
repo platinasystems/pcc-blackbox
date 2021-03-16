@@ -6,7 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/platinasystems/pcc-blackbox/models"
+
 	"github.com/lib/pq"
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/test"
 )
@@ -18,6 +21,11 @@ func reimageAllBrownNodes(t *testing.T) {
 
 func updateBmcInfo(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
+
 	assert := test.Assert{t}
 
 	for _, i := range Env.Servers {
@@ -44,11 +52,17 @@ func updateBmcInfo(t *testing.T) {
 			addReq.Console = "ttyS1"
 
 			if err = Pcc.UpdateNode(&addReq); err != nil {
-				assert.Fatalf("Failed to update BMC info: %v\n", err)
+				msg := fmt.Sprintf("Failed to update BMC info: %v\n", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		} else {
-			assert.Fatalf("Failed to get the key %v\n", err)
+			msg := fmt.Sprintf("Failed to get the key %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	}
@@ -56,6 +70,11 @@ func updateBmcInfo(t *testing.T) {
 
 func reimageAllBrown(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckServers, CheckNodes)
+
 	assert := test.Assert{t}
 
 	var nodeIdsAdded []uint64
@@ -82,7 +101,10 @@ func reimageAllBrown(t *testing.T) {
 
 		fmt.Println(request)
 		if err = Pcc.MaasDeploy(request); err != nil {
-			assert.Fatalf("MaasDeploy failed: %v\n", err)
+			msg := fmt.Sprintf("MaasDeploy failed: %v\n", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 		}
 
 		fmt.Println("Sleep for 8 minutes")
@@ -92,27 +114,30 @@ func reimageAllBrown(t *testing.T) {
 			for i, id := range nodesList {
 				status, err := Pcc.GetProvisionStatus(id)
 				if err != nil {
-					fmt.Printf("Node %v error: %v\n", id, err)
+					log.AuctaLogger.Errorf("Node %v error: %v\n", id, err)
 					fails++
 					continue
 				}
 				if strings.Contains(status, "Ready") {
-					fmt.Printf("Node %v has gone Ready\n", id)
+					log.AuctaLogger.Infof("Node %v has gone Ready\n", id)
 					nodesList = removeIndex(i, nodesList)
 					continue
 				} else if strings.Contains(status, "reimage failed") {
-					fmt.Printf("Node %v has failed reimage\n", id)
+					log.AuctaLogger.Errorf("Node %v has failed reimage\n", id)
 					nodesList = removeIndex(i, nodesList)
 					fails++
 					continue
 				}
-				fmt.Printf("Node %v: %v\n", id, status)
+				log.AuctaLogger.Infof("Node %v: %v\n", id, status)
 			}
 			if len(nodesList) == 0 {
 				if fails == 0 {
-					fmt.Printf("Brownfield re-image done\n")
+					log.AuctaLogger.Infof("Brownfield re-image done\n")
 				} else {
-					assert.Fatalf("Brownfield re-image failed on %v nodes\n", fails)
+					msg := fmt.Sprintf("Brownfield re-image failed on %v nodes\n", fails)
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					assert.FailNow()
 				}
 				checkAddNodesStatus(t, nodeIdsAdded)
 				return
@@ -120,7 +145,10 @@ func reimageAllBrown(t *testing.T) {
 			time.Sleep(60 * time.Second)
 		}
 	} else {
-		assert.Fatalf("Failed to get the key %v\n", err)
+		msg := fmt.Sprintf("Failed to get the key %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 

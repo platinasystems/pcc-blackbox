@@ -10,7 +10,7 @@ require (
 	github.com/containerd/containerd v1.4.3 // indirect
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200528182317-b47e74255811+incompatible
 	github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31
-	github.com/jinzhu/gorm v1.9.12
+	github.com/google/uuid v1.2.0
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.9.0
 	github.com/mitchellh/mapstructure v1.2.2
@@ -22,9 +22,10 @@ require (
 	github.com/platinasystems/tiles v1.3.1-rc1.0.20210303214427-2e05b34e2bab
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
 	github.com/spf13/cast v1.3.1 // indirect
-	github.com/spf13/viper v1.6.3 // indirect
+	github.com/spf13/viper v1.6.3
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/sys v0.0.0-20210225134936-a50acf3fe073 // indirect
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
+	gopkg.in/yaml.v2 v2.3.0
 	gotest.tools v2.2.0+incompatible // indirect
 )

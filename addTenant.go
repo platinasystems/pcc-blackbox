@@ -2,10 +2,14 @@ package main
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/security"
 	"github.com/platinasystems/test"
-	"testing"
 )
 
 func addTenant(t *testing.T) {
@@ -14,6 +18,11 @@ func addTenant(t *testing.T) {
 
 func addTenantA(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckServers, Env.CheckPccIp)
+
 	assert := test.Assert{t}
 	var (
 		tenants []security.Tenant
@@ -24,23 +33,29 @@ func addTenantA(t *testing.T) {
 		err     error
 	)
 
-	fmt.Println("assign all nodes to ROOT")
+	log.AuctaLogger.Infof("assign all nodes to ROOT")
 	var nodes []uint64
 	for _, i := range Env.Servers {
 		nodes = append(nodes, NodebyHostIP[i.HostIp])
 	}
 	err = Pcc.AssignTenantNodes(1, nodes)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
-	fmt.Println("Delete existing tenants")
+	log.AuctaLogger.Infof("Delete existing tenants")
 	tenants, err = Pcc.GetTenants()
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 	for _, t := range tenants {
-		fmt.Printf("delete tenant %v\n", t.Name)
+		log.AuctaLogger.Infof("delete tenant %v\n", t.Name)
 		Pcc.DelTenant(t.ID)
 	}
 
@@ -48,64 +63,87 @@ func addTenantA(t *testing.T) {
 	addReq.Name = "cust-a"
 	addReq.Description = "a tenant of ROOT"
 
-	fmt.Printf("add tenant %v\n", addReq.Name)
+	log.AuctaLogger.Infof("add tenant %v\n", addReq.Name)
 	_, err = Pcc.AddTenant(addReq)
 	if err != nil {
-		assert.Fatalf("Failed to add tenant %v: %v\n",
-			addReq.Name, err)
+		msg := fmt.Sprintf("Failed to add tenant %v: %v\n", addReq.Name, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
-	fmt.Printf("find tenant %v\n", addReq.Name)
+	log.AuctaLogger.Infof("find tenant %v\n", addReq.Name)
 	tenant, err = Pcc.FindTenant(addReq.Name)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant.Name, tenant.ID)
+	log.AuctaLogger.Infof("tenant %v, id %v\n", tenant.Name, tenant.ID)
 
 	addReq2.Name = "cust-b"
 	addReq2.Description = "a tenant of cust-b"
 	addReq2.Parent = tenant.ID
 
-	fmt.Printf("add tenant %v\n", addReq.Name)
+	log.AuctaLogger.Infof("add tenant %v\n", addReq.Name)
 	_, err = Pcc.AddTenant(addReq2)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
-	fmt.Printf("find tenant %v\n", addReq2.Name)
+	log.AuctaLogger.Infof("find tenant %v\n", addReq2.Name)
 	tenant2, err = Pcc.FindTenant(addReq2.Name)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
-	fmt.Printf("tenant %v, id %v\n", tenant2.Name, tenant2.ID)
+	log.AuctaLogger.Infof("tenant %v, id %v\n", tenant2.Name, tenant2.ID)
 
-	fmt.Printf("deleting tenant %v\n", tenant2.Name)
+	log.AuctaLogger.Infof("deleting tenant %v\n", tenant2.Name)
 	err = Pcc.DelTenant(tenant2.ID)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	} else {
 	}
 	_, err = Pcc.FindTenant(addReq2.Name)
 	if err != nil {
-		fmt.Printf("FindTenant failed as expected on deleted tenant\n")
+		log.AuctaLogger.Infof("FindTenant failed as expected on deleted tenant\n")
 	} else {
-		assert.Fatalf("%v\n", "Expecting failure, but didn't")
+		msg := fmt.Sprintf("%v\n", "Expecting failure, but didn't")
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
-	fmt.Printf("assign servers to tenant %v\n", addReq.Name)
+	log.AuctaLogger.Infof("assign servers to tenant %v\n", addReq.Name)
 	for _, i := range Env.Servers {
 		nodes = append(nodes, NodebyHostIP[i.HostIp])
 	}
 	err = Pcc.AssignTenantNodes(tenant.ID, nodes)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
 	source := fmt.Sprintf("https://%v:7654/setPass", Env.PccIp)
 
 	// remove existing users
 	if users, err := Pcc.GetUsers(); err != nil {
-		assert.Fatalf("Failed to get users: %v\n", err)
+		msg := fmt.Sprintf("Failed to get users: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	} else {
 		for _, u := range users {
@@ -114,8 +152,11 @@ func addTenantA(t *testing.T) {
 			}
 			err = Pcc.DelUser(u.UserName)
 			if err != nil {
-				assert.Fatalf("Failed to delete user %v: %v\n",
+				msg := fmt.Sprintf("Failed to delete user %v: %v\n",
 					u.UserName, err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		}
@@ -135,8 +176,11 @@ func addTenantA(t *testing.T) {
 	}
 	_, err = Pcc.AddUser(addUser)
 	if err != nil {
-		assert.Fatalf("Failed to add user %v: %v\n", addUser.UserName,
+		msg := fmt.Sprintf("Failed to add user %v: %v\n", addUser.UserName,
 			err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -153,17 +197,23 @@ func addTenantA(t *testing.T) {
 		Source:    source,
 	}
 	if _, err = Pcc.AddUser(addUser2); err != nil {
-		assert.Fatalf("Failed to add user %v: %v\n", addUser2.UserName,
+		msg := fmt.Sprintf("Failed to add user %v: %v\n", addUser2.UserName,
 			err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
-	fmt.Printf("Try change firstname of user %v \n", addUser.UserName)
+	log.AuctaLogger.Infof("Try change firstname of user %v \n", addUser.UserName)
 	newName := "Mr Bart"
 	addUser.FirstName = newName
 
 	if err = Pcc.UpdateUser(addUser); err != nil {
-		assert.Fatalf("Failed to update user %v: %v\n", newName, err)
+		msg := fmt.Sprintf("Failed to update user %v: %v\n", newName, err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 
@@ -171,32 +221,48 @@ func addTenantA(t *testing.T) {
 		found := false
 		for _, u := range users {
 			if u.UserName == addUser.UserName {
-				fmt.Printf("Found updated user %v\n", u)
+				log.AuctaLogger.Infof("Found updated user %v\n", u)
 				if u.Profile.FirstName == newName {
-					fmt.Printf("user update worked\n")
+					log.AuctaLogger.Infof("user update worked\n")
 					found = true
 				} else {
-					assert.Fatalf("user update failed\n")
+					msg := fmt.Sprintf("user update failed\n")
+					res.SetTestFailure(msg)
+					log.AuctaLogger.Error(msg)
+					assert.FailNow()
 					return
 				}
 			}
 		}
 		if !found {
-			assert.Fatalf("user update failed and not found\n")
+			msg := fmt.Sprintf("user update failed and not found\n")
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
 			return
 		}
 	} else {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 
 	err = Pcc.DelUser(addUser.UserName)
 	if err != nil {
-		assert.Fatalf("%v\n", err)
+		msg := fmt.Sprintf("%v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func delAllTenants(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	var (
 		tenants []security.Tenant
@@ -210,17 +276,27 @@ func delAllTenants(t *testing.T) {
 			}
 			id := t.ID
 			if err = Pcc.DelTenant(id); err != nil {
-				assert.Fatalf("Failed to DelTenant %v: %v\n", id, err)
+				msg := fmt.Sprintf("Failed to DelTenant %v: %v\n", id, err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		}
 	} else {
-		assert.Fatalf("Failed to GetTenants: %v\n", err)
+		msg := fmt.Sprintf("Failed to GetTenants: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 	}
 }
 
 func delAllUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	assert := test.Assert{t}
 	var (
 		users []pcc.User
@@ -234,12 +310,18 @@ func delAllUsers(t *testing.T) {
 			}
 			username := u.UserName
 			if err = Pcc.DelUser(username); err != nil {
-				assert.Fatalf("failed to Delete user %v: %v\n", username, err)
+				msg := fmt.Sprintf("failed to Delete user %v: %v\n", username, err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
 				return
 			}
 		}
 	} else {
-		assert.Fatalf("Failed to GetUsers: %v\n", err)
+		msg := fmt.Sprintf("Failed to GetUsers: %v\n", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
 		return
 	}
 }
