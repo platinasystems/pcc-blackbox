@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	db "github.com/platinasystems/go-common/database"
 	log "github.com/platinasystems/go-common/logs"
 	"github.com/platinasystems/pcc-blackbox/utility"
 )
@@ -47,11 +46,15 @@ func (testResult *TestResult) SetTestSkipped(failureMsg string) {
 
 func (testResult *TestResult) SetElapsedTime(start time.Time, name string) {
 	testResult.ElapsedTime = time.Since(start).Seconds()
-	log.AuctaLogger.Infof("%s took %s", name, testResult.ElapsedTime)
+	log.AuctaLogger.Infof("%s took %fs", name, testResult.ElapsedTime)
 }
 
 func (testResult *TestResult) SaveTestResult() {
-	db.NewDBHandler().GetDM().Create(testResult)
+	if DBh != nil {
+		DBh.Insert(testResult)
+	} else {
+		log.AuctaLogger.Error("Cannot save test result: No db handler initialized")
+	}
 }
 
 func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time) {

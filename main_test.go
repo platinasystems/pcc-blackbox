@@ -76,9 +76,14 @@ func TestMain(m *testing.M) {
 	}
 
 	params := &db.Params{DBtype: "sqlite3", DBname: "blackbox.db"}
-	db.InitWithParams(params)
-	db.NewDBHandler().GetDM().AutoMigrate(&models.TestResult{})
-	db.NewDBHandler().GetDM().AutoMigrate(&models.RandomSeed{})
+	dbh := db.InitWithParams(params, false)
+	if dbh == nil {
+		log.AuctaLogger.Errorf("No database handler initialized")
+	} else {
+		models.DBh = dbh
+		dbh.GetDM().AutoMigrate(&models.TestResult{})
+		dbh.GetDM().AutoMigrate(&models.RandomSeed{})
+	}
 
 	credential := pcc.Credential{ // FIXME move to json
 		UserName: "admin",
@@ -106,8 +111,9 @@ func TestMain(m *testing.M) {
 	}
 	randomGenerator = utility.RandomGenerator(seed)
 	randomSeed := models.RandomSeed{RunID: runID, Seed: seed}
-	db.NewDBHandler().GetDM().Create(&randomSeed)
-
+	if dbh != nil {
+		dbh.Insert(&randomSeed)
+	}
 	ecode = m.Run()
 
 	dockerStats.Stop()

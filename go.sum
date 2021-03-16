@@ -462,6 +462,8 @@ github.com/platinasystems/buildinfo v1.1.0/go.mod h1:VO8oKwJRCwPKxkqaLjkMxPHLAoe
 github.com/platinasystems/go-common v0.0.0-20210301194408-24b3dc94600b/go.mod h1:9+OhO1tdlFdePATEGfLaewb0IEIOO3F22T/K1j+Waa8=
 github.com/platinasystems/go-common v0.0.0-20210310143655-f69d678ee58d h1:Z7EOnIU9kRCLGHugp5X2pEZ/oUftctcO8TBb9tiEuuw=
 github.com/platinasystems/go-common v0.0.0-20210310143655-f69d678ee58d/go.mod h1:9+OhO1tdlFdePATEGfLaewb0IEIOO3F22T/K1j+Waa8=
+github.com/platinasystems/go-common v0.0.0-20210316090614-55f8ad8c7082 h1:u0O+ay6WabVZb1lApDJRLbRi6K1NGE2Pa/2dVKOnAGk=
+github.com/platinasystems/go-common v0.0.0-20210316090614-55f8ad8c7082/go.mod h1:9+OhO1tdlFdePATEGfLaewb0IEIOO3F22T/K1j+Waa8=
 github.com/platinasystems/go-kafka-avro v0.0.0-20210301082519-907c69bbb2fc/go.mod h1:Wkk72Ljb4IdxtyAbh0TqsG89nq2xrHagi3FGKWOrR+M=
 github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210301182854-26002441c6a3 h1:uL0YiHi64QLLpcsZQjxeBBOYSBULozSmiRJoFZgq5h0=
 github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210301182854-26002441c6a3/go.mod h1:YFPFbkCVpGy/PuaCMqpasIKlI926hZAlG1Y0SnSf8AY=
