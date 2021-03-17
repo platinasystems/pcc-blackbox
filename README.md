@@ -59,7 +59,10 @@ tests:
     - updateIpam
     - addNetCluster
 ```
-Note: TestNodes: [] is used to include a Test Group already available.
+Important Notes:  
+\-TestNodes: [] is used to include a Test Group already available.  
+\-To be invoked using TestCustom approach, each test or Test Group should be listed in GetNameToTestFunc() and in GetDefaultTestMap() respectivelly (please, check testMap.go).   
+
 
 
 **Execution Examples:**  
@@ -233,4 +236,14 @@ func name_of_test_here(t *testing.T, ...) {
 		return
 	}
 }
+```
+Please, be sure to add the new test into the GetNameToTestFunc() to make possible execute the test using TestCustom approach.  
+For example, if the name is "name_of_test_here", modify the func GetNameToTestFunc() in the following way:
+
+```
+func GetNameToTestFunc() (nameToTestFunc map[string]func(*testing.T)) {
+	nameToTestFunc = map[string]func(*testing.T){
+	    "name_of_test_here":                         name_of_test_here,
+	    "getNodes":                                  getNodes,
+		....
 ```
