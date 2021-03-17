@@ -2,7 +2,9 @@ package main
 
 import (
 	"errors"
+	"fmt"
 
+	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -167,17 +169,42 @@ func (te *testEnv) CheckPccIp() (err error) {
 	return
 }
 func (netInt *netInterface) CheckNetInt() (err error) {
-	if netInt.MacAddr == "" || netInt.Speed == "" || netInt.Autoneg == "" || netInt.Mtu == "" {
-		err = errors.New("Error in configuration parameters (MacAddr, Speed, Autoneg, Mtu)")
+	if netInt.AdminStatus != pcc.INTERFACE_STATUS_UP {
+		log.AuctaLogger.Infof("CheckNetInt [%v] AdminStatus [%v]",
+			netInt.Name, netInt.AdminStatus)
+		return
+	}
+	switch netInt.Autoneg {
+	case "true", "on":
+		if netInt.Speed != "" {
+			err = fmt.Errorf("Error in configurtion (speed must "+
+				"not be set with autoneg off for [%v] speed "+
+				"[%v] auto [%v]",
+				netInt.Name, netInt.Speed, netInt.Autoneg)
+		}
+		return
+	case "false", "off", "":
+		if netInt.Speed == "" {
+			err = fmt.Errorf("Error in configurtion (speed must "+
+				"be set with autoneg on for [%v] speed [%v] auto [%v]",
+				netInt.Name, netInt.Speed, netInt.Autoneg)
+		}
+		return
+	}
+	if netInt.MacAddr == "" || netInt.Mtu == "" {
+		err = fmt.Errorf("Error in configuration parameters (MacAddr,"+
+			" Mtu) for [%v]", netInt.Name)
 		return
 	}
 	if !(len(netInt.Cidrs) > 0) {
-		err = errors.New("There are no Cidrs in Env File")
+		err = fmt.Errorf("There are no Cidrs in Env File for [%v]",
+			netInt.Name)
 		return
 	}
 	for _, cidr := range netInt.Cidrs {
 		if cidr == "" {
-			err = errors.New("Error in configuration parameters (check: cidr)")
+			err = fmt.Errorf("Error in configuration parameters "+
+				"(check: cidr) [%v]", netInt.Name)
 			return
 		}
 	}
