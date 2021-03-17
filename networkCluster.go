@@ -27,8 +27,8 @@ func addNetCluster(t *testing.T) {
 		netClusterId, err := Pcc.FindNetClusterId(netCluster.Name)
 		netClusterName = netCluster.Name
 		if err == nil {
-			log.AuctaLogger.Warnf("Network cluster [%v] already exists [%v]",
-				netCluster.Name, netClusterId)
+			log.AuctaLogger.Infof("Network cluster [%v] already "+
+				"exists [%v]", netCluster.Name, netClusterId)
 			continue
 		}
 		addNetClusterInternal(t, netCluster)
