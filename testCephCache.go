@@ -56,7 +56,7 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 
 			pool := pools[0]
 
-			log.AuctaLogger.Infof("\nCEPH CACHE: Selected the pool [%s]", pool.Name)
+			log.AuctaLogger.Infof("CEPH CACHE: Selected the pool [%s]", pool.Name)
 			request := ceph.CacheRequest{}
 			request.StoragePoolID = pool.Id
 			request.Size = pool.Size
@@ -69,14 +69,14 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 			poolName := fmt.Sprintf("%s-%s", name, pool.Name)
 			request.Name = poolName
 			if _, err := Pcc.CreateCephCache(&request); err != nil {
-				msg := fmt.Sprintf("%v\n", err)
+				msg := fmt.Sprintf("%v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
 			}
 
 			for limit := 1; limit <= 15; limit++ { // TODO sync on notification
-				log.AuctaLogger.Infof("\nWait for %s creation...", poolName)
+				log.AuctaLogger.Infof("Wait for %s creation...", poolName)
 				time.Sleep(time.Duration(10) * time.Second)
 				if caches, err := Pcc.GetCephCaches(); err == nil {
 					for i := range caches {
@@ -85,14 +85,14 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 								return caches[i]
 							}
 						} else {
-							msg := fmt.Sprintf("%v\n", err)
+							msg := fmt.Sprintf("%v", err)
 							res.SetTestFailure(msg)
 							log.AuctaLogger.Error(msg)
 							t.FailNow()
 						}
 					}
 				} else {
-					msg := fmt.Sprintf("%v\n", err)
+					msg := fmt.Sprintf("%v", err)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					t.FailNow()
@@ -103,13 +103,13 @@ func addCephCache(t *testing.T, cacheMode string, name string) *ceph3.CephCacheT
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
 		} else {
-			msg := fmt.Sprintf("%v\n", err)
+			msg := fmt.Sprintf("%v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
 		}
 	} else {
-		msg := fmt.Sprintf("%v\n", err)
+		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
@@ -125,7 +125,7 @@ func testCephCacheAdd(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
-	log.AuctaLogger.Info("\nCEPH CACHE: adding the cache")
+	log.AuctaLogger.Info("CEPH CACHE: adding the cache")
 	var (
 		err        error
 		cephCache  *ceph3.CephCacheTier
@@ -134,15 +134,15 @@ func testCephCacheAdd(t *testing.T) {
 
 	cephCache = addCephCache(t, "", "blackbox")
 
-	log.AuctaLogger.Infof("\nCEPH CACHE: added the cache %d", cephCache.ID)
+	log.AuctaLogger.Infof("CEPH CACHE: added the cache %d", cephCache.ID)
 	defer func() {
 		Pcc.DeleteCephCache(cephCache.ID)
-		log.AuctaLogger.Infof("\nCEPH CACHE: removed the cache %d\n", cephCache.ID)
+		log.AuctaLogger.Infof("CEPH CACHE: removed the cache %d", cephCache.ID)
 	}()
 
 	// Check if the cache exist
 	if cephCache2, err = Pcc.GetCephCache(cephCache.ID); err != nil {
-		msg := fmt.Sprintf("%v\n", err)
+		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
@@ -170,7 +170,7 @@ func testCephCacheDelete(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckCephConfiguration, CheckCephClusterExists)
 
-	log.AuctaLogger.Info("\nCEPH CACHE: adding the cache")
+	log.AuctaLogger.Info("CEPH CACHE: adding the cache")
 	var (
 		err        error
 		cephCache  *ceph3.CephCacheTier
@@ -193,7 +193,7 @@ func testCephCacheDelete(t *testing.T) {
 			}
 		}
 	} else {
-		msg := fmt.Sprintf("%v\n", err)
+		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()

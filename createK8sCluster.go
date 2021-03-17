@@ -77,7 +77,7 @@ func createK8s_3nodes(t *testing.T) {
 
 	netClusterId, err := Pcc.FindNetClusterId(netClusterName)
 	if err != nil {
-		msg := fmt.Sprintf("FindNetClusterId failed: %v\n", err)
+		msg := fmt.Sprintf("FindNetClusterId failed: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -139,7 +139,7 @@ func validateK8sCluster(t *testing.T) {
 			status, percent, err := Pcc.GetKubernetesDeployStatus(id)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
-					"%v\n", err)
+					"%v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
@@ -156,7 +156,7 @@ func validateK8sCluster(t *testing.T) {
 				// already at this state and only the percent
 				// changes.
 				if percent != last_percent {
-					log.AuctaLogger.Infof("Cluster %v = %v  %v%%\n",
+					log.AuctaLogger.Infof("Cluster %v = %v  %v%%",
 						id, status, percent)
 					last_percent = percent
 				}
@@ -172,7 +172,7 @@ func validateK8sCluster(t *testing.T) {
 			case pcc.K8S_DEPLOY_APP_STATUS_PROGRESS:
 				log.AuctaLogger.Info("Kubernetes app progress")
 			default:
-				msg := fmt.Sprintf("Unexpected status - %v\n",
+				msg := fmt.Sprintf("Unexpected status - %v",
 					status)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
@@ -188,7 +188,7 @@ func validateK8sCluster(t *testing.T) {
 	for !done {
 		select {
 		case <-timeout:
-			msg := "health check timed out\n"
+			msg := "health check timed out"
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -196,13 +196,13 @@ func validateK8sCluster(t *testing.T) {
 		case <-tick:
 			health, err := Pcc.GetKubernetesHealth(id)
 			if err != nil {
-				msg := "Error geting K8s health\n"
+				msg := "Error geting K8s health"
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
 				return
 			}
-			log.AuctaLogger.Infof("Kubernetes health = %v\n", health)
+			log.AuctaLogger.Infof("Kubernetes health = %v", health)
 			if health == "good" {
 				done = true
 				return
@@ -238,7 +238,7 @@ func addNodeK8sCluster(t *testing.T) {
 	}
 
 	if len(k8sAddDelNodes) == 0 {
-		msg := fmt.Sprintf("No spare nodes to add to Kubernetes cluster %v\n", id)
+		msg := fmt.Sprintf("No spare nodes to add to Kubernetes cluster %v", id)
 		res.SetTestSkipped(msg)
 		t.SkipNow()
 		return
@@ -272,7 +272,7 @@ func deleteAllK8sCluster(t *testing.T) {
 
 	clusters, err := Pcc.GetKubernetes()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get kubernetes clusters: %v\n", err)
+		msg := fmt.Sprintf("Failed to get kubernetes clusters: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -323,7 +323,7 @@ func deleteAllK8sCluster(t *testing.T) {
 					}
 				}
 				if !found {
-					log.AuctaLogger.Info("K8s delete OK\n")
+					log.AuctaLogger.Info("K8s delete OK")
 					return
 				}
 				var percent int8
@@ -332,7 +332,7 @@ func deleteAllK8sCluster(t *testing.T) {
 					percent = task.Progress
 				}
 				if percent != last_percent {
-					log.AuctaLogger.Infof("delete status: %v  %v%%\n",
+					log.AuctaLogger.Infof("delete status: %v  %v%%",
 						cluster.DeployStatus, percent)
 					last_percent = percent
 				}

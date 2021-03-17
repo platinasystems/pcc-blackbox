@@ -33,7 +33,7 @@ func getAvailableNodes(t *testing.T) {
 			Env.setNodeId(node.Host, id)
 		}
 	} else {
-		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -55,7 +55,7 @@ func testNodeGroups(t *testing.T) {
 
 	err := Pcc.AddNodeGroup(&req)
 	if err != nil {
-		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -65,7 +65,7 @@ func testNodeGroups(t *testing.T) {
 
 	group, err := Pcc.GetNodeGroupId(id)
 	if err != nil {
-		msg := fmt.Sprintf("Error GetNodeGroupId: %v\n", err)
+		msg := fmt.Sprintf("Error GetNodeGroupId: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -77,7 +77,7 @@ func testNodeGroups(t *testing.T) {
 	group.Description = newDescription
 	err = Pcc.UpdateNodeGroup(&group)
 	if err != nil {
-		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v\n", err)
+		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -86,9 +86,9 @@ func testNodeGroups(t *testing.T) {
 
 	groups, err := Pcc.GetNodeGroups()
 	if err != nil {
-		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v\n", err)
+		msg := fmt.Sprintf("Error UpdateNodeGroupId: %v", err)
 		res.SetTestFailure(msg)
-		log.AuctaLogger.Errorf("Error GetNodeGroups: %v\n", err)
+		log.AuctaLogger.Errorf("Error GetNodeGroups: %v", err)
 		assert.FailNow()
 		return
 	}
@@ -102,7 +102,7 @@ func testNodeGroups(t *testing.T) {
 		}
 	}
 	if !found {
-		msg := "Error finding updated group\n"
+		msg := "Error finding updated group"
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -111,7 +111,7 @@ func testNodeGroups(t *testing.T) {
 
 	err = Pcc.DeleteNodeGroup(group.ID)
 	if err != nil {
-		msg := fmt.Sprintf("Error DeleteNodeGroup: %v\n", err)
+		msg := fmt.Sprintf("Error DeleteNodeGroup: %v", err)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 		return

@@ -32,7 +32,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	assert := test.Assert{t}
 	f, err := os.OpenFile("maas_pubkey", os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
-		msg := fmt.Sprintf("Unable to create file:\n%v\n", err)
+		msg := fmt.Sprintf("Unable to create file:%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -40,7 +40,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 	}
 	_, err = f.Write([]byte(PUB_KEY))
 	if err != nil {
-		msg := fmt.Sprintf("Unable to write on disk:\n%v\n", err)
+		msg := fmt.Sprintf("Unable to write on disk:%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -53,7 +53,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 		description := "Don't be evil"
 		exist, err := Pcc.CheckKeyLabelExists(label)
 		if err != nil {
-			msg := fmt.Sprintf("%v\n", err)
+			msg := fmt.Sprintf("%v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -62,7 +62,7 @@ func updateSecurityKey_MaaS(t *testing.T) {
 			_, err = Pcc.UploadKey("./maas_pubkey", label,
 				pcc.PUBLIC_KEY, description)
 			if err != nil {
-				msg := fmt.Sprintf("%v\n", err)
+				msg := fmt.Sprintf("%v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
@@ -87,7 +87,7 @@ func delAllKeys(t *testing.T) {
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to GetSecurityKeys: %v\n", err)
+		msg := fmt.Sprintf("Failed to GetSecurityKeys: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -97,7 +97,7 @@ func delAllKeys(t *testing.T) {
 	for i := 0; i < len(secKeys); i++ {
 		err = Pcc.DeleteKey(secKeys[i].Alias)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to delete key %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete key %v: %v",
 				secKeys[i].Alias, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)

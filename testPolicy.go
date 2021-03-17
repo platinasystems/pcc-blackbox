@@ -60,7 +60,7 @@ func testPreparePolicies(t *testing.T) {
 		node, err := Pcc.GetNode(nodeId)
 		checkError(t, res, err)
 		if *node.ScopeId != defaultRack.ID {
-			log.AuctaLogger.Infof("Assign the default rack scope to node %d:%s\n", nodeId, node.Name)
+			log.AuctaLogger.Infof("Assign the default rack scope to node %d:%s", nodeId, node.Name)
 			node.ScopeId = &defaultRack.ID
 			err = Pcc.UpdateNode(node)
 			checkError(t, res, err)
@@ -166,16 +166,16 @@ func addPolicy(t *testing.T, application *app.AppConfiguration, scopes *[]uint64
 	defer res.CheckTestAndSave(t, time.Now())
 
 	var err error
-	log.AuctaLogger.Infof("\n--- ADD POLICY")
+	log.AuctaLogger.Infof("--- ADD POLICY")
 	p := policy.Policy{Description: POLICY_BB_TEST, AppId: application.ID, Inputs: inputs}
-	log.AuctaLogger.Infof("Adding the policy %s with inputs: %v\n", p.Description, p.Inputs)
+	log.AuctaLogger.Infof("Adding the policy %s with inputs: %v", p.Description, p.Inputs)
 	if scopes != nil {
-		log.AuctaLogger.Infof("Associate the policy %s to the scopes: %v\n", p.Description, p.ScopeIDs)
+		log.AuctaLogger.Infof("Associate the policy %s to the scopes: %v", p.Description, p.ScopeIDs)
 		p.ScopeIDs = *scopes
 	}
 	p, err = Pcc.AddPolicy(&p) // ADD a policy
 	checkError(t, res, err)
-	log.AuctaLogger.Infof("Added the policy %d %s\n\n", p.Id, p.Description)
+	log.AuctaLogger.Infof("Added the policy %d %s", p.Id, p.Description)
 	return &p
 }
 
@@ -208,7 +208,7 @@ func testPolicies(t *testing.T) {
 	p.Id = p1.Id
 
 	log.AuctaLogger.Infof("--- UPDATE POLICY")
-	log.AuctaLogger.Infof("Updating the policy %v\n\n", p)
+	log.AuctaLogger.Infof("Updating the policy %v", p)
 	p2, err = Pcc.UpdatePolicy(p) // Update the policy
 	checkError(t, res, err)
 
@@ -224,7 +224,7 @@ func testPolicies(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
 	}
-	log.AuctaLogger.Infof("Policy %d %s was correctly updated\n", p.Id, p.Description)
+	log.AuctaLogger.Infof("Policy %d %s was correctly updated", p.Id, p.Description)
 }
 
 //
@@ -249,11 +249,11 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Add the scope
 	////
-	log.AuctaLogger.Info("\n--- ADD SCOPE")
-	log.AuctaLogger.Infof("Creating the scope %s\n", s.Description)
+	log.AuctaLogger.Info("--- ADD SCOPE")
+	log.AuctaLogger.Infof("Creating the scope %s", s.Description)
 	s, err = Pcc.AddScope(&s)
 	checkError(t, res, err)
-	log.AuctaLogger.Infof("Added the scope %d %s\n\n", s.ID, s.Description)
+	log.AuctaLogger.Infof("Added the scope %d %s", s.ID, s.Description)
 
 	////
 	// Add the policy for LLDPD
@@ -276,14 +276,14 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Assign the scope to the node
 	////
-	log.AuctaLogger.Info("\n--- ASSIGN SCOPE")
+	log.AuctaLogger.Info("--- ASSIGN SCOPE")
 	nodes, err = Pcc.GetNodeIds()
 	checkError(t, res, err)
 	nodeId := nodes[0]
 	node, err := Pcc.GetNode(nodeId)
 	checkError(t, res, err)
 	node.ScopeId = &s.ID
-	log.AuctaLogger.Infof("Assigning the scope %s to the node %s\n", s.Description, node.Name)
+	log.AuctaLogger.Infof("Assigning the scope %s to the node %s", s.Description, node.Name)
 	err = Pcc.UpdateNode(node)
 	checkError(t, res, err)
 
@@ -296,8 +296,8 @@ func testPolicyScope(t *testing.T) {
 	////
 	// Assign the default role to the node
 	////
-	log.AuctaLogger.Info("\n--- ASSIGN THE ROLE")
-	log.AuctaLogger.Infof("Removing all roles from the node %d\n", nodeId)
+	log.AuctaLogger.Info("--- ASSIGN THE ROLE")
+	log.AuctaLogger.Infof("Removing all roles from the node %d", nodeId)
 	node.RoleIds = []uint64{}
 	err = Pcc.UpdateNode(node)
 	checkError(t, res, err)

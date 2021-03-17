@@ -52,14 +52,14 @@ func updateBmcInfo(t *testing.T) {
 			addReq.Console = "ttyS1"
 
 			if err = Pcc.UpdateNode(&addReq); err != nil {
-				msg := fmt.Sprintf("Failed to update BMC info: %v\n", err)
+				msg := fmt.Sprintf("Failed to update BMC info: %v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
 				return
 			}
 		} else {
-			msg := fmt.Sprintf("Failed to get the key %v\n", err)
+			msg := fmt.Sprintf("Failed to get the key %v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -101,7 +101,7 @@ func reimageAllBrown(t *testing.T) {
 
 		fmt.Println(request)
 		if err = Pcc.MaasDeploy(request); err != nil {
-			msg := fmt.Sprintf("MaasDeploy failed: %v\n", err)
+			msg := fmt.Sprintf("MaasDeploy failed: %v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -114,27 +114,27 @@ func reimageAllBrown(t *testing.T) {
 			for i, id := range nodesList {
 				status, err := Pcc.GetProvisionStatus(id)
 				if err != nil {
-					log.AuctaLogger.Errorf("Node %v error: %v\n", id, err)
+					log.AuctaLogger.Errorf("Node %v error: %v", id, err)
 					fails++
 					continue
 				}
 				if strings.Contains(status, "Ready") {
-					log.AuctaLogger.Infof("Node %v has gone Ready\n", id)
+					log.AuctaLogger.Infof("Node %v has gone Ready", id)
 					nodesList = removeIndex(i, nodesList)
 					continue
 				} else if strings.Contains(status, "reimage failed") {
-					log.AuctaLogger.Errorf("Node %v has failed reimage\n", id)
+					log.AuctaLogger.Errorf("Node %v has failed reimage", id)
 					nodesList = removeIndex(i, nodesList)
 					fails++
 					continue
 				}
-				log.AuctaLogger.Infof("Node %v: %v\n", id, status)
+				log.AuctaLogger.Infof("Node %v: %v", id, status)
 			}
 			if len(nodesList) == 0 {
 				if fails == 0 {
-					log.AuctaLogger.Infof("Brownfield re-image done\n")
+					log.AuctaLogger.Infof("Brownfield re-image done")
 				} else {
-					msg := fmt.Sprintf("Brownfield re-image failed on %v nodes\n", fails)
+					msg := fmt.Sprintf("Brownfield re-image failed on %v nodes", fails)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
@@ -145,7 +145,7 @@ func reimageAllBrown(t *testing.T) {
 			time.Sleep(60 * time.Second)
 		}
 	} else {
-		msg := fmt.Sprintf("Failed to get the key %v\n", err)
+		msg := fmt.Sprintf("Failed to get the key %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()

@@ -30,7 +30,7 @@ func addInvaders(t *testing.T) {
 		envNodes = append(envNodes, Env.Invaders[i].node)
 	}
 
-	log.AuctaLogger.Infof("adding %d invaders\n", len(envNodes))
+	log.AuctaLogger.Infof("adding %d invaders", len(envNodes))
 	nodesAdded := addEnvNodes(t, envNodes)
 	checkAddNodesStatus(t, nodesAdded)
 }
@@ -47,7 +47,7 @@ func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
 	for _, n := range envNodes {
 		if NodebyHostIP[n.HostIp] != 0 {
 			if Nodes[NodebyHostIP[n.HostIp]] != nil {
-				log.AuctaLogger.Infof("the node %s was already added\n",
+				log.AuctaLogger.Infof("the node %s was already added",
 					n.HostIp)
 				continue
 			}
@@ -57,7 +57,7 @@ func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
 		newNode.Managed = new(bool)
 		*newNode.Managed = true
 
-		fmt.Printf("adding the node %s\n", newNode.Host)
+		log.AuctaLogger.Infof("adding the node %s", newNode.Host)
 		if err = Pcc.AddNode(newNode); err != nil {
 			err = fmt.Errorf("add node %s failed: %v", newNode.Host, err)
 			res.SetTestFailure(err.Error())
@@ -68,7 +68,7 @@ func addEnvNodes(t *testing.T, envNodes []node) (nodesAdded []uint64) {
 		Nodes[newNode.Id] = newNode
 		NodebyHostIP[n.HostIp] = newNode.Id
 		nodesAdded = append(nodesAdded, newNode.Id)
-		log.AuctaLogger.Infof("Add id %d to Nodes. Mapping hostIP %v to id %d\n",
+		log.AuctaLogger.Infof("Add id %d to Nodes. Mapping hostIP %v to id %d",
 			newNode.Id, newNode.Host, newNode.Id)
 	}
 	return
@@ -88,16 +88,16 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 	//Check Agent and collector installation function.
 	// FIXME add a channel for stopping on error
 	waitInstallation := func(timeout time.Duration, app string, nodeId uint64, from *time.Time) {
-		log.AuctaLogger.Infof("Checking %s installation for nodeId:%v from %s \n",
+		log.AuctaLogger.Infof("Checking %s installation for nodeId:%v from %s ",
 			app, nodeId, from.String())
 		check, waitErr := Pcc.WaitForInstallation(nodeId, timeout,
 			app, "", from)
 		if waitErr != nil {
-			log.AuctaLogger.Errorf("\n%v\n", waitErr)
+			log.AuctaLogger.Errorf("%v", waitErr)
 			err = waitErr
 		}
 		if check {
-			log.AuctaLogger.Infof("%s correctly installed on nodeId:%v\n",
+			log.AuctaLogger.Infof("%s correctly installed on nodeId:%v",
 				app, nodeId)
 		}
 	}
@@ -141,7 +141,7 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 			if ignore == nil {
 				switch connection { // FIXME use models
 				case "online":
-					log.AuctaLogger.Infof("the node %d:%s is %v\n",
+					log.AuctaLogger.Infof("the node %d:%s is %v",
 						id, host, connection)
 					return
 				case "", "NoRunningService":
@@ -157,14 +157,14 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 				if previousConnection != "" &&
 					previousConnection != connection {
 					log.AuctaLogger.Infof("node %d:%s connection "+
-						"status switched from %s to %s\n",
+						"status switched from %s to %s",
 						id, host, previousConnection,
 						connection)
 				}
 				previousConnection = connection
 			} else {
 				log.AuctaLogger.Errorf("error getting the connection "+
-					"status for node %d:%s %v\n",
+					"status for node %d:%s %v",
 					id, host, err)
 			}
 

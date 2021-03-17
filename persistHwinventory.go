@@ -39,7 +39,7 @@ func pxebootNode(t *testing.T) {
 	if len(Env.Servers) != 0 {
 		pxeboot, err = exec.Command("/bin/bash", "-c", "for cmd in 'chassis bootdev pxe' 'chassis power cycle'; do ipmitool -I lanplus -H "+Env.Servers[0].BMCIp+" -U ADMIN -P ADMIN $cmd; done").Output()
 		if err != nil {
-			msg := fmt.Sprintf("%v\n%v\n", string(pxeboot), err)
+			msg := fmt.Sprintf("%v%v", string(pxeboot), err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -58,7 +58,7 @@ func checkNodeAdd(t *testing.T) {
 	from := time.Now()
 	err := verifyAddNode(from, "nodeAdd")
 	if err != nil {
-		msg := fmt.Sprintf("Node additon failed..ERROR:%v\n", err)
+		msg := fmt.Sprintf("Node additon failed..ERROR:%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -81,7 +81,7 @@ func checkHardWareInventory(t *testing.T) {
 
 	hwInventory, err = Pcc.GetHardwareInventory()
 	if err != nil {
-		msg := fmt.Sprintf("GetHardwareInventory failed: %v\n", err)
+		msg := fmt.Sprintf("GetHardwareInventory failed: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -122,7 +122,7 @@ func checkStorage(t *testing.T) {
 
 	storage, err = Pcc.GetStorageNode(PxeBootSelectedNodeId)
 	if err != nil {
-		msg := fmt.Sprintf("GetStorageNode failed: %v\n", err)
+		msg := fmt.Sprintf("GetStorageNode failed: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -156,7 +156,7 @@ func powerCycleNode(t *testing.T) {
 	if len(Env.Servers) != 0 {
 		powerCycle, err = exec.Command("/bin/bash", "-c", "ipmitool -I lanplus -H "+Env.Servers[0].BMCIp+" -U ADMIN -P ADMIN chassis power cycle").Output()
 		if err != nil {
-			msg := fmt.Sprintf("power cycle failed %v\n%v\n", string(powerCycle), err)
+			msg := fmt.Sprintf("power cycle failed %v%v", string(powerCycle), err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -188,7 +188,7 @@ func verifyAddNode(from time.Time, action string) (err error) {
 	}()
 	if !s.isError {
 		if strings.Contains(s.msg, PXEBOOT_NODE_ADD_NOTIFICATION) {
-			fmt.Println("Node is added succesfully..\n", s.msg)
+			fmt.Println("Node is added succesfully..", s.msg)
 		} else if strings.Contains(s.msg, PXEBOOT_NODE_ADD_FAILED_NOTIFICATION) {
 			err = fmt.Errorf("%v", s.msg)
 		}

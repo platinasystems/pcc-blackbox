@@ -59,7 +59,7 @@ func addAuthProfile(t *testing.T) {
 
 	exist, certificate, err := Pcc.FindCertificate(LDAP_CERT_FILENAME)
 	if err != nil {
-		msg := fmt.Sprintf("Get certificate %s failed\n%v\n",
+		msg := fmt.Sprintf("Get certificate %s failed%v",
 			LDAP_CERT_FILENAME, err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
@@ -91,7 +91,7 @@ func addAuthProfile(t *testing.T) {
 
 	err = Pcc.AddAuthProfile(authProfile)
 	if err != nil {
-		msg := fmt.Sprintf("Error: %v\n", err)
+		msg := fmt.Sprintf("Error: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -115,7 +115,7 @@ func delAllProfiles(t *testing.T) {
 
 	authProfiles, err = Pcc.GetAuthProfiles()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get auth profiles: %v\n", err)
+		msg := fmt.Sprintf("Failed to get auth profiles: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -124,10 +124,10 @@ func delAllProfiles(t *testing.T) {
 
 	for _, aP := range authProfiles {
 		id = aP.ID
-		log.AuctaLogger.Infof("Deleting auth profile %v\n", aP.Name)
+		log.AuctaLogger.Infof("Deleting auth profile %v", aP.Name)
 		err = Pcc.DelAuthProfile(id)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to delete auth profile %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete auth profile %v: %v",
 				id, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)

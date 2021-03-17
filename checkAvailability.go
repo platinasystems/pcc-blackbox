@@ -49,7 +49,7 @@ func addInaccessibleNode(t *testing.T) {
 
 // add a node and wait for the connection status
 func checkNodeConnectionStatus(status string, host string) (err error) {
-	log.AuctaLogger.Info(fmt.Sprintf("\nAVAILABILITY: add %s node", status))
+	log.AuctaLogger.Info(fmt.Sprintf("AVAILABILITY: add %s node", status))
 	var node *pcc.NodeDetailed
 
 	node = &pcc.NodeDetailed{}
@@ -60,12 +60,12 @@ func checkNodeConnectionStatus(status string, host string) (err error) {
 			Pcc.DeleteNode(node.Id)
 		}()
 
-		log.AuctaLogger.Infof("node [%s] added with id [%d]. Waiting for connection status [%s]\n", node.Host, node.Id, status)
+		log.AuctaLogger.Infof("node [%s] added with id [%d]. Waiting for connection status [%s]", node.Host, node.Id, status)
 		for i := 1; i <= 20; i++ { // wait for the status
 			time.Sleep(time.Second * time.Duration(10))
 			if node, err = Pcc.GetNode(node.Id); err == nil && node.NodeStatus != nil {
 				connectionStatus := node.NodeStatus.ConnectionStatus
-				log.AuctaLogger.Infof("Connection status for node %s is %s\n", host, connectionStatus)
+				log.AuctaLogger.Infof("Connection status for node %s is %s", host, connectionStatus)
 				if strings.Compare(strings.ToLower(connectionStatus), status) == 0 {
 					return
 				}
@@ -86,7 +86,7 @@ func checkAgentAndCollectorRestore(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Infof("\nAVAILABILITY: checking the agent/collector restore")
+	log.AuctaLogger.Infof("AVAILABILITY: checking the agent/collector restore")
 	var wg sync.WaitGroup
 
 	if nodes, err := Pcc.GetNodes(); err == nil {
@@ -131,14 +131,14 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 	)
 	execPath = fmt.Sprintf("/opt/platina/pcc/bin/%v", path)
 
-	log.AuctaLogger.Infof("Stopping and removing the service %s from node %d %s %s\n",
+	log.AuctaLogger.Infof("Stopping and removing the service %s from node %d %s %s",
 		service, node.Id, node.Name, node.Host)
 	cmd = fmt.Sprintf("sudo rm -f %s && sudo kill -9 `pidof %s`",
 		execPath, path)
 	if _, _, err = Pcc.SSHHandler().Run(node.Host, cmd); err != nil {
 		return
 	}
-	log.AuctaLogger.Infof("The %s:%s was correctly killed & removed from node %d:%s\n",
+	log.AuctaLogger.Infof("The %s:%s was correctly killed & removed from node %d:%s",
 		service, path, node.Id, node.Name)
 
 	time.Sleep(10 * time.Second)
@@ -149,7 +149,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 	for !done {
 		select {
 		case <-timeout:
-			err = fmt.Errorf("Timed out waiting for %v\n",
+			err = fmt.Errorf("Timed out waiting for %v",
 				service)
 			return
 		case <-tick:
@@ -158,7 +158,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 				return
 			}
 			if stdout == "OK" {
-				log.AuctaLogger.Infof("Executable found: %s\n", path)
+				log.AuctaLogger.Infof("Executable found: %s", path)
 				done = true
 			}
 		}
@@ -167,7 +167,7 @@ func checkRestore(service string, path string, node *pcc.NodeDetailed) (err erro
 	cmd = fmt.Sprintf("pidof %s", path)
 	stdout, _, err = Pcc.SSHHandler().Run(node.Host, cmd)
 	if err != nil {
-		err = fmt.Errorf("Could not find pid of %s\n", path)
+		err = fmt.Errorf("Could not find pid of %s", path)
 		return
 	}
 	log.AuctaLogger.Infof("pid of %s found %s", path, stdout)

@@ -47,7 +47,7 @@ func configNetworkInterfaces(t *testing.T) {
 		id := NodebyHostIP[node.HostIp]
 		ifaces, err = Pcc.GetIfacesByNodeId(id)
 		if err != nil {
-			msg := fmt.Sprintf("Error retrieving node %s id[%d] interfaces\n %v", node.HostIp, id, err)
+			msg := fmt.Sprintf("Error retrieving node %s id[%d] interfaces %v", node.HostIp, id, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -63,7 +63,7 @@ func configNetworkInterfaces(t *testing.T) {
 				}
 			}
 
-			log.AuctaLogger.Infof("SKIP interface %v for node %d\n", iface, id)
+			log.AuctaLogger.Infof("SKIP interface %v for node %d", iface, id)
 		}
 		nodeIntfMap[id] = nodeIntfs
 		configNodeInterfaces(t, sever, id, node.HostIp, node.NetInterfaces, ifaces)
@@ -102,7 +102,7 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 			ifaceRequest.Speed = json.Number(configIface.Speed)
 		}
 	default:
-		log.AuctaLogger.Errorf("Error: invalid autoneg [%v] using ON\n",
+		log.AuctaLogger.Errorf("Error: invalid autoneg [%v] using ON",
 			configIface.Autoneg)
 		ifaceRequest.Autoneg = pcc.INTERFACE_AUTONEG_ON
 	}
@@ -132,7 +132,7 @@ func prepIfaceRequest(nodeId uint64, iface *pcc.InterfaceDetail, configIface net
 	case "none", "", "off":
 		fec = pcc.INTERFACE_FEC_NONE
 	default:
-		log.AuctaLogger.Errorf("Error: invalid fec [%v] using none\n",
+		log.AuctaLogger.Errorf("Error: invalid fec [%v] using none",
 			configIface.Fec)
 		fec = pcc.INTERFACE_FEC_NONE
 	}
@@ -172,12 +172,12 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 		ifaceRequest = prepIfaceRequest(nodeId, iface,
 			serverInterfaces[j])
 
-		log.AuctaLogger.Infof("Configuring node %v interface %v %v\n", nodeId,
+		log.AuctaLogger.Infof("Configuring node %v interface %v %v", nodeId,
 			iface.Interface.Name, ifaceRequest)
 
 		if err := Pcc.SetIface(ifaceRequest); err != nil {
 			msg := fmt.Sprintf("Error setting interface %v for node "+
-				"%v id[%v]: %v\n", ifaceRequest, HostIp,
+				"%v id[%v]: %v", ifaceRequest, HostIp,
 				nodeId, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
@@ -186,9 +186,9 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 		}
 	}
 
-	log.AuctaLogger.Infof("Apply interface changes for node %d\n", nodeId)
+	log.AuctaLogger.Infof("Apply interface changes for node %d", nodeId)
 	if err = Pcc.ApplyIface(nodeId); err != nil {
-		msg := fmt.Sprintf("Interface apply failed: %v\n", err)
+		msg := fmt.Sprintf("Interface apply failed: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -206,16 +206,16 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 
 	err = fmt.Errorf("config mismatch for %v", intfReq.Name)
 
-	log.AuctaLogger.Infof("  Validating config for %v\n", intfReq.Name)
+	log.AuctaLogger.Infof("  Validating config for %v", intfReq.Name)
 
 	// chop off ",<metric>"
 	rGateway := strings.Split(intfReq.Gateway, ",")
 	cGateway := strings.Split(iface.Interface.Gateway, ",")
 	if rGateway[0] != cGateway[0] {
 		if rGateway[0] == "" && cGateway[0] != "" {
-			log.AuctaLogger.Info("    skipping configured gateway\n")
+			log.AuctaLogger.Info("    skipping configured gateway")
 		} else {
-			log.AuctaLogger.Errorf("    gateway mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    gateway mismatch [%v] [%v]",
 				intfReq.Gateway, iface.Interface.Gateway)
 			return
 		}
@@ -223,57 +223,57 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	switch intfReq.Autoneg {
 	case pcc.INTERFACE_AUTONEG_ON:
 		if iface.Interface.Autoneg != true {
-			log.AuctaLogger.Errorf("    autoneg mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    autoneg mismatch [%v] [%v]",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
 	case pcc.INTERFACE_AUTONEG_OFF:
 		if iface.Interface.Autoneg != false {
-			log.AuctaLogger.Errorf("    autoneg mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    autoneg mismatch [%v] [%v]",
 				intfReq.Autoneg, iface.Interface.Autoneg)
 			return
 		}
 		if intfReq.AdminStatus == pcc.INTERFACE_STATUS_UP {
 			if intfReq.Speed != json.Number(iface.Interface.Speed) {
-				log.AuctaLogger.Errorf("    speed mismatch [%v] [%v]\n",
+				log.AuctaLogger.Errorf("    speed mismatch [%v] [%v]",
 					intfReq.Speed, iface.Interface.Speed)
 				return
 			}
 		}
 	default:
-		log.AuctaLogger.Errorf("Error: unexpected autoneg [%v]\n", intfReq.Autoneg)
+		log.AuctaLogger.Errorf("Error: unexpected autoneg [%v]", intfReq.Autoneg)
 		return
 	}
 
 	mtu := fmt.Sprintf("%v", iface.Interface.Mtu)
 	if intfReq.Mtu != json.Number(mtu) {
-		log.AuctaLogger.Errorf("    mtu mismatch [%v] [%v]\n", intfReq.Mtu, mtu)
+		log.AuctaLogger.Errorf("    mtu mismatch [%v] [%v]", intfReq.Mtu, mtu)
 		return
 	}
 	if iface.Interface.AdminStatus != "" {
 		if intfReq.AdminStatus != iface.Interface.AdminStatus {
-			log.AuctaLogger.Errorf("    adminStatus mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    adminStatus mismatch [%v] [%v]",
 				intfReq.AdminStatus, iface.Interface.AdminStatus)
 			return
 		}
 	}
 	if iface.Interface.IsManagement {
 		if intfReq.IsManagement != "true" {
-			log.AuctaLogger.Errorf("    IsManagement mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    IsManagement mismatch [%v] [%v]",
 				intfReq.IsManagement,
 				iface.Interface.IsManagement)
 			return
 		}
 	} else {
 		if intfReq.IsManagement != "false" {
-			log.AuctaLogger.Errorf("    IsManagement mismatch [%v] [%v]\n",
+			log.AuctaLogger.Errorf("    IsManagement mismatch [%v] [%v]",
 				intfReq.IsManagement,
 				iface.Interface.IsManagement)
 			return
 		}
 	}
 	if intfReq.ManagedByPcc != iface.Interface.ManagedByPcc {
-		log.AuctaLogger.Errorf("    ManagedByPcc mismatch [%v] [%v]\n",
+		log.AuctaLogger.Errorf("    ManagedByPcc mismatch [%v] [%v]",
 			intfReq.ManagedByPcc, iface.Interface.ManagedByPcc)
 		return
 	}
@@ -290,7 +290,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	if len(desireIpMap) != 0 {
 		log.AuctaLogger.Errorf("    Ipv4 mismatch ")
 		for k, _ := range desireIpMap {
-			log.AuctaLogger.Errorf("  %v\n", k)
+			log.AuctaLogger.Errorf("  %v", k)
 		}
 		return
 	}
@@ -313,7 +313,7 @@ func validateIfaceConfig(intfReq pcc.InterfaceRequest) (err error) {
 	if len(desire6IpMap) != 0 {
 		log.AuctaLogger.Errorf("    Ipv6 mismatch ")
 		for k, _ := range desire6IpMap {
-			log.AuctaLogger.Infof("  %v\n", k)
+			log.AuctaLogger.Infof("  %v", k)
 		}
 		return
 	}
@@ -330,7 +330,7 @@ func serverConfigLoop(id uint64, serverIntfs []netInterface) (done bool, err err
 		return
 	}
 
-	log.AuctaLogger.Infof("Validating config on server %v\n", id)
+	log.AuctaLogger.Infof("Validating config on server %v", id)
 
 	var intfsToCheck = make(map[string]netInterface, len(serverIntfs))
 	for _, intf := range serverIntfs {
@@ -398,7 +398,7 @@ func verifyNetworkConfig(t *testing.T) {
 	loopLimit := 50
 	for !allDone {
 		loop++
-		log.AuctaLogger.Info("Interface config validation, loop %v\n", loop)
+		log.AuctaLogger.Info("Interface config validation, loop %v", loop)
 		for _, node := range Nodes {
 			var (
 				done bool
@@ -410,7 +410,7 @@ func verifyNetworkConfig(t *testing.T) {
 			}
 			done, err = serverConfigLoop(node.Id, ifaces)
 			if err != nil {
-				msg := fmt.Sprintf("Failed serverConfigLoop: %v\n", err)
+				msg := fmt.Sprintf("Failed serverConfigLoop: %v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
@@ -426,7 +426,7 @@ func verifyNetworkConfig(t *testing.T) {
 			time.Sleep(10 * time.Second)
 		}
 		if loop >= loopLimit {
-			msg := "Timed out verifying intferface config\n"
+			msg := "Timed out verifying intferface config"
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -457,7 +457,7 @@ func verifyNetworkInterfaces(t *testing.T) {
 			for id, _ := range nodesToCheck {
 				intfs, found := nodeIntfMap[id]
 				if !found {
-					msg := fmt.Sprintf("map lookup failed %v\n", id)
+					msg := fmt.Sprintf("map lookup failed %v", id)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
@@ -471,13 +471,13 @@ func verifyNetworkInterfaces(t *testing.T) {
 					state := intf.Interface.IntfState
 					if state != pcc.Ready {
 						log.AuctaLogger.Errorf("failed to update"+
-							" %v %v %v\n", id,
+							" %v %v %v", id,
 							intf.Interface.Name,
 							state)
 					}
 				}
 			}
-			msg := "time out updating interfaces\n"
+			msg := "time out updating interfaces"
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -509,7 +509,7 @@ func verifyNetworkInterfaces(t *testing.T) {
 					case pcc.Offline:
 					default:
 						msg := fmt.Sprintf("unexpected "+
-							"IntfState %v\n",
+							"IntfState %v",
 							state)
 						res.SetTestFailure(msg)
 						log.AuctaLogger.Error(msg)
@@ -519,15 +519,15 @@ func verifyNetworkInterfaces(t *testing.T) {
 				}
 				if intf_count == intf_up {
 					log.AuctaLogger.Infof("Node %v interfaces "+
-						"updated\n", id)
+						"updated", id)
 					delete(nodesToCheck, id)
 				} else {
 					// work around for PCC-3012
-					log.AuctaLogger.Infof("Pcc.ApplyIface(%d)\n", id)
+					log.AuctaLogger.Infof("Pcc.ApplyIface(%d)", id)
 					err := Pcc.ApplyIface(id)
 					if err != nil {
 						msg := fmt.Sprintf("Interface "+
-							"apply failed: %v\n",
+							"apply failed: %v",
 							err)
 						res.SetTestFailure(msg)
 						log.AuctaLogger.Error(msg)
@@ -566,7 +566,7 @@ func verifyNetworkUp(t *testing.T) {
 			for id, _ := range nodesToCheck {
 				intfs, found := nodeIntfMap[id]
 				if !found {
-					msg := fmt.Sprintf("map lookup failed %v\n", id)
+					msg := fmt.Sprintf("map lookup failed %v", id)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
@@ -587,11 +587,11 @@ func verifyNetworkUp(t *testing.T) {
 					carrier := intf.Interface.CarrierStatus
 					admin := intf.Interface.AdminStatus
 					log.AuctaLogger.Infof("  %v %v admin %v carrier "+
-						"%v\n",
+						"%v",
 						id, ifName, admin, carrier)
 				}
 			}
-			msg := "time out updating interfaces\n"
+			msg := "time out updating interfaces"
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
@@ -626,10 +626,10 @@ func verifyNetworkUp(t *testing.T) {
 					admin := intf.Interface.AdminStatus
 					if admin == pcc.INTERFACE_STATUS_DOWN {
 						log.AuctaLogger.Errorf("  %v %v admin "+
-							"down\n", id, ifName)
+							"down", id, ifName)
 					} else {
 						log.AuctaLogger.Infof("  %v %v carrier "+
-							"%v\n", id, ifName,
+							"%v", id, ifName,
 							carrier)
 						if carrier == pcc.INTERFACE_STATUS_UP {
 							intf_up++
@@ -639,7 +639,7 @@ func verifyNetworkUp(t *testing.T) {
 				}
 				if intf_up+admin_down == intf_count {
 					log.AuctaLogger.Infof("Node %v interfaces "+
-						"all UP\n", id)
+						"all UP", id)
 					delete(nodesToCheck, id)
 				}
 			}

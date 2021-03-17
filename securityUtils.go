@@ -16,13 +16,13 @@ func CreateFileAndUpload(fileName string, key string, fileType string, keyId uin
 	var f *os.File
 	f, err = os.OpenFile(fileName, os.O_CREATE|os.O_RDWR, 0600)
 	if err != nil {
-		err = fmt.Errorf("Unable to create file:\n%v\n", err)
+		err = fmt.Errorf("Unable to create file:%v", err)
 		return
 	}
 	defer f.Close()
 	_, err = f.Write([]byte(key))
 	if err != nil {
-		err = fmt.Errorf("Unable to write on disk:\n%v\n", err)
+		err = fmt.Errorf("Unable to write on disk:%v", err)
 		return
 	}
 
@@ -77,7 +77,7 @@ func delAllCerts(t *testing.T) {
 
 	certificates, err = Pcc.GetCertificates()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get certificates: %v\n", err)
+		msg := fmt.Sprintf("Failed to get certificates: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -86,10 +86,10 @@ func delAllCerts(t *testing.T) {
 
 	for _, c := range certificates {
 		id = c.Id
-		log.AuctaLogger.Infof("Deleting certificate %v\n", c.Alias)
+		log.AuctaLogger.Infof("Deleting certificate %v", c.Alias)
 		err = Pcc.DeleteCertificate(id)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to delete Certificate %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete Certificate %v: %v",
 				id, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)

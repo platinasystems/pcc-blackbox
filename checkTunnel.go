@@ -17,7 +17,7 @@ func checkInvaderTunnels(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the invaders")
+	log.AuctaLogger.Info("TUNNEL: checking the tunnel addresses for the invaders")
 
 	if nodes, err := Pcc.GetInvaders(); err == nil {
 
@@ -58,7 +58,7 @@ func checkServerTunnels(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nTUNNEL: checking the tunnel addresses for the servers")
+	log.AuctaLogger.Info("TUNNEL: checking the tunnel addresses for the servers")
 
 	if invaders, err := Pcc.GetInvadersFromDB(); err == nil {
 		if nodes, err := Pcc.GetServers(); err == nil {
@@ -155,7 +155,7 @@ func checkTunnelConnection(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nTUNNEL: checking invaders connection")
+	log.AuctaLogger.Info("TUNNEL: checking invaders connection")
 
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {
@@ -180,12 +180,12 @@ func tunnelPing(node *pcc.NodeDetailed, logs bool) error {
 	nodeId := node.Id
 	if stdout, stderr, err := Pcc.SSHHandler().Run(node.Host, fmt.Sprintf("ping -c 3 %s", node.TunnelServerAddress)); err == nil {
 		if logs {
-			log.AuctaLogger.Info(fmt.Sprintf("The node %d:%s is pinging the address %v\n%s", nodeId, node.Name, node.TunnelServerAddress, stdout))
+			log.AuctaLogger.Info(fmt.Sprintf("The node %d:%s is pinging the address %v%s", nodeId, node.Name, node.TunnelServerAddress, stdout))
 		}
 		return nil
 	} else {
 		if logs {
-			log.AuctaLogger.Error(fmt.Sprintf("Error pinging from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr))
+			log.AuctaLogger.Error(fmt.Sprintf("Error pinging from the node %d:%s %v%s", nodeId, node.Name, err, stderr))
 		}
 		return err
 	}
@@ -197,7 +197,7 @@ func checkTunnelForwardingRules(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nTUNNEL: checking forwarding rules")
+	log.AuctaLogger.Info("TUNNEL: checking forwarding rules")
 
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {
@@ -215,13 +215,13 @@ func checkTunnelForwardingRules(t *testing.T) {
 							continue loopPort
 						}
 					}
-					msg := fmt.Sprintf("Unable to find the forward rule for port %s on invader %d:%s. \nRules are:%s", port, nodeId, node.Name, stdout)
+					msg := fmt.Sprintf("Unable to find the forward rule for port %s on invader %d:%s. Rules are:%s", port, nodeId, node.Name, stdout)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					t.FailNow()
 				}
 			} else {
-				msg := fmt.Sprintf("Error getting iptables tule from the node %d:%s %v\n%s", nodeId, node.Name, err, stderr)
+				msg := fmt.Sprintf("Error getting iptables tule from the node %d:%s %v%s", nodeId, node.Name, err, stderr)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
@@ -241,7 +241,7 @@ func checkTunnelRestore(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nTUNNEL: checking the restore for the invaders")
+	log.AuctaLogger.Info("TUNNEL: checking the restore for the invaders")
 
 	if nodes, err := Pcc.GetInvadersFromDB(); err == nil {
 		for i := range *nodes {

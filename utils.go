@@ -132,7 +132,7 @@ func CheckNodes() (err error) {
 			return
 		}
 	} else {
-		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v", err)
 		err = errors.New(msg)
 		return
 	}
@@ -156,7 +156,7 @@ func CheckNumNodes(numNodes int) (err error) {
 		}
 
 	} else {
-		msg := fmt.Sprintf("Error getting nodes: %v\n", err)
+		msg := fmt.Sprintf("Error getting nodes: %v", err)
 		err = errors.New(msg)
 		return
 	}

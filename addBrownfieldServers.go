@@ -25,7 +25,7 @@ func addServer(t *testing.T) {
 		envNodes = append(envNodes, Env.Servers[i].node)
 	}
 
-	log.AuctaLogger.Infof("adding %d servers\n", len(envNodes))
+	log.AuctaLogger.Infof("adding %d servers", len(envNodes))
 	nodesAdded := addEnvNodes(t, envNodes)
 	checkAddNodesStatus(t, nodesAdded)
 }

@@ -17,7 +17,7 @@ func testKMKeys(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\n\nKEYS:\n")
+	log.AuctaLogger.Info("KEYS:")
 	var (
 		key pcc.SecurityKey
 		err error
@@ -51,7 +51,7 @@ func testKMKeys(t *testing.T) {
 		log.AuctaLogger.Infof("deleting the key", alias)
 		err = Pcc.DeleteKey(alias) // delete at the end
 		if err != nil {
-			log.AuctaLogger.Infof("Delete key [%v] failed: %v\n", alias, err)
+			log.AuctaLogger.Infof("Delete key [%v] failed: %v", alias, err)
 			msg := fmt.Sprintf("%v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
@@ -91,7 +91,7 @@ cont:
 	log.AuctaLogger.Infof("getting the key", alias)
 	if key, err = Pcc.GetSecurityKey(alias); err == nil {
 		if alias != key.Alias || description != key.Description || key.Protect {
-			msg := fmt.Sprintf("the describe returned some different values %v\n", key)
+			msg := fmt.Sprintf("the describe returned some different values %v", key)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
@@ -126,7 +126,7 @@ func testKMCertificates(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\n\nCERTIFICATES:\n")
+	log.AuctaLogger.Info("CERTIFICATES:")
 	var (
 		err  error
 		cert *pcc.Certificate
@@ -140,7 +140,7 @@ func testKMCertificates(t *testing.T) {
 			if c.Alias == alias {
 				err = Pcc.DeleteCertificate(c.Id)
 				if err != nil {
-					log.AuctaLogger.Infof("Delete cert failed: %v\n",
+					log.AuctaLogger.Infof("Delete cert failed: %v",
 						err)
 				}
 				break
@@ -197,7 +197,7 @@ CONT:
 			log.AuctaLogger.Infof("deleting the certificate", cert.Id, cert.Alias)
 			err = Pcc.DeleteCertificate(cert.Id) // delete at the end
 			if err != nil {
-				msg := fmt.Sprintf("Delete cert failed: %v\n", err)
+				msg := fmt.Sprintf("Delete cert failed: %v", err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
@@ -207,7 +207,7 @@ CONT:
 
 	if c, err := Pcc.GetCertificate(cert.Id); err == nil {
 		if c.Alias != alias || c.Protect || c.Description != description {
-			msg := fmt.Sprintf("the describe returned some different values %v , %v\n", c, cert)
+			msg := fmt.Sprintf("the describe returned some different values %v , %v", c, cert)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
@@ -240,7 +240,7 @@ func readFileAndCompare(t *testing.T, content string, fileName string) {
 		defer file.Close()
 		if b, err := ioutil.ReadAll(file); err == nil {
 			if string(b) != content {
-				msg := fmt.Sprintf("the downloaded file is different from %s\n", fileName)
+				msg := fmt.Sprintf("the downloaded file is different from %s", fileName)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()

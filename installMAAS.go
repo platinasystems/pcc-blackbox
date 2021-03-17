@@ -61,10 +61,10 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 		check        bool
 		wg           sync.WaitGroup
 	)
-	log.AuctaLogger.Infof("installing %s on nodes:%v\n", app, nodes)
+	log.AuctaLogger.Infof("installing %s on nodes:%v", app, nodes)
 	if installed, nodesToCheck, err = Pcc.AddRolesToNodes(nodes, roles); err == nil {
 		if len(installed) > 0 {
-			log.AuctaLogger.Warnf("%s already installed on nodes %d\n", app, installed)
+			log.AuctaLogger.Warnf("%s already installed on nodes %d", app, installed)
 		}
 		if n := len(nodesToCheck); n > 0 {
 			if timeoutSec <= 0 {
@@ -75,14 +75,14 @@ func setRolesToNodesAndCheck(roles []uint64, app string, nodes []uint64, timeout
 			wg.Add(n)
 			checkInstall := func(id uint64) {
 				defer wg.Done()
-				log.AuctaLogger.Infof("Checking %q installation for node: %d\n", app, id)
+				log.AuctaLogger.Infof("Checking %q installation for node: %d", app, id)
 
 				start := time.Now()
 				if check, err = Pcc.WaitForInstallation(id, timeout, app, "", &start); err != nil {
 					err = fmt.Errorf("failed checking %s on %v: %v", app, id, err)
 					return
 				} else if check {
-					log.AuctaLogger.Infof("%s correctly installed on nodeId:%v\n", app, id)
+					log.AuctaLogger.Infof("%s correctly installed on nodeId:%v", app, id)
 				}
 			}
 

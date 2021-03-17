@@ -17,14 +17,14 @@ func addGreenfieldServers(t *testing.T) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nGREENFIELD: executing the pxeboot for the servers")
+	log.AuctaLogger.Info("GREENFIELD: executing the pxeboot for the servers")
 	var (
 		wg        sync.WaitGroup
 		mainError error
 	)
 
 	if err := Pcc.DeleteServers(true); err != nil { // wait for the deletion
-		msg := fmt.Sprintf("%v\n", err)
+		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
@@ -32,17 +32,17 @@ func addGreenfieldServers(t *testing.T) {
 
 	invaders, err := Pcc.GetInvaders()
 	if err != nil {
-		msg := fmt.Sprintf("%v\n", err)
+		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
 		return
 	}
 	for _, i := range *invaders {
-		log.AuctaLogger.Infof("Update MaaS for node [%v]\n", i.Id)
+		log.AuctaLogger.Infof("Update MaaS for node [%v]", i.Id)
 		err = Pcc.UpdateMaas(&i)
 		if err != nil {
-			msg := fmt.Sprintf("%v\n", err)
+			msg := fmt.Sprintf("%v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
@@ -93,7 +93,7 @@ func addGreenfieldServers(t *testing.T) {
 	wg.Wait()
 
 	if mainError != nil {
-		msg := fmt.Sprintf("%v\n", mainError)
+		msg := fmt.Sprintf("%v", mainError)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()

@@ -51,7 +51,7 @@ func validateDeleteNodes(t *testing.T) {
 				delete(Nodes, k)
 			}
 		} else {
-			log.AuctaLogger.Errorf("error getting nodes %v\n", err)
+			log.AuctaLogger.Errorf("error getting nodes %v", err)
 		}
 		if len(Nodes) == 0 {
 			log.AuctaLogger.Infof("all nodes have been deleted")
@@ -60,10 +60,10 @@ func validateDeleteNodes(t *testing.T) {
 			time.Sleep(5 * time.Second)
 		}
 		if time.Since(start) > timeout {
-			log.AuctaLogger.Infof("delAllNodes timeout\n")
+			log.AuctaLogger.Infof("delAllNodes timeout")
 			for _, node := range Nodes {
 				msg := fmt.Sprintf("node %v provisionStatus = %v was not "+
-					"deleted\n", node.Name, node.ProvisionStatus)
+					"deleted", node.Name, node.ProvisionStatus)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()

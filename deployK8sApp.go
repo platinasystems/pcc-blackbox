@@ -35,7 +35,7 @@ func testK8sApp(t *testing.T) {
 				} else {
 					cluster, err := appConfig.PccClient.GetKubernetesClusterByName(k8sname)
 					if err != nil || cluster == nil {
-						log.AuctaLogger.Errorf("Failed to get K8s Cluster[%v] Object\n", k8sname)
+						log.AuctaLogger.Errorf("Failed to get K8s Cluster[%v] Object", k8sname)
 						return
 					}
 					appConfig.K8sCluster = cluster
@@ -88,7 +88,7 @@ func testK8sApp(t *testing.T) {
 				log.AuctaLogger.Infof("Delete K8s Cluster test is skipped")
 			}
 		} else {
-			log.AuctaLogger.Infof("No K8s cluster found to perform further tests\n")
+			log.AuctaLogger.Infof("No K8s cluster found to perform further tests")
 			return
 		}
 	}
@@ -266,7 +266,7 @@ func testUndeployK8sApp(t *testing.T) {
 }
 
 func undeployK8sApp(appConfig *pcc.K8sAppConfiguration) (err error) {
-	log.AuctaLogger.Infof("K8s Apps undeploying on [%v] cluster  is starting\n", appConfig.K8sClusterName)
+	log.AuctaLogger.Infof("K8s Apps undeploying on [%v] cluster  is starting", appConfig.K8sClusterName)
 	time.Sleep(time.Second * 10)
 	if len(appConfig.AppIds) > 0 {
 		appUndeployRequest := pcc.UndeployAppRequest{
@@ -310,7 +310,7 @@ func deleteStorageClass(appConfig *pcc.K8sAppConfiguration) (err error) {
 		if err != nil {
 			err = fmt.Errorf("Deletion of Storage Class has failed..ERROR: %v", err)
 		} else {
-			log.AuctaLogger.Infof("Deletion of Storage classes[%v] has started\n", appConfig.StorageClasses)
+			log.AuctaLogger.Infof("Deletion of Storage classes[%v] has started", appConfig.StorageClasses)
 		}
 	}
 	return
@@ -346,10 +346,10 @@ func testVerifyK8sAppDeployment(t *testing.T) {
 }
 
 func verifyK8sAppDeployment(appConfig *pcc.K8sAppConfiguration) (err error) {
-	log.AuctaLogger.Infof("Verifying K8s apps deployment on cluster [%v]...Timeout:[%v sec]\n", appConfig.K8sClusterName, pcc.K8S_APP_DEPLOYMENT_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying K8s apps deployment on cluster [%v]...Timeout:[%v sec]", appConfig.K8sClusterName, pcc.K8S_APP_DEPLOYMENT_TIMEOUT)
 	_, err = appConfig.VerifyK8sApp(deployStartTime, pcc.K8S_APP_DEPLOY_EVENT, appConfig.K8sClusterName)
 	if err != nil {
-		err = fmt.Errorf("Apps deployment verification on cluster [%v] failed...ERROR: %v\n", appConfig.K8sClusterName, err)
+		err = fmt.Errorf("Apps deployment verification on cluster [%v] failed...ERROR: %v", appConfig.K8sClusterName, err)
 	} else {
 		for _, app := range appConfig.Apps {
 			id, errGet := appConfig.PccClient.GetK8sAppId(app.Label, appConfig.GetK8sClusterId())
@@ -358,7 +358,7 @@ func verifyK8sAppDeployment(appConfig *pcc.K8sAppConfiguration) (err error) {
 				return
 			}
 			appConfig.AppIds = append(appConfig.AppIds, id)
-			log.AuctaLogger.Infof("K8s App[%v] deployed on cluster[%v]. AppId: [%d]\n", app.Label, appConfig.K8sClusterName, id)
+			log.AuctaLogger.Infof("K8s App[%v] deployed on cluster[%v]. AppId: [%d]", app.Label, appConfig.K8sClusterName, id)
 		}
 	}
 	return
@@ -382,13 +382,13 @@ func testVerifyK8sAppUnDeployment(t *testing.T) {
 }
 
 func verifyK8sAppUnDeployment(appConfig *pcc.K8sAppConfiguration) (err error) {
-	log.AuctaLogger.Infof("Verifying K8s app undeployment on cluster [%v]...Timeout:[%v sec]\n", appConfig.K8sClusterName, pcc.K8S_APP_DEPLOYMENT_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying K8s app undeployment on cluster [%v]...Timeout:[%v sec]", appConfig.K8sClusterName, pcc.K8S_APP_DEPLOYMENT_TIMEOUT)
 	s, err := appConfig.VerifyK8sApp(deployStartTime, pcc.K8S_APP_UNDEPLOY_EVENT, appConfig.K8sClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("K8s App undeployment verification on cluster [%v] failed...ERROR: %v", appConfig.K8sClusterName, err)
 		err = fmt.Errorf("%v", errMsg)
 	} else {
-		log.AuctaLogger.Infof("K8s Apps undeployed on cluster [%v] properly..[%v]\n", appConfig.K8sClusterName, s.Msg)
+		log.AuctaLogger.Infof("K8s Apps undeployed on cluster [%v] properly..[%v]", appConfig.K8sClusterName, s.Msg)
 	}
 	return
 }
@@ -411,7 +411,7 @@ func testVerifyStorageClassCreation(t *testing.T) {
 }
 
 func verifyStorageClassCreation(appConfig *pcc.K8sAppConfiguration) (err error) {
-	log.AuctaLogger.Infof("Verifying storage class creation on cluster [%v]...Timeout:[%v sec]\n", appConfig.K8sClusterName, pcc.K8S_STORAGE_CLASS_CREATION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying storage class creation on cluster [%v]...Timeout:[%v sec]", appConfig.K8sClusterName, pcc.K8S_STORAGE_CLASS_CREATION_TIMEOUT)
 	_, err = appConfig.VerifyK8sApp(deployStartTime, pcc.K8S_STORAGE_CLASS_CREATION_EVENT, appConfig.K8sClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Storage class creation verification on cluster [%v] failed...ERROR: %v", appConfig.K8sClusterName, err)
@@ -429,7 +429,7 @@ func verifyStorageClassCreation(appConfig *pcc.K8sAppConfiguration) (err error) 
 		if len(scFailed) > 0 {
 			err = fmt.Errorf("Failed to create StorageClasses[%v]", scFailed)
 		} else {
-			log.AuctaLogger.Infof("Successfully verified Storage Classes %v creation on cluster[%v]\n", appConfig.StorageClasses, appConfig.K8sClusterName)
+			log.AuctaLogger.Infof("Successfully verified Storage Classes %v creation on cluster[%v]", appConfig.StorageClasses, appConfig.K8sClusterName)
 		}
 	}
 	return
@@ -453,13 +453,13 @@ func testVerifyStorageClassDeletion(t *testing.T) {
 }
 
 func verifyStorageClassDeletion(appConfig *pcc.K8sAppConfiguration) (err error) {
-	log.AuctaLogger.Infof("Verifying storage class Deletion on cluster [%v]...Timeout:[%v sec]\n", appConfig.K8sClusterName, pcc.K8S_STORAGE_CLASS_DELETION_TIMEOUT)
+	log.AuctaLogger.Infof("Verifying storage class Deletion on cluster [%v]...Timeout:[%v sec]", appConfig.K8sClusterName, pcc.K8S_STORAGE_CLASS_DELETION_TIMEOUT)
 	_, err = appConfig.VerifyK8sApp(deployStartTime, pcc.K8S_STORAGE_CLASS_DELETION_EVENT, appConfig.K8sClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Storage class deletion verification on cluster [%v] failed...ERROR: %v", appConfig.K8sClusterName, err)
 		err = fmt.Errorf("%v", errMsg)
 	} else {
-		log.AuctaLogger.Infof("Successfully verified Storage classes[%v] deletion on cluster [%v] properly\n", appConfig.StorageClasses, appConfig.K8sClusterName)
+		log.AuctaLogger.Infof("Successfully verified Storage classes[%v] deletion on cluster [%v] properly", appConfig.StorageClasses, appConfig.K8sClusterName)
 	}
 	return
 }

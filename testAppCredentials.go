@@ -94,12 +94,12 @@ func createProfile(t *testing.T, servicetype string) (created authentication.Aut
 		Profile: profile,
 		Active:  true}
 
-	log.AuctaLogger.Infof("\ncreating the metadata profile", appCredential)
+	log.AuctaLogger.Infof("creating the metadata profile", appCredential)
 	created, err = Pcc.CreateAppCredentialProfile(&appCredential)
-	log.AuctaLogger.Infof("\ncreated the metadata profile", created)
+	log.AuctaLogger.Infof("created the metadata profile", created)
 
 	if err != nil {
-		log.AuctaLogger.Errorf("\nError creating the profile. Cleaning %v", err)
+		log.AuctaLogger.Errorf("Error creating the profile. Cleaning %v", err)
 		cleanAndFail(t, res, err)
 	}
 
@@ -117,7 +117,7 @@ func testCreateCredendialMetadataProfile(t *testing.T) {
 		types []string
 		err   error
 	)
-	log.AuctaLogger.Info("\nAPP CREDENTIALS: creating the metadata profile")
+	log.AuctaLogger.Info("APP CREDENTIALS: creating the metadata profile")
 	if types, err = Pcc.GetAppCredentialServices(); err == nil {
 		log.AuctaLogger.Infof("Supported types are:", types)
 
@@ -126,7 +126,7 @@ func testCreateCredendialMetadataProfile(t *testing.T) {
 			metadataProfiles[created.Id] = &created
 		}
 	} else {
-		log.AuctaLogger.Errorf("\nError creating the profile. Cleaning %v", err)
+		log.AuctaLogger.Errorf("Error creating the profile. Cleaning %v", err)
 		cleanAndFail(t, res, err)
 	}
 }
@@ -138,7 +138,7 @@ func testUpdateCredendialMetadataProfile(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nAPP CREDENTIALS: updating the metadata profile")
+	log.AuctaLogger.Info("APP CREDENTIALS: updating the metadata profile")
 	var (
 		err            error
 		parameters     map[string]models.ItemDescription
@@ -186,15 +186,15 @@ func testUpdateCredendialMetadataProfile(t *testing.T) {
 				receivedValue := fmt.Sprintf("%v", innerProfile[k])
 
 				if fmt.Sprintf("%v", v[1]) != receivedValue {
-					log.AuctaLogger.Errorf("\nError updating the profile. Expected value for %s is %v. received %v. Cleaning", k, v[1], receivedValue)
+					log.AuctaLogger.Errorf("Error updating the profile. Expected value for %s is %v. received %v. Cleaning", k, v[1], receivedValue)
 					cleanAndFail(t, res, err)
 				} else {
-					fmt.Printf("\nThe parameter %s was correclty updated from %v to %v", k, v[0], receivedValue)
+					fmt.Printf("The parameter %s was correclty updated from %v to %v", k, v[0], receivedValue)
 				}
 
 			}
 		} else {
-			log.AuctaLogger.Errorf("\nError updating the profile. Cleaning %v", err)
+			log.AuctaLogger.Errorf("Error updating the profile. Cleaning %v", err)
 			cleanAndFail(t, res, err)
 		}
 	}
@@ -207,10 +207,10 @@ func testDeleteCredendialMetadataProfile(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	log.AuctaLogger.Info("\nAPP CREDENTIALS: deleting the metadata profile")
+	log.AuctaLogger.Info("APP CREDENTIALS: deleting the metadata profile")
 	var err error
 	for id, profile := range metadataProfiles {
-		log.AuctaLogger.Infof("Deleting the profile %d %s\n", id, profile.Name)
+		log.AuctaLogger.Infof("Deleting the profile %d %s", id, profile.Name)
 		if _, e := Pcc.DeleteAppCredential(id); e != nil {
 			err = e
 		}

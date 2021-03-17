@@ -31,7 +31,7 @@ func getSecKeys(t *testing.T) {
 
 	secKeys, err = Pcc.GetSecurityKeys()
 	if err != nil {
-		msg := fmt.Sprintf("Error in retrieving Security Keys: %v\n", err)
+		msg := fmt.Sprintf("Error in retrieving Security Keys: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -40,7 +40,7 @@ func getSecKeys(t *testing.T) {
 
 	for i := 0; i < len(secKeys); i++ {
 		SecurityKeys[secKeys[i].Alias] = &secKeys[i]
-		log.AuctaLogger.Infof("Mapping SecurityKey[%v]:%d - %v\n",
+		log.AuctaLogger.Infof("Mapping SecurityKey[%v]:%d - %v",
 			secKeys[i].Alias, secKeys[i].Id, secKeys[i].Description)
 	}
 }
