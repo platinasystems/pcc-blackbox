@@ -463,6 +463,13 @@ func TestCustom(t *testing.T) {
 			subtests = defaultSubtests
 		}
 
+		for _, subtest := range subtests {
+			if _, ok := nameToTestFunc[subtest]; !ok {
+				log.AuctaLogger.Errorf("There is no function named %s", subtest)
+				t.SkipNow()
+			}
+		}
+
 		mayRun(t, testName, func(t *testing.T) {
 			for _, subtest := range subtests {
 				mayRun(t, subtest, nameToTestFunc[subtest])

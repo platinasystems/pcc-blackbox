@@ -1,10 +1,6 @@
 tests:
-  Test1:
+  TestNodes: []
+  MyTest:
     - getNodes
     - updateIpam
     - addNetCluster
-  Test2:
-    - getNodes
-    - updateIpam
-    - addNetCluster
-    - testCeph

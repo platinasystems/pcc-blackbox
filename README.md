@@ -50,11 +50,11 @@ List of available Test Groups:
   TestDashboard 
 ```
 
-Example of TestCustom file
+Example of TestCustom file (testList.yml.example)
 ```
 tests:
   TestNodes: []
-  TestNode:
+  MyTest:
     - getNodes
     - updateIpam
     - addNetCluster
