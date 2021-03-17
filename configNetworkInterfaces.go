@@ -625,8 +625,9 @@ func verifyNetworkUp(t *testing.T) {
 					carrier := intf.Interface.CarrierStatus
 					admin := intf.Interface.AdminStatus
 					if admin == pcc.INTERFACE_STATUS_DOWN {
-						log.AuctaLogger.Errorf("  %v %v admin "+
-							"down", id, ifName)
+						log.AuctaLogger.Infof("  %v %v"+
+							" admin down",
+							id, ifName)
 					} else {
 						log.AuctaLogger.Infof("  %v %v carrier "+
 							"%v", id, ifName,

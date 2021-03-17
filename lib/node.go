@@ -1,4 +1,4 @@
-// Copyright © 2020 Platina Systems, Inc. All rights reserved.
+// Copyright © 2020-2021 Platina Systems, Inc. All rights reserved.
 // Use of this source code is governed by the GPL-2 license described in the
 // LICENSE file.
 
@@ -298,7 +298,8 @@ func (pcc *PccClient) deleteNodes(nodes *[]NodeDetailed, wait bool) (err error) 
 							continue sleep
 						}
 					}
-					log.AuctaLogger.Errorf(fmt.Sprintf("Node %d has been deleted", nodeId))
+					log.AuctaLogger.Infof("Node %d "+
+						"has been deleted", nodeId)
 				}
 				return
 			}
@@ -318,14 +319,14 @@ func (pcc *PccClient) AddNode(node *NodeDetailed) (err error) {
 
 // Delete a node
 func (pcc *PccClient) DeleteNode(id uint64) (err error) {
-	log.AuctaLogger.Infof(fmt.Sprintf("deleting the node %d", id))
+	log.AuctaLogger.Infof("deleting the node %d", id)
 	err = pcc.Delete(fmt.Sprintf("pccserver/node/%d", id), nil, nil)
 	return
 }
 
 // Update a node
 func (pcc *PccClient) UpdateNode(node *NodeDetailed) (err error) {
-	log.AuctaLogger.Infof(fmt.Sprintf("updating the node %d", node.Id))
+	log.AuctaLogger.Infof("updating the node %d", node.Id)
 	if len(node.RoleIds) > 0 { // FIXME fix pcc-side
 		m := make(map[uint64]bool)
 		for _, k := range node.RoleIds {
