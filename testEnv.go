@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 
-	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -170,8 +169,6 @@ func (te *testEnv) CheckPccIp() (err error) {
 }
 func (netInt *netInterface) CheckNetInt() (err error) {
 	if netInt.AdminStatus != pcc.INTERFACE_STATUS_UP {
-		log.AuctaLogger.Infof("CheckNetInt [%v] AdminStatus [%v]",
-			netInt.Name, netInt.AdminStatus)
 		return
 	}
 	switch netInt.Autoneg {
