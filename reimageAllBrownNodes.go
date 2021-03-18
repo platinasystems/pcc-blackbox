@@ -107,7 +107,7 @@ func reimageAllBrown(t *testing.T) {
 			assert.FailNow()
 		}
 
-		fmt.Println("Sleep for 8 minutes")
+		log.AuctaLogger.Infof("Sleep for 8 minutes")
 		time.Sleep(8 * time.Minute)
 
 		for {
