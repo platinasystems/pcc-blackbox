@@ -15,6 +15,8 @@ const (
 	TestUndefined string = "undefined"
 )
 
+var timeFormat = "02-Jan-2006 15:04:05"
+
 type TestResult struct {
 	ID          uint
 	RunID       string
@@ -22,6 +24,7 @@ type TestResult struct {
 	Result      string
 	FailureMsg  string
 	ElapsedTime float64
+	CreatedAt   string
 }
 
 func InitTestResult(runID string) (res *TestResult) {
@@ -49,6 +52,10 @@ func (testResult *TestResult) SetElapsedTime(start time.Time, name string) {
 	log.AuctaLogger.Infof("%s took %fs", name, testResult.ElapsedTime)
 }
 
+func (testResult *TestResult) SetCreatedAt(createdAt string) {
+	testResult.CreatedAt = createdAt
+}
+
 func (testResult *TestResult) SaveTestResult() {
 	if DBh != nil {
 		DBh.Insert(testResult)
@@ -61,6 +68,7 @@ func (testResult *TestResult) CheckTestAndSave(t *testing.T, start time.Time) {
 	if !t.Failed() && !t.Skipped() {
 		testResult.SetTestPass()
 	}
+	testResult.SetCreatedAt(start.Format(timeFormat))
 	testResult.SetElapsedTime(start, testResult.TestID)
 	testResult.SaveTestResult()
 }
