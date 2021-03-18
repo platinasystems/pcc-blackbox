@@ -41,7 +41,7 @@ func (p *PccClient) IsAppInstalled(nodeId uint64, appId string) (isInstalled boo
 			}
 		}
 	} else {
-		log.AuctaLogger.Errorf("Failed to GetApps: %v\n", err)
+		log.AuctaLogger.Errorf("Failed to GetApps: %v", err)
 	}
 	return
 }

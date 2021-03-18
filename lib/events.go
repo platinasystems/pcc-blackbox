@@ -34,7 +34,7 @@ func (client *PccClient) GetEventsOptions(page int, limit int, search string) (e
 }
 
 func (client *PccClient) WaitForEvent(timeout time.Duration, targetId uint64, str2check string, requestId string, start *time.Time) (found bool, err error) {
-	log.AuctaLogger.Infof("Looking for event [%s] %d. Timeout is %v\n", str2check, targetId, timeout)
+	log.AuctaLogger.Infof("Looking for event [%s] %d. Timeout is %v", str2check, targetId, timeout)
 	if start == nil {
 		n := time.Now()
 		start = &n

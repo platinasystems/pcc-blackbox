@@ -375,9 +375,13 @@ func (pcc *PccClient) AddRolesToNodes(nodes []uint64, roles []uint64) (installed
 					lock.Lock()
 					installed = append(installed, node.Id)
 					lock.Unlock()
-					log.AuctaLogger.Infof("roles %v already set on node:%v\n", roles, nodeId)
+					log.AuctaLogger.Infof("roles %v "+
+						"already set on node:%v",
+						roles, nodeId)
 				} else {
-					log.AuctaLogger.Infof("setting roles %v on node %d\n", roles, nodeId)
+					log.AuctaLogger.Infof("setting roles "+
+						"%v on node %d",
+						roles, nodeId)
 					lock.Lock()
 					installing = append(installing, nodeId)
 					lock.Unlock()
