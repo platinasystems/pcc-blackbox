@@ -1,4 +1,4 @@
-// Copyright © 2020 Platina Systems, Inc. All rights reserved.
+// Copyright © 2020-2021 Platina Systems, Inc. All rights reserved.
 // Use of this source code is governed by the GPL-2 license described in the
 // LICENSE file.
 
@@ -82,6 +82,31 @@ func (p *PccClient) GetNetCluster() (netCluster []*NetworkClusterUI, err error) 
 func (p *PccClient) GetNetClusterId(id uint64) (netCluster *NetworkClusterUI, err error) {
 	endpoint := fmt.Sprintf("pccserver/network/cluster/%d", id)
 	err = p.Get(endpoint, &netCluster)
+	return
+}
+
+func (p *PccClient) GetNetClusterHealth(id uint64) (health string, summary string, err error) {
+	var netCluster *NetworkClusterUI
+
+	endpoint := fmt.Sprintf("pccserver/network/cluster/health/%d", id)
+	err = p.Get(endpoint, &netCluster)
+	if err == nil {
+		health = netCluster.Health
+		summary = netCluster.HealthSummary
+	}
+	return
+}
+
+// same as GetNetClusterHealth, but also do a ping check
+func (p *PccClient) GetNetClusterHealthConn(id uint64) (health string, summary string, err error) {
+	var netCluster *NetworkClusterUI
+
+	endpoint := fmt.Sprintf("pccserver/network/cluster/health/conn/%d", id)
+	err = p.Get(endpoint, &netCluster)
+	if err == nil {
+		health = netCluster.Health
+		summary = netCluster.HealthSummary
+	}
 	return
 }
 

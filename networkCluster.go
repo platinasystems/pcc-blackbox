@@ -18,6 +18,7 @@ var netClusterName string = "mynetcluster"
 
 func addNetCluster(t *testing.T) {
 	test.SkipIfDryRun(t)
+	assert := test.Assert{t}
 
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
@@ -29,6 +30,27 @@ func addNetCluster(t *testing.T) {
 		if err == nil {
 			log.AuctaLogger.Infof("Network cluster [%v] already "+
 				"exists [%v]", netCluster.Name, netClusterId)
+			health, summary, err :=
+				Pcc.GetNetClusterHealthConn(netClusterId)
+			if err != nil {
+				msg := fmt.Sprintf("Failed to get net health "+
+					"[%v]: %v\n", netClusterName, err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
+				return
+			}
+			if health != pcc.NETWORK_HEALTH_OK {
+				msg := fmt.Sprintf("Net cluster health NotOK "+
+					"[%v]: %v\n", netClusterName, summary)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
+				return
+			}
+			log.AuctaLogger.Infof("Network Health [%v] [%v]\n",
+				netClusterName, health)
+
 			continue
 		}
 		addNetClusterInternal(t, netCluster)
@@ -137,7 +159,8 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		if digitCheck.MatchString(n.LocalAs) {
 			val, err := json.Number(n.LocalAs).Int64()
 			if err != nil {
-				log.AuctaLogger.Warnf("Atoi convert failed: %v", err)
+				log.AuctaLogger.Errorf("Atoi convert failed: "+
+					"%v", err)
 				continue
 			}
 			val2 := uint64(val)
@@ -150,14 +173,14 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				nodes[i].BgpNeighbors[j].NeighborIp =
 					p.NeighborIp
 				if !digitCheck.MatchString(p.RemoteAs) {
-					log.AuctaLogger.Warnf("Invalid RemoteAs [%v]",
-						p.RemoteAs)
+					log.AuctaLogger.Errorf("Invalid "+
+						"RemoteAs [%v]", p.RemoteAs)
 					continue
 				}
 				val, err := json.Number(p.RemoteAs).Int64()
 				if err != nil {
-					log.AuctaLogger.Warnf("Atoi convert failed: %v",
-						err)
+					log.AuctaLogger.Errorf("Atoi convert "+
+						"failed: %v", err)
 					continue
 				}
 				val2 := uint64(val)
@@ -191,6 +214,7 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	timeout := time.After(15 * time.Minute)
 	tick := time.Tick(10 * time.Second)
 	done := false
+	notOkCount := 0
 	for !done {
 		select {
 		case <-timeout:
@@ -209,14 +233,23 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				assert.FailNow()
 				return
 			}
-			log.AuctaLogger.Infof("deploy status [%v] %v%% health [%v]",
+			log.AuctaLogger.Infof("deploy status [%v] %v%% "+
+				"health [%v]",
 				netClusterObj.DeployStatus,
 				netClusterObj.ProgressPercentage,
 				netClusterObj.Health)
 
 			switch netClusterObj.DeployStatus {
 			case pcc.NETWORK_DEPLOY_STATUS_COMPLETED:
-				done = true
+				switch netClusterObj.Health {
+				case pcc.NETWORK_HEALTH_OK:
+					done = true
+				case pcc.NETWORK_HEALTH_NOT_OK:
+					notOkCount++
+					if notOkCount == 5 {
+						done = true
+					}
+				}
 			case pcc.NETWORK_DEPLOY_STATUS_FAILED:
 				done = true
 				msg := "Network deploy failed"
@@ -228,9 +261,21 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		}
 	}
 
-	if netClusterObj.Health != pcc.NETWORK_HEALTH_OK {
-		msg := fmt.Sprintf("Network deploy %s", netClusterObj.Health)
+	// check connectivity
+	health, summary, err := Pcc.GetNetClusterHealthConn(netClusterId)
+	if err != nil {
+		msg := fmt.Sprintf("Failed to get net health [%v]: %v\n",
+			reqCluster.Name, err)
 		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
+		return
+	}
+	log.AuctaLogger.Infof("Network Health & connectivity check [%v] [%v]\n",
+		reqCluster.Name, health)
+	if health != pcc.NETWORK_HEALTH_OK {
+		msg := fmt.Sprintf("Net cluster health NotOK [%v]: %v\n",
+			netClusterName, summary)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 		return
