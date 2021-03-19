@@ -59,7 +59,6 @@ func testNodeGroups(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	id := req.Id
 
@@ -69,7 +68,6 @@ func testNodeGroups(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	newDescription := "change it"
@@ -81,7 +79,6 @@ func testNodeGroups(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	groups, err := Pcc.GetNodeGroups()
@@ -90,7 +87,6 @@ func testNodeGroups(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Errorf("Error GetNodeGroups: %v", err)
 		assert.FailNow()
-		return
 	}
 	found := false
 	for _, g := range groups {
@@ -106,7 +102,6 @@ func testNodeGroups(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	err = Pcc.DeleteNodeGroup(group.ID)
@@ -114,6 +109,5 @@ func testNodeGroups(t *testing.T) {
 		msg := fmt.Sprintf("Error DeleteNodeGroup: %v", err)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
