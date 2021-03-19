@@ -63,7 +63,8 @@ func uploadCertificate_Portus(t *testing.T) {
 	var keyId uint64
 	exist, privateKey, err := Pcc.FindSecurityKey(PORTUS_KEY_FILENAME)
 	if err != nil {
-		log.AuctaLogger.Errorf("Get private key %s failed\n%v\n", PORTUS_KEY_FILENAME, err)
+		log.AuctaLogger.Errorf("Get private key %s failed: %v",
+			PORTUS_KEY_FILENAME, err)
 	} else if exist {
 		keyId = privateKey.Id
 	}
@@ -101,24 +102,25 @@ func installPortus(t *testing.T) {
 				if err == nil {
 					portusConfiguration.AuthenticationProfileId = &authProfile.ID
 				} else {
-					log.AuctaLogger.Warnf("Missing authentication profile %s\n, Portus will be installed without it", CurrentAuthProfileName)
+					log.AuctaLogger.Warnf("Missing authentication profile %s, Portus will be installed without it", CurrentAuthProfileName)
 				}
 			}
 
 			exist, certificate, err := Pcc.FindCertificate(PORTUS_CERT_FILENAME)
 			if err != nil {
-				log.AuctaLogger.Errorf("Get certificate %s failed\n%v\n", PORTUS_CERT_FILENAME, err)
+				log.AuctaLogger.Errorf("Get certificate %s failed: %v",
+					PORTUS_CERT_FILENAME, err)
 			} else if exist {
 				portusConfiguration.RegistryCertId = &certificate.Id
 			}
 
-			log.AuctaLogger.Infof("Installing Portus on Node with id %v\n",
+			log.AuctaLogger.Infof("Installing Portus on Node with id %v",
 				node.Id)
 
 			err = Pcc.InstallPortusNode(portusConfiguration)
 			if err != nil {
-				log.AuctaLogger.Warnf("Portus installation in %v failed\n%v\n", node.Host, err)
-				log.AuctaLogger.Warnf("Trying in another node\n")
+				log.AuctaLogger.Warnf("Portus installation in %v failed: %v", node.Host, err)
+				log.AuctaLogger.Warnf("Trying in another node")
 			} else {
 				PortusSelectedNodeIds = append(PortusSelectedNodeIds, node.Id)
 				break
@@ -126,7 +128,7 @@ func installPortus(t *testing.T) {
 		}
 	}
 	if len(PortusSelectedNodeIds) == 0 {
-		msg := "Failed to install Portus: No available nodes\n"
+		msg := "Failed to install Portus: No available nodes"
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -145,13 +147,15 @@ func checkPortus(t *testing.T) {
 		if idInSlice(node.Id, PortusSelectedNodeIds) {
 			check, err := Pcc.WaitForInstallation(id, PORTUS_TIMEOUT, PORTUS_NOTIFICATION, "", nil)
 			if err != nil {
-				msg := fmt.Sprintf("Portus installation has failed\n%v\n", err)
+				msg := fmt.Sprintf("Portus installation has failed: %v",
+					err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
 			}
 			if check {
-				log.AuctaLogger.Infof("Portus correctly installed on nodeId:%v\n", id)
+				log.AuctaLogger.Infof("Portus correctly installed on nodeId: %v",
+					id)
 			}
 		}
 	}
@@ -173,7 +177,7 @@ func delAllPortus(t *testing.T) {
 
 	portusConfigs, err = Pcc.GetPortusNodes()
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get portus nodes: %v\n", err)
+		msg := fmt.Sprintf("Failed to get portus nodes: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
@@ -181,11 +185,11 @@ func delAllPortus(t *testing.T) {
 	}
 
 	for _, p := range portusConfigs {
-		log.AuctaLogger.Infof("Deleting Portus %v\n", p.Name)
+		log.AuctaLogger.Infof("Deleting Portus %v", p.Name)
 		id = p.ID
 		err = Pcc.DelPortusNode(id, true)
 		if err != nil {
-			msg := fmt.Sprintf("Failed to delete Portus %v: %v\n",
+			msg := fmt.Sprintf("Failed to delete Portus %v: %v",
 				p.Name, err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
@@ -205,7 +209,7 @@ func delAllPortus(t *testing.T) {
 						done = true
 						continue
 					}
-					msg := fmt.Sprintf("Failed Get Portus: %v\n",
+					msg := fmt.Sprintf("Failed Get Portus: %v",
 						err)
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
@@ -213,7 +217,7 @@ func delAllPortus(t *testing.T) {
 					return
 				}
 			case <-timeout:
-				msg := fmt.Sprintf("Timeout deleting Portus\n")
+				msg := fmt.Sprintf("Timeout deleting Portus")
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()

@@ -8,9 +8,8 @@ import (
 	"time"
 
 	log "github.com/platinasystems/go-common/logs"
-	"github.com/platinasystems/pcc-blackbox/models"
-
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/test"
 )
 
@@ -34,7 +33,7 @@ func addNetCluster(t *testing.T) {
 				Pcc.GetNetClusterHealthConn(netClusterId)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get net health "+
-					"[%v]: %v\n", netClusterName, err)
+					"[%v]: %v", netClusterName, err)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
@@ -42,13 +41,13 @@ func addNetCluster(t *testing.T) {
 			}
 			if health != pcc.NETWORK_HEALTH_OK {
 				msg := fmt.Sprintf("Net cluster health NotOK "+
-					"[%v]: %v\n", netClusterName, summary)
+					"[%v]: %v", netClusterName, summary)
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
 				return
 			}
-			log.AuctaLogger.Infof("Network Health [%v] [%v]\n",
+			log.AuctaLogger.Infof("Network Health [%v] [%v]",
 				netClusterName, health)
 
 			continue
@@ -264,17 +263,17 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 	// check connectivity
 	health, summary, err := Pcc.GetNetClusterHealthConn(netClusterId)
 	if err != nil {
-		msg := fmt.Sprintf("Failed to get net health [%v]: %v\n",
+		msg := fmt.Sprintf("Failed to get net health [%v]: %v",
 			reqCluster.Name, err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 		return
 	}
-	log.AuctaLogger.Infof("Network Health & connectivity check [%v] [%v]\n",
+	log.AuctaLogger.Infof("Network Health & connectivity check [%v] [%v]",
 		reqCluster.Name, health)
 	if health != pcc.NETWORK_HEALTH_OK {
-		msg := fmt.Sprintf("Net cluster health NotOK [%v]: %v\n",
+		msg := fmt.Sprintf("Net cluster health NotOK [%v]: %v",
 			netClusterName, summary)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
