@@ -122,7 +122,8 @@ func addIpamConfig(t *testing.T) {
 
 		oldSub, err := Pcc.FindSubnetObj(ipam.Name)
 		if err == nil {
-			log.AuctaLogger.Warn("IPAM  [%v] already exists", oldSub.Name)
+			log.AuctaLogger.Warnf("IPAM [%v] already exists",
+				oldSub.Name)
 			continue
 		}
 		sub.Name = ipam.Name
@@ -130,7 +131,7 @@ func addIpamConfig(t *testing.T) {
 		sub.PubAccess = ipam.PubAccess
 		sub.Routed = ipam.Routed
 
-		log.AuctaLogger.Infof("Add IPAM  [%+v]", sub)
+		log.AuctaLogger.Infof("Add IPAM [%+v]", sub)
 		err = Pcc.AddSubnetObj(&sub)
 		if err != nil {
 			msg := fmt.Sprintf("Error adding subnetObj: %v", err)
