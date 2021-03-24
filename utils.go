@@ -63,7 +63,6 @@ func CreateMetricsFiles(data *map[string]interface{}, topic string) {
 		}
 	}
 	for k, v := range *data {
-		log.AuctaLogger.Infof("%s, %v", k, v)
 		fileName := fmt.Sprintf("%s_%s", k, topic)
 		b, err := json.MarshalIndent(v, "", "  ")
 		if err != nil {
