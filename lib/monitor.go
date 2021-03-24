@@ -8,37 +8,6 @@ import (
 	"fmt"
 )
 
-type TimeRange struct {
-	From uint64 `json:"from"`
-	To   uint64 `json:"to"`
-}
-
-type HistoricalRequest struct {
-	Fields    []string  `json:"fields"`
-	NodeIDs   []uint64  `json:"nodeIDs"`
-	TimeRange TimeRange `json:"timeRange"`
-}
-
-type Metric struct {
-	CpuLoad           float32 `json:"cpuLoad"`
-	AvailableMem      float32 `json:"availableMem"`
-	RealUsedMem       float32 `json:"realUsedMem"`
-	DiskUsage         float32 `json:"diskUsage"`
-	InodeUsage        float32 `json:"inodeUsage"`
-	CpuTemp           float32 `json:"cpuTemp"`
-	NetworkThroughput float32 `json:"networkThroughput"`
-}
-
-type HistoricalRecord struct {
-	Resource  string   `json:"resource"`
-	Timestamp int64    `json:"timestamp"`
-	Metrics   []Metric `json:"metrics"`
-}
-
-type HistoricalResponse struct {
-	Response map[string]HistoricalResponse
-}
-
 ////
 // Monitor Rest Client
 ////
