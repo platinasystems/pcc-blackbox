@@ -114,10 +114,15 @@ func TestMain(m *testing.M) {
 	if dbh != nil {
 		dbh.Insert(&randomSeed)
 	}
+
+	startTime := ConvertToMillis(time.Now())
 	ecode = m.Run()
+	stopTime := ConvertToMillis(time.Now())
 
 	dockerStats.Stop()
+	SaveNodesMetrics(startTime, stopTime)
 	log.AuctaLogger.Info("TEST COMPLETED")
+	log.AuctaLogger.Flush()
 }
 
 var count uint
