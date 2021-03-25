@@ -111,3 +111,14 @@ func Init(PccIp string, cred Credential, dbConfig *DBConfiguration, sshConfig *S
 	}
 	return
 }
+
+func Authenticate(addr string, cred Credential) (client *PccClient, err error) {
+	var out struct{ Token string }
+	rc := http.PlatinaRestClient{Address: addr, Port: 9999}
+	client = &PccClient{pccIp: addr}
+	if err = rc.Post("security/auth", cred, &out); err != nil {
+		return
+	}
+	client.bearer = fmt.Sprintf("Bearer %s", out.Token)
+	return
+}
