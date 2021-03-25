@@ -1,14 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
-	"io/ioutil"
-	"os"
 	"testing"
 	"time"
 )
@@ -51,63 +48,6 @@ func getNodeFromEnv(id uint64) *node {
 	}
 
 	return nil
-}
-
-func CreateMetricsFiles(data *map[string]interface{}, topic string) {
-	path := fmt.Sprintf("nodes_metrics/%s", runID)
-	_, err := os.Stat(path)
-	if os.IsNotExist(err) {
-		if err := os.MkdirAll(path, 0755); err != nil {
-			log.AuctaLogger.Error("Cannot create directory nodes_metrics")
-			return
-		}
-	}
-	for k, v := range *data {
-		fileName := fmt.Sprintf("%s_%s", k, topic)
-		b, err := json.MarshalIndent(v, "", "  ")
-		if err != nil {
-			log.AuctaLogger.Errorf("%v", err)
-			return
-		}
-		err = ioutil.WriteFile(fmt.Sprintf("%s/%s", path, fileName), b, 0644)
-		if err != nil {
-			log.AuctaLogger.Errorf("%v", err)
-			return
-		}
-	}
-}
-
-func SaveNodesMetrics(startTime uint64, stopTime uint64) {
-	/*fields := []string {"cpuLoad",
-	"availableMem",
-	"realUsedMem",
-	"diskUsage",
-	"inodeUsage",
-	"cpuTemp",
-	"networkThroughput"}*/
-	fields := make([]string, 0)
-	topic := "summary"
-	nodes, err := Pcc.GetNodes()
-	if err != nil {
-		log.AuctaLogger.Errorf("%v", err)
-		return
-	}
-	var nodeIDs []uint64
-	for _, node := range *nodes {
-		nodeIDs = append(nodeIDs, node.Id)
-	}
-
-	if data, err := Pcc.GetNodesHistory(topic, startTime, stopTime, nodeIDs, fields); err != nil {
-		log.AuctaLogger.Errorf("Error in getting history for topic %s, %v", topic, err)
-		return
-	} else {
-		if len(*data) == 0 {
-			log.AuctaLogger.Infof("No data for topic summary in the timeRange: %d - %d", startTime, stopTime)
-			return
-		} else {
-			CreateMetricsFiles(data, topic)
-		}
-	}
 }
 
 func CheckDependencies(t *testing.T, res *models.TestResult, dep ...func() error) {

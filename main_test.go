@@ -105,6 +105,7 @@ func TestMain(m *testing.M) {
 	}
 
 	runID = uuid.New().String()
+	log.AuctaLogger.Infof("Generated runID: %s", runID)
 
 	if seed == -1 {
 		seed = utility.CreateSeed()
@@ -120,7 +121,7 @@ func TestMain(m *testing.M) {
 	stopTime := ConvertToMillis(time.Now())
 
 	dockerStats.Stop()
-	SaveNodesMetrics(startTime, stopTime)
+	utility.SaveNodesHistoricalSummaries(Pcc, runID, startTime, stopTime)
 	log.AuctaLogger.Info("TEST COMPLETED")
 	log.AuctaLogger.Flush()
 }
