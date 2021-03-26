@@ -23,6 +23,15 @@ func (pcc *PccClient) GetHistory(topic string, from int64, to int64) (data *map[
 	return
 }
 
+func (pcc *PccClient) GetNodesHistory(topic string, from uint64, to uint64, nodeIDs []uint64, fields []string) (data *map[string]interface{}, err error) {
+	endpoint := fmt.Sprintf("monitor/topic/%s/historical", topic)
+	request := map[string]interface{}{"fields": fields, "nodeIDs": nodeIDs, "timeRange": map[string]uint64{"from": from, "to": to}}
+	m := make(map[string]interface{})
+	err = pcc.Post(endpoint, &request, &m)
+	data = &m
+	return
+}
+
 // Return last sample
 func (pcc *PccClient) GetLiveSample(topic string, nodeId uint64) (data *map[string]interface{}, err error) {
 	m := make(map[string]interface{})
