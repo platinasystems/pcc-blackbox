@@ -123,6 +123,7 @@ func main() {
 		nodes, fields string
 		raw           bool
 		err           error
+		data          interface{}
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
@@ -168,10 +169,15 @@ func main() {
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
 	hasData := len(os.Args) >= 5
-	data := "{}"
 	if hasData {
-		data = os.Args[4]
+		if err = json.Unmarshal([]byte(os.Args[4]), &data); err != nil {
+			fmt.Println("expect data to be in json format")
+			fmt.Println(err)
+			return
+		}
+
 	}
+
 	Pcc, err = pcc.Authenticate(addr, cred)
 	if err != nil {
 		fmt.Println("Authentication error:", err)
@@ -215,12 +221,15 @@ func main() {
 			return
 		}
 	case strings.EqualFold(cmd, "get"):
-		Pcc.Get(endpoint, &out, nil)
+		err = Pcc.Get(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "post"):
-		Pcc.Post(endpoint, &data, &out)
+		err = Pcc.Post(endpoint, &data, &out)
 	case strings.EqualFold(cmd, "put"):
-		Pcc.Put(endpoint, &data, &out)
+		err = Pcc.Put(endpoint, &data, &out)
 	}
 
+	if err != nil {
+		fmt.Println(err)
+	}
 	pPrint(out)
 }
