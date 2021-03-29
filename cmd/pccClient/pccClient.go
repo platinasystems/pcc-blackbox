@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -73,10 +74,16 @@ func pPrintJ(out interface{}) {
 }
 
 func (d HistoricalOut) Print(nodes, fields []string) {
-	var all bool
+	var allNodes, allFields bool
 	fields = append([]string{"hostname"}, fields...)
 	if len(nodes) == 0 {
-		all = true
+		allNodes = true
+	}
+	if len(fields) == 0 {
+		allFields = true
+	}
+	if len(fields) == 1 && fields[0] == "hostname" {
+		allFields = true
 	}
 	nodeMap := map[string]bool{}
 	for _, node := range nodes {
@@ -87,6 +94,18 @@ func (d HistoricalOut) Print(nodes, fields []string) {
 			if len(t.Metrics) == 0 {
 				continue
 			}
+			if allFields {
+				f := sort.StringSlice{}
+				for fieldName := range t.Metrics[0] {
+					if fieldName == "hostname" {
+						continue
+					}
+					f = append(f, fieldName)
+				}
+				f.Sort()
+				fields = append([]string{"hostname"}, f...)
+			}
+
 			header := fmt.Sprintf("%-10v%30v", "nodeId", "timestamp")
 			if i == 0 {
 				for _, field := range fields {
@@ -99,10 +118,16 @@ func (d HistoricalOut) Print(nodes, fields []string) {
 			zone, _ := time.LoadLocation("America/Los_Angeles")
 			timestamp := time.Unix(0, t.Timestamp*1000000).In(zone).Format("MST 2006-01-02 15:04:05.000")
 			line := fmt.Sprintf("%-10v%30v", nodeId, timestamp)
-			include := nodeMap[fmt.Sprintf("%v", nodeId)] || all
+			include := nodeMap[fmt.Sprintf("%v", nodeId)] || allNodes
 			for _, field := range fields {
 				if value, ok := t.Metrics[0][field]; ok {
-					line += fmt.Sprintf("%20v", value)
+					// skip complex fields or super long fields
+					s := fmt.Sprintf("%v", value)
+					if len(s) > 20 {
+						s = s[0:16]
+						s += "..."
+					}
+					line += fmt.Sprintf("%20v", s)
 					if field == "hostname" && nodeMap[fmt.Sprintf("%v", value)] {
 						include = true
 					}
@@ -168,7 +193,7 @@ func main() {
 	addr := os.Args[1]
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
-	hasData := len(os.Args) >= 5
+	hasData := len(os.Args) >= 5 && !strings.EqualFold(endpoint, "history")
 	if hasData {
 		if err = json.Unmarshal([]byte(os.Args[4]), &data); err != nil {
 			fmt.Println("expect data to be in json format")
