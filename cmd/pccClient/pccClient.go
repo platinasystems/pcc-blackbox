@@ -148,24 +148,30 @@ func main() {
 		nodes, fields string
 		raw           bool
 		err           error
+		hasData       bool
+		dataStr       string
 		data          interface{}
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
 		Password: "admin",
 	}
-	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT] [data]"
+	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data]"
 	usage2 := "[ip addr|domain name] history [topic] [t1] [t2] [-n nodes] [-f fields]"
-	example := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
+	example1 := "172.17.2.34 pccserver/node GET"
+	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
+	example3 := "172.17.2.34 pccserver/cluster/add POST -d '{\"id\":0,\"name\":\"lab\",\"description\":\"test node group\",\"owner\":1}'"
 	if len(os.Args) < 4 {
 		fmt.Println("usage1", os.Args[0], usage)
 		fmt.Println("usage2", os.Args[0], usage2)
-		fmt.Println("example", os.Args[0], example)
+		fmt.Println("example1", os.Args[0], example1)
+		fmt.Println("example2", os.Args[0], example2)
+		fmt.Println("example3", os.Args[0], example3)
 		return
 	}
 	if strings.EqualFold(os.Args[2], "history") && len(os.Args) < 6 {
 		fmt.Println("usage2", os.Args[0], usage2)
-		fmt.Println("example", os.Args[0], example)
+		fmt.Println("example2", os.Args[0], example2)
 		return
 	}
 
@@ -182,6 +188,9 @@ func main() {
 			nodes = p
 		case "-f":
 			fields = p
+		case "-d":
+			hasData = true
+			dataStr = p
 		case "-u":
 			cred.UserName = p
 		case "-p":
@@ -193,9 +202,8 @@ func main() {
 	addr := os.Args[1]
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
-	hasData := len(os.Args) >= 5 && !strings.EqualFold(endpoint, "history")
 	if hasData {
-		if err = json.Unmarshal([]byte(os.Args[4]), &data); err != nil {
+		if err = json.Unmarshal([]byte(dataStr), &data); err != nil {
 			fmt.Println("expect data to be in json format")
 			fmt.Println(err)
 			return
@@ -247,6 +255,8 @@ func main() {
 		}
 	case strings.EqualFold(cmd, "get"):
 		err = Pcc.Get(endpoint, &out, nil)
+	case strings.EqualFold(cmd, "delete"):
+		err = Pcc.Delete(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "post"):
 		err = Pcc.Post(endpoint, &data, &out)
 	case strings.EqualFold(cmd, "put"):
@@ -256,5 +266,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	pPrint(out)
+	if out != nil {
+		pPrint(out)
+	}
 }
