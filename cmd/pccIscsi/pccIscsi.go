@@ -437,6 +437,9 @@ func main() {
 
 	// Following executes locally
 	errs := utility.Errors{}
+
+	errs.Append(InstallDependencies())
+
 	if nr > 0 {
 		if create {
 			errs.Append(CreateTgt(nr, size, rotational)...)
