@@ -36,7 +36,7 @@ func OsArch() (os OsArchType, osVars map[string]string, err error) {
 	osVars = map[string]string{}
 	osRelease, e := Cat("/etc/os-release")
 	if e != nil {
-		err = fmt.Errorf("Cannot deterime os type: %v", err)
+		err = fmt.Errorf("Cannot determine os type: %v", err)
 		return
 	}
 	return OsArchParse(string(osRelease))

@@ -16,13 +16,14 @@ import (
 )
 
 const (
-	rotational = "rotational"
-	solidstate = "solidstate"
-	bpath      = "/srv/iscsi"
-	cpath      = "/etc/tgt/conf.d"
-	ipath      = "/etc/iscsi/nodes"
-	user       = "platina"
-	passwd     = "pf00itn2"
+	rotational   = "rotational"
+	solidstate   = "solidstate"
+	bpath        = "/srv/iscsi"
+	cpath        = "/etc/tgt/conf.d"
+	ipathDefault = "/etc/iscsi/nodes"
+	ipathRH      = "/var/lib/iscsi/nodes"
+	user         = "platina"
+	passwd       = "pf00itn2"
 )
 
 type sshConfig struct {
@@ -244,6 +245,14 @@ func RemoveInitiators(n int, size, driveType string) (errs utility.Errors) {
 }
 
 func CreateInitiators(n int, size, driveType string) (errs utility.Errors) {
+	var ipath string
+	osArch, _, _ := utility.OsArch()
+	switch osArch {
+	case utility.OsRedhat:
+		ipath = ipathRH
+	default:
+		ipath = ipathDefault
+	}
 	for i := 1; i <= n; i++ {
 		iname := iqn(driveType, size, i)
 		dirP := filepath.Join(ipath, iname)
@@ -460,9 +469,19 @@ func main() {
 		fmt.Println(errs)
 		return
 	}
+
+	var tgtService string
+	osArch, _, _ := utility.OsArch()
+	switch osArch {
+	case utility.OsRedhat:
+		tgtService = "tgtd"
+	default:
+		tgtService = "tgt"
+	}
+
 	fmt.Println("systemctl restart tgt")
-	if out, err := exec.Command("systemctl", "restart", "tgt").CombinedOutput(); err != nil {
-		fmt.Println("%v: %v", err, string(out))
+	if out, err := exec.Command("systemctl", "restart", tgtService).CombinedOutput(); err != nil {
+		fmt.Println(fmt.Sprintf("%s: %s", err.Error(), out))
 	}
 	out, _ := exec.Command("tgtadm", "--mode", "target", "--op", "show").Output()
 	for _, line := range utility.Egrep(out, "Target", "Backing store type", "Backing store path") {
@@ -474,7 +493,7 @@ func main() {
 		// do this once only because it will replace the contents of /etc/iscsi/nodes with default
 		out, err := exec.Command("iscsiadm", "-m", "discovery", "-t", "st", "-p", "127.0.0.1").CombinedOutput()
 		if err != nil {
-			fmt.Println("%v: %v", err, string(out))
+			fmt.Println(fmt.Sprintf("%s: %s", err.Error(), out))
 			return
 		}
 	}
@@ -501,10 +520,24 @@ func main() {
 		fmt.Println(errs)
 		return
 	}
-	fmt.Println("systemctl restart open-iscsi")
-	if out, err := exec.Command("systemctl", "restart", "open-iscsi").CombinedOutput(); err != nil {
-		fmt.Println("%v: %v", err, string(out))
+	var initiatorService string
+	switch osArch {
+	case utility.OsRedhat:
+		initiatorService = "iscsid"
+	default:
+		initiatorService = "open-iscsi"
 	}
+	fmt.Println("systemctl restart open-iscsi")
+	if out, err := exec.Command("systemctl", "restart", initiatorService).CombinedOutput(); err != nil {
+		fmt.Println(fmt.Sprintf("%s: %s", err.Error(), out))
+	}
+
+	if osArch == utility.OsRedhat {
+		if out, err := exec.Command("systemctl", "restart", "iscsi").CombinedOutput(); err != nil {
+			fmt.Println(fmt.Sprintf("%s: %s", err.Error(), out))
+		}
+	}
+
 	out2, _ := exec.Command("iscsiadm", "-m", "session", "-P", "3").CombinedOutput()
 	for _, line := range utility.Egrep(out2, "Target:", "Attached scsi disk") {
 		fmt.Println(line)
