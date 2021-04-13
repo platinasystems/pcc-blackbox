@@ -50,6 +50,10 @@ func testCeph(t *testing.T) {
 			} else {
 				log.AuctaLogger.Info("Ceph Pools creation test is skipped")
 			}
+			if t.Failed() {
+				log.AuctaLogger.Info("Ceph pool creation failed, skipping other ceph tests")
+				return
+			}
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephFS]; ok && run {
 				if t.Run("createCephFS", testCreateCephFS) {
 					t.Run("verifyCephFSCreation", testVerifyCephFSCreation)
@@ -620,6 +624,25 @@ func testVerifyCephInstallation(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 		return
+	}
+	_, status, err := Pcc.GetCephClusterStatus(cephConfig.ClusterId)
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
+		return
+	} else {
+		if status == "completed" {
+			log.AuctaLogger.Info("Ceph cluster completed")
+			return
+		} else {
+			msg := fmt.Sprintf("Ceph cluster status %v", status)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
+			return
+		}
 	}
 }
 
