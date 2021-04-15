@@ -80,6 +80,8 @@ func GetNameToTestFunc() (nameToTestFunc map[string]func(*testing.T)) {
 		"testDashboardGetAdvSearchedObjects":        testDashboardGetAdvSearchedObjects,
 		"testDashboardGetAggrHealthCountByType":     testDashboardGetAggrHealthCountByType,
 		"testDashboardGetMetadataEnumStrings":       testDashboardGetMetadataEnumStrings,
+		"addPrivatePublicCert":                      addPrivatePublicCert,
+		"testRGW":                                   testRGW,
 	}
 	return
 }
@@ -96,6 +98,7 @@ func GetDefaultTestMap() (defaultTests map[string][]string) {
 		"TestAddCeph":                 {"getNodes", "updateIpam", "addNetCluster", "testCeph"},
 		"TestDeleteCeph":              {"getNodes", "testDeleteCeph"},
 		"TestCephCache":               {"testCephCacheSetup", "testCephCacheAdd", "testCephCacheDelete"},
+		"TestRGW":                     {"addPrivatePublicCert", "testRGW"},
 		"TestK8sApp":                  {"getNodes", "updateIpam", "addNetCluster", "testK8sApp"},
 		"TestPortus":                  {"getNodes", "addBrownfieldServers", "UploadSecurityAuthProfileCert", "AddAuthenticationProfile", "UploadSecurityPortusKey", "UploadSecurityPortusCert", "AddPortus", "CheckPortusInstallation"},
 		"TestDelPortus":               {"getAvailableNodes", "delAllPortus"},
