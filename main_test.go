@@ -242,6 +242,14 @@ func TestCephCache(t *testing.T) {
 	})
 }
 
+// assumes a cluster named "test-ceph" has been created
+func TestRGW(t *testing.T) {
+	mayRun(t, "testRGW", func(t *testing.T) {
+		mayRun(t, "addPrivatePublicCert", addPrivatePublicCert)
+		mayRun(t, "testAddRGW", testRGW)
+	})
+}
+
 func TestK8sApp(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
