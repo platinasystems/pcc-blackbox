@@ -5,6 +5,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	m "github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/pcc-models/authentication"
 	"github.com/platinasystems/pcc-models/ceph"
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
@@ -26,6 +27,7 @@ func testRGW(t *testing.T) {
 	}
 	t.Run("installRGW", installRGW)
 	t.Run("verifyRGW", verifyRGWDeploy)
+	t.Run("addCephProfile", addCephProfile)
 }
 
 func createPoolRGW(t *testing.T) {
@@ -217,4 +219,32 @@ func verifyRGWDeploy(t *testing.T) {
 			}
 		}
 	}
+}
+
+func addCephProfile(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	serviceType := "ceph"
+	profile := map[string]string{"username": "blackbox"}
+
+	appCredential := authentication.AuthProfile{
+		Name:          fmt.Sprintf("blackbox%s", serviceType),
+		Type:          serviceType,
+		ApplicationId: id,
+		Profile:       profile,
+		Active:        true}
+
+	log.AuctaLogger.Infof("creating the ceph profile", appCredential)
+	created, err := Pcc.CreateAppCredentialProfile(&appCredential)
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+		return
+	}
+	log.AuctaLogger.Infof("created the ceph profile", created)
 }
