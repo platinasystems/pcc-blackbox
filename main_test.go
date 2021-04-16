@@ -242,7 +242,7 @@ func TestCephCache(t *testing.T) {
 	})
 }
 
-// assumes a cluster named "test-ceph" has been created
+// assumes a cluster with name Env.RGWConfiguration.clusterName has been created before
 func TestRGW(t *testing.T) {
 	mayRun(t, "testRGW", func(t *testing.T) {
 		mayRun(t, "addPrivatePublicCert", addPrivatePublicCert)

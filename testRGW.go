@@ -1,12 +1,16 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	m "github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/authentication"
 	"github.com/platinasystems/pcc-models/ceph"
+	"github.com/platinasystems/pcc-models/s3"
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
 	"testing"
@@ -14,20 +18,22 @@ import (
 )
 
 var (
-	id      uint64
-	poolID  uint64
-	cluster *models.CephCluster
+	id         uint64
+	poolID     uint64
+	cluster    *models.CephCluster
+	profileRGW s3.S3Profile
 )
 
 func testRGW(t *testing.T) {
-	t.Run("createPoolRGW", createPoolRGW)
+	/*t.Run("createPoolRGW", createPoolRGW)
 	t.Run("verifyPool", verifyPool)
-	if t.Failed() {
-		return
-	}
+	if t.Failed() { return }
 	t.Run("installRGW", installRGW)
 	t.Run("verifyRGW", verifyRGWDeploy)
+	if t.Failed() { return }
 	t.Run("addCephProfile", addCephProfile)
+	*/
+	t.Run("testPutRetrieveObject", testPutRetrieveObject)
 }
 
 func createPoolRGW(t *testing.T) {
@@ -61,8 +67,9 @@ func createPoolRGW(t *testing.T) {
 	var poolRes *models.CephPool
 	poolRes, err = Pcc.GetCephPool(Env.RGWConfiguration.PoolName, cluster.Id)
 
-	if err != nil && poolRes != nil {
+	if poolRes != nil {
 		log.AuctaLogger.Warn("Pool already exists, skipping creation")
+		poolID = poolRes.Id
 		return
 	}
 
@@ -238,7 +245,9 @@ func addCephProfile(t *testing.T) {
 		Active:        true}
 
 	log.AuctaLogger.Infof("creating the ceph profile", appCredential)
-	created, err := Pcc.CreateAppCredentialProfile(&appCredential)
+
+	var err error
+	profileRGW, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
 	if err != nil {
 		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
@@ -246,5 +255,58 @@ func addCephProfile(t *testing.T) {
 		t.FailNow()
 		return
 	}
-	log.AuctaLogger.Infof("created the ceph profile", created)
+	log.AuctaLogger.Infof("created the ceph profile", profileRGW)
+}
+
+func testPutRetrieveObject(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	ctx := context.Background()
+	endpoint := "172.17.2.114:443"
+	accessKeyID := "XOZXLTVS464LJAXEAOFE"
+	secretAccessKey := "if2mRw2OAjAp2nUE9kqVOkftEB9mLn5BCLqe75Nh"
+	useSSL := true
+
+	minioClient, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		log.AuctaLogger.Error(err)
+	}
+
+	bucketName := "test-bucket-bb"
+
+	if exists, errBucketExists := minioClient.BucketExists(ctx, bucketName); errBucketExists == nil {
+		if !exists {
+			err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+			if err != nil {
+				log.AuctaLogger.Error(err)
+			}
+		} else {
+			log.AuctaLogger.Warnf("Bucket %s already exists", bucketName)
+		}
+	} else {
+		log.AuctaLogger.Error(err)
+	}
+
+	buckets, err := minioClient.ListBuckets(ctx)
+	log.AuctaLogger.Info(buckets)
+
+	objectName := "testEnv.json"
+	filePath := "testEnv.json"
+
+	_, err = minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{})
+	if err != nil {
+		log.AuctaLogger.Error(err)
+	}
+
+	log.AuctaLogger.Infof("Successfully uploaded %s", objectName)
+
+	for object := range minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{}) {
+		log.AuctaLogger.Infof(object.Key)
+	}
 }

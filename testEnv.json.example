@@ -299,5 +299,11 @@
                 }
             ]
         }
-    ]
+    ],
+    "RGWConfiguration":{
+        "clusterName": "test-ceph",
+        "poolName": "bb-rgw-pool",
+        "certName": "test-cert-bb",
+        "rgwName": "test-rgw-bb"
+     }
 }
