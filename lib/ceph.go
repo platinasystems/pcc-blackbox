@@ -1,3 +1,7 @@
+// Copyright © 2020-2021 Platina Systems, Inc. All rights reserved.
+// Use of this source code is governed by the GPL-2 license described in the
+// LICENSE file.
+
 package pcc
 
 import (
@@ -79,7 +83,7 @@ var (
 	CEPH_POOL_CREATION_SUCCESS_NOTIFICATION        = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_COMPLETED)
 	CEPH_POOL_CREATION_FAILED_NOTIFICATION         = fmt.Sprintf("Pool : [%%s] has been [%s] for cluster [%%s]", ceph.CEPH_POOL_DEPLOY_STATUS_FAILED)
 	CEPH_POOL_CREATION_INTERMEDIATE_NOTIFICATION_1 = "Creating Pool : [%s] for cluster [%s]"
-	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from DB"
+	CEPH_POOL_DELETION_SUCCESS_NOTIFICATION        = "Pool [%s] has been removed from cluster"
 	CEPH_POOL_DELETION_FAILED_NOTIFICATION         = "Unable to remove pool [%s]"
 	CEPH_POOL_DELETION_INTERMEDIATE_NOTIFICATION_1 = "Removing Pool : [%s] from cluster [%s]"
 
@@ -204,6 +208,25 @@ func (p *PccClient) GetCephCluster(clusterName string) (cluster *models.CephClus
 
 func (p *PccClient) GetAllCephClusters() (clusterList []*models.CephCluster, err error) {
 	err = p.Get("pccserver/storage/ceph/cluster", &clusterList)
+	return
+}
+
+func (p *PccClient) GetCephClusterStatus(id uint64) (progress int8, status string, err error) {
+	var clusters []*models.CephCluster
+
+	// PCC-3141 cause us to get ALL instead of specific
+	clusters, err = p.GetAllCephClusters()
+	if err != nil {
+		return
+	}
+	for _, ceph := range clusters {
+		if ceph.Id == id {
+			progress = ceph.ProgressPercentage
+			status = ceph.DeployStatus
+			return
+		}
+	}
+	err = fmt.Errorf("Ceph cluster %v: not found", id)
 	return
 }
 

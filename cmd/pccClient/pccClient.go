@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -73,10 +74,16 @@ func pPrintJ(out interface{}) {
 }
 
 func (d HistoricalOut) Print(nodes, fields []string) {
-	var all bool
+	var allNodes, allFields bool
 	fields = append([]string{"hostname"}, fields...)
 	if len(nodes) == 0 {
-		all = true
+		allNodes = true
+	}
+	if len(fields) == 0 {
+		allFields = true
+	}
+	if len(fields) == 1 && fields[0] == "hostname" {
+		allFields = true
 	}
 	nodeMap := map[string]bool{}
 	for _, node := range nodes {
@@ -87,6 +94,18 @@ func (d HistoricalOut) Print(nodes, fields []string) {
 			if len(t.Metrics) == 0 {
 				continue
 			}
+			if allFields {
+				f := sort.StringSlice{}
+				for fieldName := range t.Metrics[0] {
+					if fieldName == "hostname" {
+						continue
+					}
+					f = append(f, fieldName)
+				}
+				f.Sort()
+				fields = append([]string{"hostname"}, f...)
+			}
+
 			header := fmt.Sprintf("%-10v%30v", "nodeId", "timestamp")
 			if i == 0 {
 				for _, field := range fields {
@@ -99,10 +118,16 @@ func (d HistoricalOut) Print(nodes, fields []string) {
 			zone, _ := time.LoadLocation("America/Los_Angeles")
 			timestamp := time.Unix(0, t.Timestamp*1000000).In(zone).Format("MST 2006-01-02 15:04:05.000")
 			line := fmt.Sprintf("%-10v%30v", nodeId, timestamp)
-			include := nodeMap[fmt.Sprintf("%v", nodeId)] || all
+			include := nodeMap[fmt.Sprintf("%v", nodeId)] || allNodes
 			for _, field := range fields {
 				if value, ok := t.Metrics[0][field]; ok {
-					line += fmt.Sprintf("%20v", value)
+					// skip complex fields or super long fields
+					s := fmt.Sprintf("%v", value)
+					if len(s) > 20 {
+						s = s[0:16]
+						s += "..."
+					}
+					line += fmt.Sprintf("%20v", s)
 					if field == "hostname" && nodeMap[fmt.Sprintf("%v", value)] {
 						include = true
 					}
@@ -123,24 +148,30 @@ func main() {
 		nodes, fields string
 		raw           bool
 		err           error
+		hasData       bool
+		dataStr       string
 		data          interface{}
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
 		Password: "admin",
 	}
-	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT] [data]"
+	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data]"
 	usage2 := "[ip addr|domain name] history [topic] [t1] [t2] [-n nodes] [-f fields]"
-	example := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
+	example1 := "172.17.2.34 pccserver/node GET"
+	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
+	example3 := "172.17.2.34 pccserver/cluster/add POST -d '{\"id\":0,\"name\":\"lab\",\"description\":\"test node group\",\"owner\":1}'"
 	if len(os.Args) < 4 {
 		fmt.Println("usage1", os.Args[0], usage)
 		fmt.Println("usage2", os.Args[0], usage2)
-		fmt.Println("example", os.Args[0], example)
+		fmt.Println("example1", os.Args[0], example1)
+		fmt.Println("example2", os.Args[0], example2)
+		fmt.Println("example3", os.Args[0], example3)
 		return
 	}
 	if strings.EqualFold(os.Args[2], "history") && len(os.Args) < 6 {
 		fmt.Println("usage2", os.Args[0], usage2)
-		fmt.Println("example", os.Args[0], example)
+		fmt.Println("example2", os.Args[0], example2)
 		return
 	}
 
@@ -157,6 +188,9 @@ func main() {
 			nodes = p
 		case "-f":
 			fields = p
+		case "-d":
+			hasData = true
+			dataStr = p
 		case "-u":
 			cred.UserName = p
 		case "-p":
@@ -168,9 +202,8 @@ func main() {
 	addr := os.Args[1]
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
-	hasData := len(os.Args) >= 5
 	if hasData {
-		if err = json.Unmarshal([]byte(os.Args[4]), &data); err != nil {
+		if err = json.Unmarshal([]byte(dataStr), &data); err != nil {
 			fmt.Println("expect data to be in json format")
 			fmt.Println(err)
 			return
@@ -222,6 +255,8 @@ func main() {
 		}
 	case strings.EqualFold(cmd, "get"):
 		err = Pcc.Get(endpoint, &out, nil)
+	case strings.EqualFold(cmd, "delete"):
+		err = Pcc.Delete(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "post"):
 		err = Pcc.Post(endpoint, &data, &out)
 	case strings.EqualFold(cmd, "put"):
@@ -231,5 +266,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	pPrint(out)
+	if out != nil {
+		pPrint(out)
+	}
 }

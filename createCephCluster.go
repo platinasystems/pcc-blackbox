@@ -39,12 +39,20 @@ func testCeph(t *testing.T) {
 			} else {
 				log.AuctaLogger.Info("Ceph Cluster creation test is skipped")
 			}
+			if t.Failed() {
+				log.AuctaLogger.Info("Ceph Cluster creation failed, skipping other ceph tests")
+				return
+			}
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephPools]; ok && run {
 				if t.Run("createCephPool", testCreateCephPool) {
 					t.Run("verifyCephPoolCreation", testVerifyCephPoolCreation)
 				}
 			} else {
 				log.AuctaLogger.Info("Ceph Pools creation test is skipped")
+			}
+			if t.Failed() {
+				log.AuctaLogger.Info("Ceph pool creation failed, skipping other ceph tests")
+				return
 			}
 			if run, ok := cephConfig.Tests[pcc.TestCreateCephFS]; ok && run {
 				if t.Run("createCephFS", testCreateCephFS) {
@@ -606,22 +614,44 @@ func testVerifyCephInstallation(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
+	_, status, err := Pcc.GetCephClusterStatus(cephConfig.ClusterId)
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		assert.FailNow()
+		return
+	} else {
+		if status == "completed" {
+			log.AuctaLogger.Info("Ceph cluster completed")
+			return
+		} else {
+			msg := fmt.Sprintf("Ceph cluster status %v", status)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			assert.FailNow()
+			return
+		}
+	}
 }
 
 func verifyCephInstallation(cephConfig *pcc.CephConfiguration) (err error) {
+	var eventStatus pcc.EventStatus
+
 	log.AuctaLogger.Infof("Verifying ceph cluster[%v] installation...Timeout:[%v sec]",
 		cephConfig.ClusterName, pcc.CEPH_3_NODE_INSTALLATION_TIMEOUT)
+
 	_, err = cephConfig.PccClient.GetCephCluster(cephConfig.ClusterName)
 	if err != nil {
 		errMsg := fmt.Sprintf("Ceph cluster[%v] installation verification failed...ERROR: %v", cephConfig.ClusterName, err)
 		err = fmt.Errorf("%v", errMsg)
 	} else {
-		s, err := cephConfig.VerifyCeph(startTime, pcc.CEPH_CLUSTER_INSTALL_EVENT, cephConfig.ClusterName)
+		eventStatus, err = cephConfig.VerifyCeph(startTime, pcc.CEPH_CLUSTER_INSTALL_EVENT, cephConfig.ClusterName)
 		if err != nil {
 			errMsg := fmt.Sprintf("Ceph cluster[%v] installation verification failed...ERROR: %v", cephConfig.ClusterName, err)
 			err = fmt.Errorf("%v", errMsg)
 		} else {
-			log.AuctaLogger.Infof("Ceph cluster [%v] deployed properly..[%v]", cephConfig.ClusterName, s.Msg)
+			log.AuctaLogger.Infof("Ceph cluster [%v] deployed properly..[%v]", cephConfig.ClusterName, eventStatus.Msg)
 		}
 	}
 	return
