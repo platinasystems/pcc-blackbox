@@ -158,21 +158,11 @@ func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier str
 	return
 }
 
-type CreateCephClusterRequest struct {
-	// models.CephCluster
-	Name                     string         `json:"name"`
-	Nodes                    []CephNodes    `json:"nodes"`
-	Version                  string         `json:"version"`
-	Tags                     pq.StringArray `json:"tags"`
-	NetworkClusterId         uint64         `gorm:"network_cluster_id" json:"networkClusterID"`
-	models.CephClusterConfig `json:"config"`
-}
+type CephCluster = models.CephCluster
 
-type CephNodes struct {
-	ID uint64
-}
+type CephNode = models.CephNode
 
-func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint64, err error) {
+func (p *PccClient) CreateCephCluster(request CephCluster) (id uint64, err error) {
 	endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster")
 
 	if err = p.Post(endpoint, &request, nil); err == nil {
