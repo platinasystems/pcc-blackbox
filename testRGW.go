@@ -13,6 +13,7 @@ import (
 	"github.com/platinasystems/pcc-models/s3"
 	"github.com/platinasystems/test"
 	"github.com/platinasystems/tiles/pccserver/models"
+	"strings"
 	"testing"
 	"time"
 )
@@ -46,6 +47,7 @@ func testRGW(t *testing.T) {
 	}
 	t.Run("testRemoveObject", testRemoveObject)
 	t.Run("testRemoveBucket", testRemoveBucket)
+	t.Run("testRemoveRGW", testRemoveRGW)
 }
 
 func createPoolRGW(t *testing.T) {
@@ -109,7 +111,6 @@ func verifyPool(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
-			return
 		case <-tick:
 			pool, err := Pcc.GetCephPool("bb-rgw-pool", cluster.Id)
 			if err != nil {
@@ -118,7 +119,6 @@ func verifyPool(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
-				return
 			}
 			switch pool.DeployStatus {
 			case pcc.RGW_DEPLOY_STATUS_PROGRESS:
@@ -137,7 +137,6 @@ func verifyPool(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
-				return
 			}
 		}
 	}
@@ -205,7 +204,6 @@ func verifyRGWDeploy(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
-			return
 		case <-tick:
 			gw, err := Pcc.GetRadosGW(id)
 			if err != nil {
@@ -214,7 +212,6 @@ func verifyRGWDeploy(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
-				return
 			}
 
 			switch gw.DeployStatus {
@@ -234,7 +231,6 @@ func verifyRGWDeploy(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				t.FailNow()
-				return
 			}
 		}
 	}
@@ -282,7 +278,6 @@ func testPutRetrieveObject(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
-		return
 	}
 	endpoint := fmt.Sprintf("%s:443", node.Host)
 	accessKeyID := profileRGW.AccessKey
@@ -371,5 +366,56 @@ func testRemoveBucket(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
+	}
+}
+
+func testRemoveRGW(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	//Delete is implemented as a synchronous operation, a timeout doesn't necessarily
+	//imply a failure
+
+	if _, err := Pcc.DeleteRadosGW(id); err != nil && !strings.Contains(err.Error(), "Timeout") {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
+
+	timeout := time.After(45 * time.Minute)
+	tick := time.Tick(1 * time.Minute)
+	for true {
+		select {
+		case <-timeout:
+			msg := "Timed out waiting for RGW"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
+		case <-tick:
+			gws, err := Pcc.GetRadosGWs()
+
+			if err != nil {
+				msg := fmt.Sprintf("Failed to get deploy status "+
+					"%v", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				t.FailNow()
+			}
+
+			found := false
+			for _, gw := range gws {
+				if gw.ID == id {
+					found = true
+				}
+			}
+
+			if !found {
+				log.AuctaLogger.Info("RGW uninstalled successfully")
+				return
+			}
+		}
 	}
 }

@@ -15,7 +15,7 @@ const (
 )
 
 // Get all Rados Gateways
-func (pcc *PccClient) GetRadosGWs(serviceType string) (gws []ceph.RadosGateway, err error) {
+func (pcc *PccClient) GetRadosGWs() (gws []ceph.RadosGateway, err error) {
 	err = pcc.Get("pccserver/v2/storage/ceph/rgws", &gws)
 	return
 }
