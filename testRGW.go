@@ -18,22 +18,34 @@ import (
 )
 
 var (
-	id         uint64
-	poolID     uint64
-	cluster    *models.CephCluster
-	profileRGW s3.S3Profile
+	id          uint64
+	poolID      uint64
+	cluster     *models.CephCluster
+	targetNode  *models.CephNode
+	profileRGW  s3.S3Profile
+	minioClient *minio.Client
+	bucketName  string
+	objectName  string
 )
 
 func testRGW(t *testing.T) {
-	/*t.Run("createPoolRGW", createPoolRGW)
+	t.Run("createPoolRGW", createPoolRGW)
 	t.Run("verifyPool", verifyPool)
-	if t.Failed() { return }
+	if t.Failed() {
+		return
+	}
 	t.Run("installRGW", installRGW)
 	t.Run("verifyRGW", verifyRGWDeploy)
-	if t.Failed() { return }
+	if t.Failed() {
+		return
+	}
 	t.Run("addCephProfile", addCephProfile)
-	*/
 	t.Run("testPutRetrieveObject", testPutRetrieveObject)
+	if t.Failed() {
+		return
+	}
+	t.Run("testRemoveObject", testRemoveObject)
+	t.Run("testRemoveBucket", testRemoveBucket)
 }
 
 func createPoolRGW(t *testing.T) {
@@ -156,14 +168,14 @@ func installRGW(t *testing.T) {
 		t.FailNow()
 	}
 
-	targetNode := cluster.Nodes[randomGenerator.Intn(len(cluster.Nodes))].NodeId
+	targetNode = cluster.Nodes[randomGenerator.Intn(len(cluster.Nodes))]
 
 	RGWRequest := ceph.RadosGateway{
 		CephPoolID:    poolID,
 		CertificateID: certId,
 		Name:          Env.RGWConfiguration.RGWName,
 		Port:          443,
-		TargetNodes:   []uint64{targetNode},
+		TargetNodes:   []uint64{targetNode.NodeId},
 	}
 
 	addedRGW, err := Pcc.AddRadosGW(&RGWRequest)
@@ -244,7 +256,7 @@ func addCephProfile(t *testing.T) {
 		Profile:       profile,
 		Active:        true}
 
-	log.AuctaLogger.Infof("creating the ceph profile", appCredential)
+	log.AuctaLogger.Infof("creating the ceph profile %v", appCredential)
 
 	var err error
 	profileRGW, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
@@ -253,7 +265,6 @@ func addCephProfile(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
-		return
 	}
 	log.AuctaLogger.Infof("created the ceph profile", profileRGW)
 }
@@ -265,48 +276,100 @@ func testPutRetrieveObject(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 
 	ctx := context.Background()
-	endpoint := "172.17.2.114:443"
-	accessKeyID := "XOZXLTVS464LJAXEAOFE"
-	secretAccessKey := "if2mRw2OAjAp2nUE9kqVOkftEB9mLn5BCLqe75Nh"
+	node, err := Pcc.GetNode(targetNode.NodeId)
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+		return
+	}
+	endpoint := fmt.Sprintf("%s:443", node.Host)
+	accessKeyID := profileRGW.AccessKey
+	secretAccessKey := profileRGW.SecretKey
 	useSSL := true
 
-	minioClient, err := minio.New(endpoint, &minio.Options{
+	minioClient, err = minio.New(endpoint, &minio.Options{
 		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
 		Secure: useSSL,
 	})
 	if err != nil {
-		log.AuctaLogger.Error(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
-	bucketName := "test-bucket-bb"
+	bucketName = "test-bucket-bb"
 
 	if exists, errBucketExists := minioClient.BucketExists(ctx, bucketName); errBucketExists == nil {
 		if !exists {
 			err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
 			if err != nil {
-				log.AuctaLogger.Error(err)
+				msg := fmt.Sprintf("%v", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				t.FailNow()
 			}
 		} else {
 			log.AuctaLogger.Warnf("Bucket %s already exists", bucketName)
 		}
 	} else {
-		log.AuctaLogger.Error(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	buckets, err := minioClient.ListBuckets(ctx)
 	log.AuctaLogger.Info(buckets)
 
-	objectName := "testEnv.json"
+	objectName = "testEnv.json"
 	filePath := "testEnv.json"
 
 	_, err = minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{})
 	if err != nil {
-		log.AuctaLogger.Error(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 
 	log.AuctaLogger.Infof("Successfully uploaded %s", objectName)
 
 	for object := range minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{}) {
 		log.AuctaLogger.Infof(object.Key)
+	}
+}
+
+func testRemoveObject(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	log.AuctaLogger.Infof("Removing object: %s", objectName)
+	err := minioClient.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
+}
+
+func testRemoveBucket(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	log.AuctaLogger.Infof("Removing bucket: %s", bucketName)
+	err := minioClient.RemoveBucket(context.Background(), bucketName)
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
