@@ -27,6 +27,8 @@ var (
 	minioClient *minio.Client
 	bucketName  string
 	objectName  string
+	profiles    []s3.S3Profile
+	ctx         = context.Background()
 )
 
 func testRGW(t *testing.T) {
@@ -37,17 +39,30 @@ func testRGW(t *testing.T) {
 	}
 	t.Run("installRGW", installRGW)
 	t.Run("verifyRGW", verifyRGWDeploy)
+	t.Run("createCephProfilesWithPermission", createCephProfilesWithPermission)
 	if t.Failed() {
 		return
 	}
-	t.Run("addCephProfile", addCephProfile)
-	t.Run("testPutRetrieveObject", testPutRetrieveObject)
+	t.Run("testAllProfilesPermission", testAllProfilesPermission)
 	if t.Failed() {
 		return
 	}
+	t.Run("testRemoveRGW", testRemoveRGW)
+}
+
+func testAllProfilesPermission(t *testing.T) {
+	for _, p := range profiles {
+		profileRGW = p
+		t.Run("addCephProfile", addCephCredential)
+		t.Run("testProfilePermission", testProfilePermission)
+	}
+}
+func testProfilePermission(t *testing.T) {
+	t.Run("testCreateBucket", testCreateBucket)
+	t.Run("testPutObject", testPutObject)
+	t.Run("testRetrieveObject", testRetrieveObject)
 	t.Run("testRemoveObject", testRemoveObject)
 	t.Run("testRemoveBucket", testRemoveBucket)
-	t.Run("testRemoveRGW", testRemoveRGW)
 }
 
 func createPoolRGW(t *testing.T) {
@@ -236,20 +251,35 @@ func verifyRGWDeploy(t *testing.T) {
 	}
 }
 
-func addCephProfile(t *testing.T) {
+func createCephProfilesWithPermission(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	profileRWD := s3.S3Profile{
+		Username:         "blackbox-rwd",
+		ReadPermission:   true,
+		WritePermission:  true,
+		DeletePermission: true,
+	}
+
+	profiles = append(profiles, profileRWD)
+}
+
+func addCephCredential(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
 	serviceType := "ceph"
-	profile := map[string]string{"username": "blackbox"}
 
 	appCredential := authentication.AuthProfile{
-		Name:          fmt.Sprintf("blackbox%s", serviceType),
+		Name:          fmt.Sprintf("%s-%s", profileRGW.Username, serviceType),
 		Type:          serviceType,
 		ApplicationId: id,
-		Profile:       profile,
+		Profile:       profileRGW,
 		Active:        true}
 
 	log.AuctaLogger.Infof("creating the ceph profile %v", appCredential)
@@ -265,29 +295,32 @@ func addCephProfile(t *testing.T) {
 	log.AuctaLogger.Infof("created the ceph profile", profileRGW)
 }
 
-func testPutRetrieveObject(t *testing.T) {
+func initS3Client(host string, accessKey string, secretKey string) (*minio.Client, error) {
+	endpoint := fmt.Sprintf("%s:443", host)
+	accessKeyID := accessKey
+	secretAccessKey := secretKey
+	useSSL := true
+
+	client, err := minio.New(endpoint, &minio.Options{
+		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
+		Secure: useSSL,
+	})
+	if err != nil {
+		return nil, err
+	}
+	return client, nil
+}
+
+func testCreateBucket(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	ctx := context.Background()
 	node, err := Pcc.GetNode(targetNode.NodeId)
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
-	endpoint := fmt.Sprintf("%s:443", node.Host)
-	accessKeyID := profileRGW.AccessKey
-	secretAccessKey := profileRGW.SecretKey
-	useSSL := true
 
-	minioClient, err = minio.New(endpoint, &minio.Options{
-		Creds:  credentials.NewStaticV4(accessKeyID, secretAccessKey, ""),
-		Secure: useSSL,
-	})
+	minioClient, err = initS3Client(node.Host, profileRGW.AccessKey, profileRGW.SecretKey)
+
 	if err != nil {
 		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
@@ -318,7 +351,15 @@ func testPutRetrieveObject(t *testing.T) {
 
 	buckets, err := minioClient.ListBuckets(ctx)
 	log.AuctaLogger.Info(buckets)
+}
 
+func testPutObject(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
 	objectName = "testEnv.json"
 	filePath := "testEnv.json"
 
@@ -331,10 +372,24 @@ func testPutRetrieveObject(t *testing.T) {
 	}
 
 	log.AuctaLogger.Infof("Successfully uploaded %s", objectName)
+}
 
-	for object := range minioClient.ListObjects(ctx, bucketName, minio.ListObjectsOptions{}) {
-		log.AuctaLogger.Infof(object.Key)
+func testRetrieveObject(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	_, err := minioClient.GetObject(ctx, bucketName, objectName, minio.GetObjectOptions{})
+
+	if err != nil {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
+
+	log.AuctaLogger.Infof("Successfully retrieved object %s", objectName)
 }
 
 func testRemoveObject(t *testing.T) {

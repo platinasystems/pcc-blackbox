@@ -17,7 +17,7 @@ require (
 	github.com/morikuni/aec v1.0.0 // indirect
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/platinasystems/go-common v0.0.0-20210316090614-55f8ad8c7082
-	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210301182854-26002441c6a3
+	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210420142308-4b4a2630570e
 	github.com/platinasystems/test v1.8.6
 	github.com/platinasystems/tiles v1.7.0-rc3
 	github.com/shirou/gopsutil v2.20.3+incompatible // indirect
