@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -295,7 +296,9 @@ func addCephCredential(t *testing.T) {
 
 	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(15 * time.Second)
-	for true {
+	found := false
+
+	for !found {
 		select {
 		case <-timeout:
 			msg := "Timed out waiting for RGW"
@@ -313,18 +316,14 @@ func addCephCredential(t *testing.T) {
 				t.FailNow()
 			}
 
-			found := false
 			for _, ac := range acs {
 				if ac.Name == fmt.Sprintf("%s-%s", profileRGW.Username, "ceph") {
-					log.AuctaLogger.Infof("%v", ac.Profile)
-					profileRGW = profileRGW.Clone(ac.Profile).(s3.S3Profile)
+					jsonString, _ := json.Marshal(ac.Profile)
+					json.Unmarshal(jsonString, &profileRGW)
 					if profileRGW.AccessKey != "" {
 						found = true
 					}
 				}
-			}
-			if found {
-				break
 			}
 		}
 	}
