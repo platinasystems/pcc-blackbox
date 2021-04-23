@@ -285,13 +285,50 @@ func addCephCredential(t *testing.T) {
 	log.AuctaLogger.Infof("creating the ceph profile %v", appCredential)
 
 	var err error
-	profileRGW, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
+	_, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
 	if err != nil {
 		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
 	}
+
+	timeout := time.After(5 * time.Minute)
+	tick := time.Tick(15 * time.Second)
+	for true {
+		select {
+		case <-timeout:
+			msg := "Timed out waiting for RGW"
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
+		case <-tick:
+			acs, err := Pcc.GetAppCredentials("ceph")
+
+			if err != nil {
+				msg := fmt.Sprintf("Failed to get deploy status "+
+					"%v", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				t.FailNow()
+			}
+
+			found := false
+			for _, ac := range acs {
+				if ac.Name == fmt.Sprintf("%s-%s", profileRGW.Username, "ceph") {
+					log.AuctaLogger.Infof("%v", ac.Profile)
+					profileRGW = profileRGW.Clone(ac.Profile).(s3.S3Profile)
+					if profileRGW.AccessKey != "" {
+						found = true
+					}
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+
 	log.AuctaLogger.Infof("created the ceph profile", profileRGW)
 }
 
