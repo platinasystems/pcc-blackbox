@@ -59,7 +59,7 @@ const (
 
 var (
 	CEPH_INSTALLATION_SUCCESS_NOTIFICATION        = "Ceph cluster has been deployed"
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster [%+v] installation failed"
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster %+v installation failed"
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_2       = "Unable to create ceph cluster "
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_3       = "Unable to store ceph cluster "
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_4       = "Unable to deploy ceph  cluster [%s] as there are no OSD nodes available"
