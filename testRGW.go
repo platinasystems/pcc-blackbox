@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
@@ -48,7 +49,7 @@ func testRGW(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	t.Run("testRemoveRGW", testRemoveRGW)
+	//t.Run("testRemoveRGW", testRemoveRGW)
 }
 
 func testAllProfilesPermission(t *testing.T) {
@@ -77,13 +78,7 @@ func createPoolRGW(t *testing.T) {
 	)
 
 	cluster, err = Pcc.GetCephCluster(Env.RGWConfiguration.ClusterName)
-
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkError(t, res, err)
 
 	poolRequest := pcc.CreateCephPoolRequest{
 		CephClusterId: cluster.Id,
@@ -104,12 +99,7 @@ func createPoolRGW(t *testing.T) {
 	}
 
 	poolID, err = Pcc.CreateCephPool(poolRequest)
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkError(t, res, err)
 }
 
 func verifyPool(t *testing.T) {
@@ -124,17 +114,13 @@ func verifyPool(t *testing.T) {
 		select {
 		case <-timeout:
 			msg := "Timed out waiting for pool response"
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
+			checkError(t, res, errors.New(msg))
 		case <-tick:
 			pool, err := Pcc.GetCephPool("bb-rgw-pool", cluster.Id)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 			switch pool.DeployStatus {
 			case pcc.RGW_DEPLOY_STATUS_PROGRESS:
@@ -144,15 +130,11 @@ func verifyPool(t *testing.T) {
 				return
 			case pcc.RGW_DEPLOY_STATUS_FAILED:
 				msg := "RGW installation failed"
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			default:
 				msg := fmt.Sprintf("Unexpected status - %v",
 					pool.DeployStatus)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 		}
 	}
@@ -172,15 +154,10 @@ func installRGW(t *testing.T) {
 			certId = cert.Id
 		} else {
 			msg := fmt.Sprintf("No certificate found with name %s", certName)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
+			checkError(t, res, errors.New(msg))
 		}
 	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+		checkError(t, res, err)
 	}
 
 	targetNode = cluster.Nodes[randomGenerator.Intn(len(cluster.Nodes))]
@@ -194,13 +171,7 @@ func installRGW(t *testing.T) {
 	}
 
 	addedRGW, err := Pcc.AddRadosGW(&RGWRequest)
-
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkError(t, res, err)
 
 	id = addedRGW.ID
 }
@@ -217,17 +188,13 @@ func verifyRGWDeploy(t *testing.T) {
 		select {
 		case <-timeout:
 			msg := "Timed out waiting for RGW"
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
+			checkError(t, res, errors.New(msg))
 		case <-tick:
 			gw, err := Pcc.GetRadosGW(id)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 
 			switch gw.DeployStatus {
@@ -238,15 +205,11 @@ func verifyRGWDeploy(t *testing.T) {
 				return
 			case pcc.RGW_DEPLOY_STATUS_FAILED:
 				msg := "RGW installation failed"
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			default:
 				msg := fmt.Sprintf("Unexpected status - %v",
 					gw.DeployStatus)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 		}
 	}
@@ -265,7 +228,15 @@ func createCephProfilesWithPermission(t *testing.T) {
 		DeletePermission: true,
 	}
 
-	profiles = append(profiles, profileRWD)
+	profileR := s3.S3Profile{
+		Username:         "blackbox-r",
+		ReadPermission:   true,
+		WritePermission:  false,
+		DeletePermission: false,
+	}
+
+	profiles = append(profiles, profileRWD, profileR)
+
 }
 
 func addCephCredential(t *testing.T) {
@@ -287,12 +258,7 @@ func addCephCredential(t *testing.T) {
 
 	var err error
 	_, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkError(t, res, err)
 
 	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(15 * time.Second)
@@ -302,18 +268,13 @@ func addCephCredential(t *testing.T) {
 		select {
 		case <-timeout:
 			msg := "Timed out waiting for RGW"
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
+			checkError(t, res, errors.New(msg))
 		case <-tick:
 			acs, err := Pcc.GetAppCredentials("ceph")
-
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 
 			for _, ac := range acs {
@@ -356,33 +317,19 @@ func testCreateBucket(t *testing.T) {
 	node, err := Pcc.GetNode(targetNode.NodeId)
 
 	minioClient, err = initS3Client(node.Host, profileRGW.AccessKey, profileRGW.SecretKey)
-
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkError(t, res, err)
 
 	bucketName = "test-bucket-bb"
 
 	if exists, errBucketExists := minioClient.BucketExists(ctx, bucketName); errBucketExists == nil {
 		if !exists {
 			err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-			if err != nil {
-				msg := fmt.Sprintf("%v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
-			}
+			checkResultByPermission(t, res, err, profileRGW.WritePermission, "create a bucket")
 		} else {
 			log.AuctaLogger.Warnf("Bucket %s already exists", bucketName)
 		}
 	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+		checkError(t, res, err)
 	}
 
 	buckets, err := minioClient.ListBuckets(ctx)
@@ -400,14 +347,7 @@ func testPutObject(t *testing.T) {
 	filePath := "testEnv.json"
 
 	_, err = minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{})
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
-
-	log.AuctaLogger.Infof("Successfully uploaded %s", objectName)
+	checkResultByPermission(t, res, err, profileRGW.WritePermission, "put an object")
 }
 
 func testRetrieveObject(t *testing.T) {
@@ -417,15 +357,7 @@ func testRetrieveObject(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 
 	_, err := minioClient.GetObject(ctx, bucketName, objectName, minio.GetObjectOptions{})
-
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
-
-	log.AuctaLogger.Infof("Successfully retrieved object %s", objectName)
+	checkResultByPermission(t, res, err, profileRGW.ReadPermission, "retrieve an object")
 }
 
 func testRemoveObject(t *testing.T) {
@@ -436,12 +368,7 @@ func testRemoveObject(t *testing.T) {
 
 	log.AuctaLogger.Infof("Removing object: %s", objectName)
 	err := minioClient.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkResultByPermission(t, res, err, profileRGW.DeletePermission, "remove an object")
 }
 
 func testRemoveBucket(t *testing.T) {
@@ -452,12 +379,7 @@ func testRemoveBucket(t *testing.T) {
 
 	log.AuctaLogger.Infof("Removing bucket: %s", bucketName)
 	err := minioClient.RemoveBucket(context.Background(), bucketName)
-	if err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	checkResultByPermission(t, res, err, profileRGW.DeletePermission, "remove a bucket")
 }
 
 func testRemoveRGW(t *testing.T) {
@@ -470,10 +392,7 @@ func testRemoveRGW(t *testing.T) {
 	//imply a failure
 
 	if _, err := Pcc.DeleteRadosGW(id); err != nil && !strings.Contains(err.Error(), "Timeout") {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+		checkError(t, res, err)
 	}
 
 	timeout := time.After(45 * time.Minute)
@@ -482,18 +401,14 @@ func testRemoveRGW(t *testing.T) {
 		select {
 		case <-timeout:
 			msg := "Timed out waiting for RGW"
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
+			checkError(t, res, errors.New(msg))
 		case <-tick:
 			gws, err := Pcc.GetRadosGWs()
 
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
+				checkError(t, res, errors.New(msg))
 			}
 
 			found := false
@@ -507,6 +422,25 @@ func testRemoveRGW(t *testing.T) {
 				log.AuctaLogger.Info("RGW uninstalled successfully")
 				return
 			}
+		}
+	}
+}
+
+func checkResultByPermission(t *testing.T, res *m.TestResult, err error, permission bool, operation string) {
+	if err == nil {
+		if permission {
+			log.AuctaLogger.Infof("Success: %s", operation)
+		} else {
+			msg := fmt.Sprintf("The user is not supposed to be able to %s", operation)
+			checkError(t, res, errors.New(msg))
+		}
+	} else {
+		if permission {
+			msg := fmt.Sprintf("%v", err)
+			checkError(t, res, errors.New(msg))
+		} else if !strings.Contains(err.Error(), "Access Denied") {
+			msg := fmt.Sprintf("%v", err)
+			checkError(t, res, errors.New(msg))
 		}
 	}
 }
