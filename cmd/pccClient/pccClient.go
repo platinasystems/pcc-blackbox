@@ -255,6 +255,8 @@ func main() {
 		}
 	case strings.EqualFold(cmd, "get"):
 		err = Pcc.Get(endpoint, &out, nil)
+	case strings.EqualFold(cmd, "getf"):
+		out, err = Pcc.GetFile(endpoint)
 	case strings.EqualFold(cmd, "delete"):
 		err = Pcc.Delete(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "post"):
