@@ -222,10 +222,17 @@ func createCephProfilesWithPermission(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 
 	profileRWD := s3.S3Profile{
-		Username:         "blackbox-rwd",
+		Username:         "blackbox-full",
 		ReadPermission:   true,
 		WritePermission:  true,
 		DeletePermission: true,
+	}
+
+	profileRW := s3.S3Profile{
+		Username:         "blackbox-rw",
+		ReadPermission:   true,
+		WritePermission:  true,
+		DeletePermission: false,
 	}
 
 	profileR := s3.S3Profile{
@@ -235,7 +242,7 @@ func createCephProfilesWithPermission(t *testing.T) {
 		DeletePermission: false,
 	}
 
-	profiles = append(profiles, profileRWD, profileR)
+	profiles = append(profiles, profileRWD, profileRW, profileR)
 
 }
 
@@ -438,6 +445,8 @@ func checkResultByPermission(t *testing.T, res *m.TestResult, err error, permiss
 		if permission {
 			msg := fmt.Sprintf("%v", err)
 			checkError(t, res, errors.New(msg))
+		} else if strings.Contains(err.Error(), "Access Denied") {
+			log.AuctaLogger.Infof("Success: %s, denied", operation)
 		} else if !strings.Contains(err.Error(), "Access Denied") {
 			msg := fmt.Sprintf("%v", err)
 			checkError(t, res, errors.New(msg))
