@@ -122,3 +122,11 @@ func Authenticate(addr string, cred Credential) (client *PccClient, err error) {
 	client.bearer = fmt.Sprintf("Bearer %s", out.Token)
 	return
 }
+
+func (p *PccClient) ChangeUser(cred Credential) (err error) {
+	var out struct{ Token string }
+	if err = p.Post("security/auth", cred, &out); err == nil {
+		p.bearer = fmt.Sprintf("Bearer %s", out.Token)
+	}
+	return
+}

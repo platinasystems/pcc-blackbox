@@ -415,6 +415,14 @@ func TestUserManagement(t *testing.T) {
 	})
 }
 
+func TestAuthentication(t *testing.T) {
+	count++
+	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
+	mayRun(t, "TestAuthentication", func(t *testing.T) {
+		mayRun(t, "testAuthentication", testAuthentication)
+	})
+}
+
 func TestKeyManager(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
