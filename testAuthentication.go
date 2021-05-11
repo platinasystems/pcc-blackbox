@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"github.com/dgrijalva/jwt-go"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	m "github.com/platinasystems/pcc-blackbox/models"
@@ -23,7 +24,7 @@ var (
 func testAuthentication(t *testing.T) {
 	t.Run("addRolesAndTenants", addRolesAndTenants)
 	t.Run("addOktaGroupMapping", checkOktaGroupMapping)
-	t.Run("addLDAPGroupMapping", checkLDAPGroupMapping)
+	//t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
 	t.Run("addPlatinaUsers", addPlatinaUsers)
 	t.Run("checkTenantsScope", checkTenantsScope)
 	t.Run("checkRolePermissions", checkRolePermissions)
@@ -94,6 +95,37 @@ func checkOktaGroupMapping(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+	group := &pcc.ThirdPartyGroup{
+		Group:    "test-group",
+		RoleID:   roles["role-child-rw"].Id,
+		TenantID: tenant.ID,
+		Provider: "okta",
+		Owner:    tenant.ID,
+	}
+
+	group, err = Pcc.AddThirdPartyGroup(group)
+	checkError(t, res, err)
+
+	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: "garena@auctacognitio.net", Password: "ciaociaociao", Provider: "okta"})
+	checkError(t, res, err)
+
+	var token *jwt.Token
+	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("AllYourBase"), nil
+	})
+	claims := token.Claims.(*pcc.TokenClaims)
+
+	if claims.Tenant != tenant.ID {
+		err = errors.New("Error assigning tenant id to user")
+	}
+
+	if claims.Role != roles["role-child-rw"].Id {
+		err = errors.New("Error assigning role id to user")
+	}
 }
 
 func checkLDAPGroupMapping(t *testing.T) {
@@ -101,12 +133,47 @@ func checkLDAPGroupMapping(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+	group := &pcc.ThirdPartyGroup{
+		Group:    "test-group",
+		RoleID:   roles["role-child-rw"].Id,
+		TenantID: tenant.ID,
+		Provider: "ldap",
+		Owner:    tenant.ID,
+	}
+
+	group, err = Pcc.AddThirdPartyGroup(group)
+	checkError(t, res, err)
+
+	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: "INSERTLDAPCNHERE", Password: "INSERTPASSWORD HERE", Provider: "ldap"})
+	checkError(t, res, err)
+
+	var token *jwt.Token
+	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte("AllYourBase"), nil
+	})
+	claims := token.Claims.(*pcc.TokenClaims)
+
+	if claims.Tenant != tenant.ID {
+		err = errors.New("Error assigning tenant id to user")
+	}
+
+	if claims.Role != roles["role-child-rw"].Id {
+		err = errors.New("Error assigning role id to user")
+	}
 }
+
 func addPlatinaUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	checkError(t, res, err)
 
 	users = make(map[string]*pcc.User)
 	userRequests = make(map[string]*pcc.UserRequest)
@@ -117,6 +184,7 @@ func addPlatinaUsers(t *testing.T) {
 		FirstName: "a",
 		LastName:  "a",
 		Password:  "password-bb",
+		TenantId:  1,
 		RoleId:    roles["role-parent-ro"].Id,
 	}
 	userRequests["user-parent-rw"] = &pcc.UserRequest{
@@ -124,6 +192,7 @@ func addPlatinaUsers(t *testing.T) {
 		FirstName: "b",
 		LastName:  "b",
 		Password:  "password-bb",
+		TenantId:  1,
 		RoleId:    roles["role-parent-rw"].Id,
 	}
 
@@ -144,7 +213,6 @@ func addPlatinaUsers(t *testing.T) {
 		RoleId:    roles["role-child-rw"].Id,
 	}
 
-	var err error
 	for _, username := range userNames {
 		users[username], err = Pcc.AddUserReq(*userRequests[username])
 		checkError(t, res, err)

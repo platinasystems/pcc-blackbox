@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/platinasystems/pcc-models/security"
 )
 
@@ -95,6 +96,22 @@ type User struct {
 	Role      *SecurityRole   `json:"role"`
 	Tenant    security.Tenant `json:"tenant"`
 	Profile   Profile         `json:"profile"`
+}
+
+type ThirdPartyGroup struct {
+	Id       uint64 `json:"id"`
+	Owner    uint64 `json:"owner"`
+	Provider string `json:"provider"`
+	Group    string `json:"groupId"`
+	RoleID   uint64 `json:"roleId"`
+	TenantID uint64 `json:"tenantId"`
+}
+
+type TokenClaims struct {
+	Provider string `json:"provider"`
+	Role     uint64 `json:"role"`
+	Tenant   uint64 `json:"tenant"`
+	jwt.StandardClaims
 }
 
 func (pcc *PccClient) AddTenant(tenant security.Tenant) (t *security.Tenant, err error) {
@@ -309,5 +326,13 @@ func (pcc *PccClient) GetEntity(id uint64) (role *GenericModel, err error) {
 	endpoint := fmt.Sprintf("user-management/entity/%d", id)
 	err = pcc.Get(endpoint, &r)
 	role = &r
+	return
+}
+
+func (pcc *PccClient) AddThirdPartyGroup(groupReq *ThirdPartyGroup) (group *ThirdPartyGroup, err error) {
+	var g ThirdPartyGroup
+	endpoint := fmt.Sprintf("user-management/third-party/groups")
+	err = pcc.Post(endpoint, groupReq, &g)
+	group = &g
 	return
 }

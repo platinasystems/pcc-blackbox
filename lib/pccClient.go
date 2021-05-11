@@ -13,6 +13,7 @@ import (
 type Credential struct {
 	UserName string `json:"username"`
 	Password string `json:"password"`
+	Provider string `json:"provider,omitempty"`
 }
 
 type PccClient struct {
@@ -129,4 +130,8 @@ func (p *PccClient) ChangeUser(cred Credential) (err error) {
 		p.bearer = fmt.Sprintf("Bearer %s", out.Token)
 	}
 	return
+}
+
+func (p *PccClient) GetToken() (token string) {
+	return p.bearer[7:]
 }
