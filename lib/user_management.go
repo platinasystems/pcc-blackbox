@@ -113,6 +113,19 @@ type TokenClaims struct {
 	Tenant   uint64 `json:"tenant"`
 	jwt.StandardClaims
 }
+type SecurityConfig struct {
+	Auth struct {
+		Service struct {
+			Okta struct {
+				Domain string `yaml:"domain"`
+				Token  string `yaml:"token"`
+			} `yaml:"okta"`
+			LDAP struct {
+				Url string `yaml:"url"`
+			} `yaml:"ldap"`
+		} `yaml:"service"`
+	} `yaml:"auth"`
+}
 
 func (pcc *PccClient) AddTenant(tenant security.Tenant) (t *security.Tenant, err error) {
 	endpoint := fmt.Sprintf("user-management/tenant/register")

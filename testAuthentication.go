@@ -8,11 +8,16 @@ import (
 	m "github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/security"
 	"github.com/platinasystems/test"
+	"gopkg.in/yaml.v2"
+	"io/ioutil"
+	"os/exec"
 	"testing"
 	"time"
 )
 
 var (
+	ldapReady    bool
+	oktaReady    bool
 	roles        map[string]*pcc.SecurityRole
 	users        map[string]*pcc.User
 	userRequests map[string]*pcc.UserRequest
@@ -22,6 +27,7 @@ var (
 )
 
 func testAuthentication(t *testing.T) {
+	t.Run("checkSecurityConfigFile", checkSecurityConfigFile)
 	t.Run("addRolesAndTenants", addRolesAndTenants)
 	t.Run("checkOktaGroupMapping", checkOktaGroupMapping)
 	t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
@@ -30,6 +36,41 @@ func testAuthentication(t *testing.T) {
 	t.Run("checkRolePermissions", checkRolePermissions)
 	t.Run("deleteUsers", deleteUsers)
 	t.Run("deleteRolesAndTenants", deleteRolesAndTenants)
+
+}
+func checkSecurityConfigFile(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var config pcc.SecurityConfig
+
+	ldapReady = true
+	oktaReady = true
+
+	cmd := exec.Command("docker", "cp", "security:/home/conf/application.yml", ".")
+	err := cmd.Run()
+	checkError(t, res, err)
+
+	appYaml, _ := ioutil.ReadFile("application.yml")
+
+	cmd = exec.Command("rm", "application.yml")
+	err = cmd.Run()
+	checkError(t, res, err)
+
+	err = yaml.Unmarshal(appYaml, &config)
+	checkError(t, res, err)
+
+	if config.Auth.Service.Okta.Token == "" || config.Auth.Service.Okta.Domain == "" {
+		oktaReady = false
+		log.AuctaLogger.Warn("The security service is not configured for okta")
+	}
+
+	if config.Auth.Service.LDAP.Url == "" {
+		oktaReady = false
+		log.AuctaLogger.Warn("The security service is not configured for LDAP")
+	}
 }
 
 func addRolesAndTenants(t *testing.T) {
@@ -97,6 +138,10 @@ func checkOktaGroupMapping(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckOktaAuthConfiguration)
 
+	if !oktaReady {
+		t.SkipNow()
+	}
+
 	var err error
 	group := &pcc.ThirdPartyGroup{
 		Group:    Env.AuthConfiguration.OktaGroup,
@@ -133,6 +178,10 @@ func checkLDAPGroupMapping(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 	CheckDependencies(t, res, Env.CheckLDAPAuthConfiguration)
+
+	if !ldapReady {
+		t.SkipNow()
+	}
 
 	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
 	checkError(t, res, err)
