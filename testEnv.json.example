@@ -299,5 +299,13 @@
                 }
             ]
         }
-    ]
+    ],
+    "AuthConfiguration":{
+        "oktaGroup":"",
+        "oktaUsername": "",
+        "oktaPassword": "",
+        "LDAPGroup": "",
+        "LDAPUsername": "",
+        "LDAPPassword": "",
+      }
 }

@@ -23,7 +23,7 @@ var (
 
 func testAuthentication(t *testing.T) {
 	t.Run("addRolesAndTenants", addRolesAndTenants)
-	t.Run("addOktaGroupMapping", checkOktaGroupMapping)
+	t.Run("checkOktaGroupMapping", checkOktaGroupMapping)
 	t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
 	t.Run("addPlatinaUsers", addPlatinaUsers)
 	t.Run("checkTenantsScope", checkTenantsScope)
@@ -95,6 +95,7 @@ func checkOktaGroupMapping(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckOktaAuthConfiguration)
 
 	var err error
 	group := &pcc.ThirdPartyGroup{
@@ -131,6 +132,7 @@ func checkLDAPGroupMapping(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, Env.CheckLDAPAuthConfiguration)
 
 	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
 	checkError(t, res, err)
