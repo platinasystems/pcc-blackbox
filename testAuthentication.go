@@ -24,7 +24,7 @@ var (
 func testAuthentication(t *testing.T) {
 	t.Run("addRolesAndTenants", addRolesAndTenants)
 	t.Run("addOktaGroupMapping", checkOktaGroupMapping)
-	//t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
+	t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
 	t.Run("addPlatinaUsers", addPlatinaUsers)
 	t.Run("checkTenantsScope", checkTenantsScope)
 	t.Run("checkRolePermissions", checkRolePermissions)
@@ -98,7 +98,7 @@ func checkOktaGroupMapping(t *testing.T) {
 
 	var err error
 	group := &pcc.ThirdPartyGroup{
-		Group:    "test-group",
+		Group:    Env.AuthConfiguration.OktaGroup,
 		RoleID:   roles["role-child-rw"].Id,
 		TenantID: tenant.ID,
 		Provider: "okta",
@@ -110,13 +110,11 @@ func checkOktaGroupMapping(t *testing.T) {
 
 	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
 
-	err = Pcc.ChangeUser(pcc.Credential{UserName: "garena@auctacognitio.net", Password: "ciaociaociao", Provider: "okta"})
+	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.AuthConfiguration.OktaUsername, Password: Env.AuthConfiguration.OktaPassword, Provider: "okta"})
 	checkError(t, res, err)
 
 	var token *jwt.Token
-	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("AllYourBase"), nil
-	})
+	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, nil)
 	claims := token.Claims.(*pcc.TokenClaims)
 
 	if claims.Tenant != tenant.ID {
@@ -134,9 +132,11 @@ func checkLDAPGroupMapping(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	var err error
+	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	checkError(t, res, err)
+
 	group := &pcc.ThirdPartyGroup{
-		Group:    "test-group",
+		Group:    Env.AuthConfiguration.LDAPGroup,
 		RoleID:   roles["role-child-rw"].Id,
 		TenantID: tenant.ID,
 		Provider: "ldap",
@@ -148,13 +148,11 @@ func checkLDAPGroupMapping(t *testing.T) {
 
 	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
 
-	err = Pcc.ChangeUser(pcc.Credential{UserName: "INSERTLDAPCNHERE", Password: "INSERTPASSWORD HERE", Provider: "ldap"})
+	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.AuthConfiguration.LDAPUsername, Password: Env.AuthConfiguration.LDAPPassword, Provider: "ldap"})
 	checkError(t, res, err)
 
 	var token *jwt.Token
-	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte("AllYourBase"), nil
-	})
+	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, nil)
 	claims := token.Claims.(*pcc.TokenClaims)
 
 	if claims.Tenant != tenant.ID {

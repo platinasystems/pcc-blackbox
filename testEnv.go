@@ -27,6 +27,7 @@ type testEnv struct {
 	Availability          Availability
 	NetIpam               []netIpam
 	NetCluster            []netCluster
+	AuthConfiguration     AuthConfiguration
 }
 
 type node struct {
@@ -92,6 +93,15 @@ type netIpam struct {
 	Subnet    string
 	PubAccess bool
 	Routed    bool
+}
+
+type AuthConfiguration struct {
+	OktaGroup    string `json"oktaGroup"`
+	OktaUsername string `json"oktaUsername"`
+	OktaPassword string `json"oktaPassword"`
+	LDAPGroup    string `json"LDAPGroup"`
+	LDAPUsername string `json"LDAPUsername"`
+	LDAPPassword string `json"LDAPPassword"`
 }
 
 var exampleEnv = testEnv{
