@@ -49,7 +49,7 @@ func testRGW(t *testing.T) {
 	if t.Failed() {
 		return
 	}
-	//t.Run("testRemoveRGW", testRemoveRGW)
+	t.Run("testRemoveRGW", testRemoveRGW)
 }
 
 func testAllProfilesPermission(t *testing.T) {
