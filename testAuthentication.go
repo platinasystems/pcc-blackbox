@@ -183,7 +183,7 @@ func checkLDAPGroupMapping(t *testing.T) {
 		t.SkipNow()
 	}
 
-	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 
 	group := &pcc.ThirdPartyGroup{
@@ -221,7 +221,7 @@ func addPlatinaUsers(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 
 	users = make(map[string]*pcc.User)
@@ -350,7 +350,7 @@ func deleteUsers(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 
 	for _, username := range userNames {
@@ -365,7 +365,7 @@ func deleteRolesAndTenants(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	err := Pcc.ChangeUser(pcc.Credential{UserName: "admin", Password: "admin"})
+	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 
 	for _, roleName := range roleNames {
