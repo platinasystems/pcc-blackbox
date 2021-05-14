@@ -85,11 +85,12 @@ func TestMain(m *testing.M) {
 		dbh.GetDM().AutoMigrate(&models.RandomSeed{})
 	}
 
-	credential := pcc.Credential{ // FIXME move to json
+	adminCredential = pcc.Credential{ // FIXME move to json
 		UserName: "admin",
 		Password: "admin",
 	}
-	if Pcc, err = pcc.Init(Env.PccIp, credential, Env.DBConfiguration, Env.SshConfiguration); err != nil {
+
+	if Pcc, err = pcc.Init(Env.PccIp, adminCredential, Env.DBConfiguration, Env.SshConfiguration); err != nil {
 		panic(fmt.Errorf("Authentication error: %v", err))
 	}
 
@@ -412,6 +413,14 @@ func TestUserManagement(t *testing.T) {
 		mayRun(t, "testUMOperation", testUMOperation)
 		mayRun(t, "testUMEntity", testUMEntity)
 		mayRun(t, "testUMUserSpace", testUMUserSpace)
+	})
+}
+
+func TestAuthentication(t *testing.T) {
+	count++
+	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
+	mayRun(t, "TestAuthentication", func(t *testing.T) {
+		mayRun(t, "testAuthentication", testAuthentication)
 	})
 }
 

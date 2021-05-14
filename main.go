@@ -20,5 +20,6 @@ var dockerStats *pcc.DockerStats
 var randomGenerator *rand.Rand
 var nameToTestFunc map[string]func(*testing.T)
 var defaultTests map[string][]string
+var adminCredential pcc.Credential
 
 func main() {}

@@ -6,6 +6,7 @@ package pcc
 
 import (
 	"fmt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/platinasystems/pcc-models/security"
 )
 
@@ -56,9 +57,30 @@ type Operation struct {
 	GroupId bool `json:"groupID"`
 }
 
+type UserRole struct {
+	GenericModel
+	GroupOperations []security.GroupOperation `json:"groupOperations"`
+}
+
 // tried re-using model.User, but not sure about
 // unmarshal in to type interface
 // FIXME import from pcc-models
+type UserRequest struct {
+	Id        uint64        `json:"id"`
+	UserName  string        `json:"username"`
+	FirstName string        `json:"firstname"`
+	LastName  string        `json:"lastname"`
+	Email     string        `json:"email"`
+	Password  string        `json:"password,omitempty"`
+	TenantId  uint64        `json:"tenant"`
+	RoleId    uint64        `json:"roleID"`
+	Source    string        `json:"source"`
+	Active    bool          `json:"active"`
+	Protect   bool          `json:"protect"`
+	Role      *SecurityRole `json:"role"`
+	Profile   Profile       `json:"profile"`
+}
+
 type User struct {
 	Id        uint64          `json:"id"`
 	UserName  string          `json:"username"`
@@ -74,6 +96,35 @@ type User struct {
 	Role      *SecurityRole   `json:"role"`
 	Tenant    security.Tenant `json:"tenant"`
 	Profile   Profile         `json:"profile"`
+}
+
+type ThirdPartyGroup struct {
+	Id       uint64 `json:"id"`
+	Owner    uint64 `json:"owner"`
+	Provider string `json:"provider"`
+	Group    string `json:"groupId"`
+	RoleID   uint64 `json:"roleId"`
+	TenantID uint64 `json:"tenantId"`
+}
+
+type TokenClaims struct {
+	Provider string `json:"provider"`
+	Role     uint64 `json:"role"`
+	Tenant   uint64 `json:"tenant"`
+	jwt.StandardClaims
+}
+type SecurityConfig struct {
+	Auth struct {
+		Service struct {
+			Okta struct {
+				Domain string `yaml:"domain"`
+				Token  string `yaml:"token"`
+			} `yaml:"okta"`
+			LDAP struct {
+				Url string `yaml:"url"`
+			} `yaml:"ldap"`
+		} `yaml:"service"`
+	} `yaml:"auth"`
 }
 
 func (pcc *PccClient) AddTenant(tenant security.Tenant) (t *security.Tenant, err error) {
@@ -150,6 +201,28 @@ func (pcc *PccClient) AddRole(name string, description string) (role *GenericMod
 	return
 }
 
+func (pcc *PccClient) RegisterRole(ur UserRole) (role *SecurityRole, err error) {
+	var r SecurityRole
+	endpoint := fmt.Sprintf("user-management/role/register")
+	err = pcc.Post(endpoint, ur, &r)
+	role = &r
+	return
+}
+
+func (pcc *PccClient) UpdateRole(ur UserRole) (role *SecurityRole, err error) {
+	var r SecurityRole
+	endpoint := fmt.Sprintf("user-management/role/update")
+	err = pcc.Post(endpoint, ur, &r)
+	role = &r
+	return
+}
+
+func (pcc *PccClient) ListRoles() (roles []*SecurityRole, err error) {
+	endpoint := fmt.Sprintf("user-management/role/list")
+	err = pcc.Get(endpoint, &roles)
+	return
+}
+
 func (pcc *PccClient) GetSecurityRole(id uint64) (role *GenericModel, err error) {
 	var r GenericModel
 	endpoint := fmt.Sprintf("user-management/role/%d", id)
@@ -208,6 +281,14 @@ func (pcc *PccClient) AddUser(user User) (added *User, err error) {
 	return
 }
 
+func (pcc *PccClient) AddUserReq(userreq UserRequest) (added *User, err error) {
+	var user User
+	endpoint := fmt.Sprintf("user-management/user/register")
+	err = pcc.Post(endpoint, &userreq, &user)
+	added = &user
+	return
+}
+
 func (pcc *PccClient) UpdateUser(user User) (err error) {
 	endpoint := fmt.Sprintf("user-management/user/update")
 	err = pcc.Post(endpoint, &user, &user)
@@ -258,5 +339,13 @@ func (pcc *PccClient) GetEntity(id uint64) (role *GenericModel, err error) {
 	endpoint := fmt.Sprintf("user-management/entity/%d", id)
 	err = pcc.Get(endpoint, &r)
 	role = &r
+	return
+}
+
+func (pcc *PccClient) AddThirdPartyGroup(groupReq *ThirdPartyGroup) (group *ThirdPartyGroup, err error) {
+	var g ThirdPartyGroup
+	endpoint := fmt.Sprintf("user-management/third-party/groups")
+	err = pcc.Post(endpoint, groupReq, &g)
+	group = &g
 	return
 }

@@ -59,7 +59,7 @@ const (
 
 var (
 	CEPH_INSTALLATION_SUCCESS_NOTIFICATION        = "Ceph cluster has been deployed"
-	CEPH_INSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster [%+v] installation failed"
+	CEPH_INSTALLATION_FAILED_NOTIFICATION_1       = "Ceph cluster %+v installation failed"
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_2       = "Unable to create ceph cluster "
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_3       = "Unable to store ceph cluster "
 	CEPH_INSTALLATION_FAILED_NOTIFICATION_4       = "Unable to deploy ceph  cluster [%s] as there are no OSD nodes available"
@@ -158,21 +158,11 @@ func (p *PccClient) ValidateCephConfig(config *CephConfiguration, identifier str
 	return
 }
 
-type CreateCephClusterRequest struct {
-	// models.CephCluster
-	Name                     string         `json:"name"`
-	Nodes                    []CephNodes    `json:"nodes"`
-	Version                  string         `json:"version"`
-	Tags                     pq.StringArray `json:"tags"`
-	NetworkClusterId         uint64         `gorm:"network_cluster_id" json:"networkClusterID"`
-	models.CephClusterConfig `json:"config"`
-}
+type CephCluster = models.CephCluster
 
-type CephNodes struct {
-	ID uint64
-}
+type CephNode = models.CephNode
 
-func (p *PccClient) CreateCephCluster(request CreateCephClusterRequest) (id uint64, err error) {
+func (p *PccClient) CreateCephCluster(request CephCluster) (id uint64, err error) {
 	endpoint := fmt.Sprintf("pccserver/storage/ceph/cluster")
 
 	if err = p.Post(endpoint, &request, nil); err == nil {

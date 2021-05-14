@@ -1,4 +1,3 @@
-
 {
     "Env": "",
     "PccIp": "172.17.3.215",
@@ -6,12 +5,12 @@
         {
             "Id": 0,
             "HostIp": "172.17.2.72",
-            "BMCIp": "",
-            "BMCUser": "",
+            "BMCIp": "172.17.3.72",
+            "BMCUser": "ADMIN",
             "BMCUsers": [
-                ""
+                "ADMIN"
             ],
-            "BMCPass": "",
+            "BMCPass": "ADMIN",
             "KeyAlias": [
                 "test_0"
             ],
@@ -487,12 +486,12 @@
         {
             "Id": 0,
             "HostIp": "172.17.2.71",
-            "BMCIp": "",
-            "BMCUser": "",
+            "BMCIp": "172.17.3.71",
+            "BMCUser": "ADMIN",
             "BMCUsers": [
-                ""
+                "ADMIN"
             ],
-            "BMCPass": "",
+            "BMCPass": "ADMIN",
             "KeyAlias": [
                 "test_0"
             ],
@@ -1176,7 +1175,7 @@
                "deployApp": true,
                "undeployApp": true,
                "deleteK8sStorageClass": true,
-               "deleteK8sCluster": false
+               "deleteK8sCluster": true
         }
    },
     "Availability": {
@@ -1199,7 +1198,7 @@
     ],
     "NetCluster": [
         {
-            "Name": "my-net",
+            "Name": "mynetcluster",
             "ControlCIDR": "control-cidr",
             "DataCIDR": "data-cidr",
             "IgwPolicy": "upstream",
