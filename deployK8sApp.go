@@ -142,7 +142,6 @@ func testCreateStorageClass(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -206,7 +205,6 @@ func testDeployK8sApp(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -261,7 +259,6 @@ func testUndeployK8sApp(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -297,7 +294,6 @@ func testDeleteStorageClass(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -341,7 +337,6 @@ func testVerifyK8sAppDeployment(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -377,7 +372,6 @@ func testVerifyK8sAppUnDeployment(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -406,7 +400,6 @@ func testVerifyStorageClassCreation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -448,7 +441,6 @@ func testVerifyStorageClassDeletion(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 

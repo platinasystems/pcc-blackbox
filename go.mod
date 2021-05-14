@@ -8,6 +8,7 @@ require (
 	github.com/Microsoft/go-winio v0.4.16 // indirect
 	github.com/astaxie/beego v1.12.1 // indirect
 	github.com/containerd/containerd v1.4.3 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/docker v17.12.0-ce-rc1.0.20200528182317-b47e74255811+incompatible
 	github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31
 	github.com/google/uuid v1.2.0

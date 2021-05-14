@@ -34,7 +34,6 @@ func addIpam(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, sub := range *subs {
@@ -51,7 +50,6 @@ func addIpam(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 
@@ -67,7 +65,6 @@ func addIpam(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	log.AuctaLogger.Infof("After add [%+v]", addSubReq1)
 
@@ -79,14 +76,12 @@ func addIpam(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	if addSubReq1.Subnet != newSub.Subnet {
 		msg := fmt.Sprintf("Error updating subnetObj: %v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	err = Pcc.DeleteSubnetObj(addSubReq1.Id)
@@ -95,7 +90,6 @@ func addIpam(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	subs, err = Pcc.GetSubnetObj()
@@ -104,7 +98,6 @@ func addIpam(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -138,7 +131,6 @@ func addIpamConfig(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 		log.AuctaLogger.Infof("After add [%+v]", sub)
 	}
@@ -157,7 +149,6 @@ func delAllIpams(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, sub := range *subs {
@@ -169,7 +160,6 @@ func delAllIpams(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 }

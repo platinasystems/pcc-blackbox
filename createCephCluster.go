@@ -144,13 +144,12 @@ func testCreateCephCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
 func createCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 	var (
-		createRequest pcc.CreateCephClusterRequest
+		createRequest pcc.CephCluster
 		clusterId     uint64
 	)
 	log.AuctaLogger.Info("Ceph cluster installation is starting")
@@ -176,12 +175,12 @@ func createCephCluster(cephConfig *pcc.CephConfiguration) (err error) {
 	return
 }
 
-func getCephCreateClusterRequest(cephConfig *pcc.CephConfiguration) (createRequest pcc.CreateCephClusterRequest, err error) {
-	var sNodes []pcc.CephNodes
+func getCephCreateClusterRequest(cephConfig *pcc.CephConfiguration) (createRequest pcc.CephCluster, err error) {
+	var sNodes []*pcc.CephNode
 	if sNodes, err = getNodesList(cephConfig); err != nil {
 		return
 	}
-	createRequest = pcc.CreateCephClusterRequest{
+	createRequest = pcc.CephCluster{
 		Name:  cephConfig.ClusterName,
 		Nodes: sNodes,
 		Tags:  pq.StringArray{"ROTATIONAL", "SATA", "PCIe"},
@@ -216,7 +215,6 @@ func testCreateCephPool(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -277,7 +275,6 @@ func testCreateCephFS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -344,7 +341,6 @@ func testDeleteCephFS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -390,7 +386,6 @@ func testDeleteCephPool(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -439,7 +434,6 @@ func testDeleteCephCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -474,7 +468,6 @@ func testVerifyCephFSCreation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -504,7 +497,6 @@ func testVerifyCephFSDeletion(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -536,7 +528,6 @@ func testVerifyCephPoolCreation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -583,7 +574,6 @@ func testVerifyCephPoolDeletion(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -623,7 +613,6 @@ func testVerifyCephInstallation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	_, status, err := Pcc.GetCephClusterStatus(cephConfig.ClusterId)
 	if err != nil {
@@ -681,7 +670,6 @@ func testVerifyCephUninstallation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -705,33 +693,37 @@ func verifyCephUninstallation(cephConfig *pcc.CephConfiguration) (err error) {
 	return
 }
 
-func getNodesList(cephConfig *pcc.CephConfiguration) ([]pcc.CephNodes, error) {
+func getNodesList(cephConfig *pcc.CephConfiguration) (sNodes []*pcc.CephNode, err error) {
 	var (
 		DIM                    = cephConfig.NumberOfNodes
-		sNodes                 = make([]pcc.CephNodes, DIM)
 		nodesSetCompleted bool = false
+		j                      = 0
 	)
-	var j = 0
+	sNodes = make([]*pcc.CephNode, DIM)
+
 	for _, i := range Env.Invaders {
-		sNodes[j] = pcc.CephNodes{ID: NodebyHostIP[i.HostIp]}
+		sNodes[j] = &pcc.CephNode{NodeId: NodebyHostIP[i.HostIp]}
 		j++
 		if j == DIM {
 			nodesSetCompleted = true
 		}
 	}
 	if cephConfig.HighAvailability && len(sNodes) < 2 {
-		return sNodes, fmt.Errorf("Atleast 2 invaders are required for High Availability configuration..Found: %v invaders", len(sNodes))
+		err = fmt.Errorf("At least 2 invaders are required for High "+
+			"Available configuration..Found: %v invaders",
+			len(sNodes))
+		return
 	}
 	for _, i := range Env.Servers {
 		if nodesSetCompleted {
-			continue
+			break
 		}
-		sNodes[j] = pcc.CephNodes{ID: NodebyHostIP[i.HostIp]}
+		sNodes[j] = &pcc.CephNode{NodeId: NodebyHostIP[i.HostIp]}
 		j++
 		if j == DIM {
 			nodesSetCompleted = true
-			continue
+			break
 		}
 	}
-	return sNodes, nil
+	return
 }

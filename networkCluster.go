@@ -37,7 +37,6 @@ func addNetCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			if health != pcc.NETWORK_HEALTH_OK {
 				msg := fmt.Sprintf("Net cluster health NotOK "+
@@ -45,7 +44,6 @@ func addNetCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			log.AuctaLogger.Infof("Network Health [%v] [%v]",
 				netClusterName, health)
@@ -107,7 +105,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	reqCluster.IgwPolicy = igwPolicy
 
@@ -117,7 +114,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	controlCIDRObj, err := Pcc.FindSubnetObj(controlCIDR)
 	if err != nil {
@@ -126,7 +122,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	reqCluster.ControlCIDRId = controlCIDRObj.Id
 
@@ -136,7 +131,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	dataCIDRObj, err := Pcc.FindSubnetObj(dataCIDR)
 	if err != nil {
@@ -146,7 +140,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	reqCluster.DataCIDRId = dataCIDRObj.Id
 
@@ -195,7 +188,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	time.Sleep(1 * time.Second)
@@ -206,8 +198,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-
-		return
 	}
 	netClusterId := netClusterObj.Id
 	timeout := time.After(15 * time.Minute)
@@ -221,7 +211,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		case <-tick:
 			netClusterObj, err = Pcc.GetNetClusterId(netClusterId)
 			if err != nil {
@@ -230,7 +219,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			log.AuctaLogger.Infof("deploy status [%v] %v%% "+
 				"health [%v]",
@@ -268,7 +256,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	log.AuctaLogger.Infof("Network Health & connectivity check [%v] [%v]",
 		reqCluster.Name, health)
@@ -277,7 +264,6 @@ func addNetClusterInternal(t *testing.T, netCluster netCluster) {
 			netClusterName, summary)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -294,7 +280,6 @@ func deleteNetClusterInternal(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	err = Pcc.DelNetClusterWait(netClusterId, false)
@@ -303,7 +288,6 @@ func deleteNetClusterInternal(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	return
@@ -322,7 +306,6 @@ func delAllNetsCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, nC := range netCluster {
@@ -334,7 +317,6 @@ func delAllNetsCluster(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 
 		err = Pcc.DelNetClusterWait(nC.Id, false)
@@ -344,7 +326,6 @@ func delAllNetsCluster(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 }

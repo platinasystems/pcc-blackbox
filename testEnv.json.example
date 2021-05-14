@@ -306,4 +306,13 @@
         "certName": "test-cert-bb",
         "rgwName": "test-rgw-bb"
      }
+    ],
+    "AuthConfiguration":{
+        "oktaGroup":"",
+        "oktaUsername": "",
+        "oktaPassword": "",
+        "LDAPGroup": "",
+        "LDAPUsername": "",
+        "LDAPPassword": "",
+      }
 }

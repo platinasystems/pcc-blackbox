@@ -36,7 +36,6 @@ func updateSecurityKey_MaaS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	_, err = f.Write([]byte(PUB_KEY))
 	if err != nil {
@@ -44,7 +43,6 @@ func updateSecurityKey_MaaS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	f.Close()
 
@@ -66,7 +64,6 @@ func updateSecurityKey_MaaS(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			break
 		}
@@ -91,7 +88,6 @@ func delAllKeys(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for i := 0; i < len(secKeys); i++ {
@@ -102,7 +98,6 @@ func delAllKeys(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 }

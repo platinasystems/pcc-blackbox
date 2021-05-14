@@ -82,6 +82,7 @@ func GetNameToTestFunc() (nameToTestFunc map[string]func(*testing.T)) {
 		"testDashboardGetMetadataEnumStrings":       testDashboardGetMetadataEnumStrings,
 		"addPrivatePublicCert":                      addPrivatePublicCert,
 		"testRGW":                                   testRGW,
+		"testAuthentication":                        testAuthentication,
 	}
 	return
 }
@@ -98,7 +99,6 @@ func GetDefaultTestMap() (defaultTests map[string][]string) {
 		"TestAddCeph":                 {"getNodes", "updateIpam", "addNetCluster", "testCeph"},
 		"TestDeleteCeph":              {"getNodes", "testDeleteCeph"},
 		"TestCephCache":               {"testCephCacheSetup", "testCephCacheAdd", "testCephCacheDelete"},
-		"TestRGW":                     {"addPrivatePublicCert", "testRGW"},
 		"TestK8sApp":                  {"getNodes", "updateIpam", "addNetCluster", "testK8sApp"},
 		"TestPortus":                  {"getNodes", "addBrownfieldServers", "UploadSecurityAuthProfileCert", "AddAuthenticationProfile", "UploadSecurityPortusKey", "UploadSecurityPortusCert", "AddPortus", "CheckPortusInstallation"},
 		"TestDelPortus":               {"getAvailableNodes", "delAllPortus"},
@@ -115,6 +115,7 @@ func GetDefaultTestMap() (defaultTests map[string][]string) {
 		"TestKeyManager":              {"testKMKeys", "testKMCertificates"},
 		"TestAppCredentials":          {"testCreateCredendialMetadataProfile", "testUpdateCredendialMetadataProfile", "testDeleteCredendialMetadataProfile"},
 		"TestDashboard":               {"testDashboardGetAllPCCObjects", "testDashboardGetPCCObjectByRandomId", "testDashboardGetPCCObjectById", "testDashboardGetChildrenObjectsByRandomId", "testDashboardGetParentObjectsByRandomId", "testDashboardGetFilteredObjects", "testDashboardGetAdvSearchedObjects", "testDashboardGetAggrHealthCountByType", "testDashboardGetMetadataEnumStrings"},
+		"TestAuthentication":          {"testAuthentication"},
 	}
 	return
 }

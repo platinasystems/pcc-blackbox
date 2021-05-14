@@ -144,7 +144,6 @@ func addTenantA(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	} else {
 		for _, u := range users {
 			if u.UserName == "admin" {
@@ -157,7 +156,6 @@ func addTenantA(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		}
 	}
@@ -181,7 +179,6 @@ func addTenantA(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	addUser2 := pcc.User{
@@ -202,7 +199,6 @@ func addTenantA(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	log.AuctaLogger.Infof("Try change firstname of user %v ", addUser.UserName)
@@ -214,7 +210,6 @@ func addTenantA(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	if users, err := Pcc.GetUsers(); err == nil {
@@ -230,7 +225,6 @@ func addTenantA(t *testing.T) {
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
-					return
 				}
 			}
 		}
@@ -239,7 +233,6 @@ func addTenantA(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	} else {
 		msg := fmt.Sprintf("%v", err)
@@ -280,7 +273,6 @@ func delAllTenants(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		}
 	} else {
@@ -314,7 +306,6 @@ func delAllUsers(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		}
 	} else {
@@ -322,6 +313,5 @@ func delAllUsers(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }

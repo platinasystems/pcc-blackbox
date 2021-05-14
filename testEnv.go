@@ -28,6 +28,7 @@ type testEnv struct {
 	NetIpam               []netIpam
 	NetCluster            []netCluster
 	RGWConfiguration      RGWConfiguration
+	AuthConfiguration     AuthConfiguration
 }
 
 type node struct {
@@ -100,6 +101,15 @@ type netIpam struct {
 	Subnet    string
 	PubAccess bool
 	Routed    bool
+}
+
+type AuthConfiguration struct {
+	OktaGroup    string `json"oktaGroup"`
+	OktaUsername string `json"oktaUsername"`
+	OktaPassword string `json"oktaPassword"`
+	LDAPGroup    string `json"LDAPGroup"`
+	LDAPUsername string `json"LDAPUsername"`
+	LDAPPassword string `json"LDAPPassword"`
 }
 
 var exampleEnv = testEnv{
@@ -360,6 +370,26 @@ func (te *testEnv) CheckPortusConfiguration() (err error) {
 			"PortusConfiguration.Password " +
 			"PortusConfiguration.SecretKeyBase " +
 			"PortusConfiguration.AdminState)")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckOktaAuthConfiguration() (err error) {
+	if te.AuthConfiguration.OktaGroup == "" ||
+		te.AuthConfiguration.OktaUsername == "" ||
+		te.AuthConfiguration.OktaPassword == "" {
+		err = errors.New("Okta configuration parameters missing")
+		return
+	}
+	return
+}
+
+func (te *testEnv) CheckLDAPAuthConfiguration() (err error) {
+	if te.AuthConfiguration.LDAPGroup == "" ||
+		te.AuthConfiguration.LDAPUsername == "" ||
+		te.AuthConfiguration.LDAPPassword == "" {
+		err = errors.New("LDAP configuration parameters missing")
 		return
 	}
 	return

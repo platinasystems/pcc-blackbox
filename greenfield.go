@@ -36,7 +36,6 @@ func addGreenfieldServers(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		t.FailNow()
-		return
 	}
 	for _, i := range *invaders {
 		log.AuctaLogger.Infof("Update MaaS for node [%v]", i.Id)
@@ -46,7 +45,6 @@ func addGreenfieldServers(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			t.FailNow()
-			return
 		}
 	}
 
