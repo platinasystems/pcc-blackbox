@@ -134,7 +134,6 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 					res.SetTestFailure(err.Error())
 					log.AuctaLogger.Error(err.Error())
 					t.FailNow()
-					return
 				}
 			}
 			connection, ignore = Pcc.GetNodeConnectionStatus(id)
@@ -152,7 +151,6 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 					res.SetTestFailure(err.Error())
 					log.AuctaLogger.Error(err.Error())
 					t.FailNow()
-					return
 				}
 				if previousConnection != "" &&
 					previousConnection != connection {
@@ -174,7 +172,6 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 				res.SetTestFailure(err.Error())
 				log.AuctaLogger.Error(err.Error())
 				t.FailNow()
-				return
 			}
 
 			if err != nil {
@@ -194,7 +191,5 @@ func checkAddNodesStatus(t *testing.T, nodeIdsAdded []uint64) {
 		res.SetTestFailure(err.Error())
 		log.AuctaLogger.Error(err.Error())
 		t.FailNow()
-		return
 	}
-
 }

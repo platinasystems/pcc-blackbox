@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/platinasystems/pcc-models/authentication"
+	"github.com/platinasystems/pcc-models/s3"
 )
 
 ////
@@ -48,6 +49,16 @@ func (pcc *PccClient) GetAppCredentialServices() (types []string, err error) {
 
 // Create a profile (metadata or not)
 func (pcc *PccClient) CreateAppCredentialProfile(profile *authentication.AuthProfile) (created authentication.AuthProfile, err error) {
+	var b []byte
+	m := make(map[string]string)
+	if b, err = json.Marshal(profile); err == nil {
+		m["data"] = string(b)
+		err = pcc.PutFile("pccserver/app-credentials", "", m, &created)
+	}
+	return
+}
+
+func (pcc *PccClient) CreateAppCredentialProfileCeph(profile *authentication.AuthProfile) (created s3.S3Profile, err error) {
 	var b []byte
 	m := make(map[string]string)
 	if b, err = json.Marshal(profile); err == nil {

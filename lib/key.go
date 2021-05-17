@@ -113,6 +113,14 @@ func (p *PccClient) UploadCert(filePath string, label string, description string
 	return
 }
 
+func (p *PccClient) UploadCertPrivatePublic(filePath string, keyPath string, alias string, description string) (certificate Certificate, err error) {
+	endPoint := fmt.Sprintf("key-manager/certificates/upload/%s", alias)
+	m := map[string]string{"description": description}
+	fileMap := map[string]string{"file": filePath, "key": keyPath}
+	err = p.PutFiles("POST", endPoint, fileMap, m, &certificate)
+	return
+}
+
 // Download a certificate from the KM
 func (p *PccClient) DownloadCertificate(id uint64) (content string, err error) {
 	endPoint := fmt.Sprintf("key-manager/certificates/%d", id)

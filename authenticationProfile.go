@@ -64,7 +64,6 @@ func addAuthProfile(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	} else if exist {
 		if authProfile.Type == "LDAP" {
 			var ldapConfiguration pcc.LDAPConfiguration
@@ -95,7 +94,6 @@ func addAuthProfile(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -119,7 +117,6 @@ func delAllProfiles(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, aP := range authProfiles {

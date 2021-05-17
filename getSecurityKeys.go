@@ -35,7 +35,6 @@ func getSecKeys(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for i := 0; i < len(secKeys); i++ {

@@ -27,6 +27,7 @@ type testEnv struct {
 	Availability          Availability
 	NetIpam               []netIpam
 	NetCluster            []netCluster
+	RGWConfiguration      RGWConfiguration
 	AuthConfiguration     AuthConfiguration
 }
 
@@ -81,6 +82,13 @@ type netNode struct {
 	IpAddr       string
 	LocalAs      string
 	BgpNeighbors []bgpPeer
+}
+
+type RGWConfiguration struct {
+	ClusterName string `json:"clusterName"`
+	PoolName    string `json:"poolName"`
+	CertName    string `json:"certName"`
+	RGWName     string `json:"rgwName"`
 }
 
 type bgpPeer struct {

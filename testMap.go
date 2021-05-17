@@ -80,6 +80,8 @@ func GetNameToTestFunc() (nameToTestFunc map[string]func(*testing.T)) {
 		"testDashboardGetAdvSearchedObjects":        testDashboardGetAdvSearchedObjects,
 		"testDashboardGetAggrHealthCountByType":     testDashboardGetAggrHealthCountByType,
 		"testDashboardGetMetadataEnumStrings":       testDashboardGetMetadataEnumStrings,
+		"addPrivatePublicCert":                      addPrivatePublicCert,
+		"testRGW":                                   testRGW,
 		"testAuthentication":                        testAuthentication,
 	}
 	return

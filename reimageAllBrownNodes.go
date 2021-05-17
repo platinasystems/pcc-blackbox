@@ -56,14 +56,12 @@ func updateBmcInfo(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		} else {
 			msg := fmt.Sprintf("Failed to get the key %v", err)
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 }
