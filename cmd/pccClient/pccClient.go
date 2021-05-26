@@ -5,15 +5,17 @@
 package main
 
 import (
+	"github.com/platinasystems/go-common/logs"
+	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	"github.com/platinasystems/tiles/pccserver/network"
+
 	"encoding/json"
 	"fmt"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
-
-	"github.com/platinasystems/go-common/logs"
-	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
 var Pcc *pcc.PccClient
@@ -48,6 +50,20 @@ func pPrint(out interface{}) {
 	default:
 		fmt.Println(out)
 	}
+}
+
+func pSprint(out interface{}) (s string) {
+	switch t := out.(type) {
+	case []interface{}:
+		j, _ := json.MarshalIndent(t, "", " ")
+		s = fmt.Sprint(string(j))
+	case map[string]interface{}:
+		j, _ := json.MarshalIndent(t, "", " ")
+		s = fmt.Sprint(string(j))
+	default:
+		s = fmt.Sprint(out)
+	}
+	return
 }
 
 func pPrintJ(out interface{}) {
@@ -145,12 +161,15 @@ func (d HistoricalOut) Print(nodes, fields []string) {
 
 func main() {
 	var (
-		nodes, fields string
-		raw           bool
-		err           error
-		hasData       bool
-		dataStr       string
-		data          interface{}
+		nodes, fields     string
+		raw               bool
+		err               error
+		hasData           bool
+		dataStr           string
+		data              interface{}
+		netId             int
+		netName           string
+		verbose, verbose2 bool
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
@@ -159,14 +178,16 @@ func main() {
 	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data]"
 	usage2 := "[ip addr|domain name] history [topic] [t1] [t2] [-n nodes] [-f fields]"
 	example1 := "172.17.2.34 pccserver/node GET"
-	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
 	example3 := "172.17.2.34 pccserver/cluster/add POST -d '{\"id\":0,\"name\":\"lab\",\"description\":\"test node group\",\"owner\":1}'"
+	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
+	example4 := "172.17.2.34 multipath-check -netname skynet"
 	if len(os.Args) < 4 {
 		fmt.Println("usage1", os.Args[0], usage)
 		fmt.Println("usage2", os.Args[0], usage2)
 		fmt.Println("example1", os.Args[0], example1)
 		fmt.Println("example2", os.Args[0], example2)
 		fmt.Println("example3", os.Args[0], example3)
+		fmt.Println("example4", os.Args[0], example4)
 		return
 	}
 	if strings.EqualFold(os.Args[2], "history") && len(os.Args) < 6 {
@@ -176,8 +197,13 @@ func main() {
 	}
 
 	for i, arg := range os.Args {
-		if arg == "--raw" {
+		switch arg {
+		case "--raw":
 			raw = true
+		case "-v":
+			verbose = true
+		case "-vv":
+			verbose2 = true
 		}
 		if len(os.Args) <= i+1 {
 			break
@@ -191,6 +217,10 @@ func main() {
 		case "-d":
 			hasData = true
 			dataStr = p
+		case "-netname":
+			netName = p
+		case "-netid":
+			netId, _ = strconv.Atoi(p)
 		case "-u":
 			cred.UserName = p
 		case "-p":
@@ -219,6 +249,39 @@ func main() {
 
 	var out interface{}
 	switch {
+	case strings.EqualFold(endpoint, "multipath-check"):
+		var pairs []*network.PktPaths
+		if netId > 0 {
+			pairs, _, _ = multipathCheck(netId)
+		} else if netName != "" {
+			pairs, _, _ = multipathCheck(netName)
+		} else {
+			err = fmt.Errorf("No network ID or name provided")
+		}
+		switch {
+		case verbose:
+			_, infos, errs := network.PrintPairs(pairs, network.PPVerbose)
+			fmt.Println(infos)
+			if len(errs) > 0 {
+				fmt.Println(errs)
+			}
+		case verbose2:
+			_, infos, errs := network.PrintPairs(pairs, network.PPVeryVerbose)
+			fmt.Println(infos)
+			if len(errs) > 0 {
+				fmt.Println(errs)
+			}
+		case raw:
+			js, _, _ := network.PrintPairs(pairs, network.PPJson)
+			fmt.Println(js)
+		default:
+			_, infos, errs := network.PrintPairs(pairs, network.PPBrief)
+			fmt.Println(infos)
+			if len(errs) > 0 {
+				fmt.Println(errs)
+			}
+		}
+
 	case strings.EqualFold(endpoint, "history"):
 		var out2 HistoricalOut
 		topic := os.Args[3]
