@@ -6,6 +6,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
+	"os"
 	"testing"
 	"time"
 )
@@ -49,7 +50,6 @@ func getNodeFromEnv(id uint64) *node {
 
 	return nil
 }
-
 
 func checkError(t *testing.T, res *models.TestResult, err error) {
 	if err != nil {
@@ -313,6 +313,18 @@ func CheckNetClusterExists() (err error) {
 	if networkCluster.Health != "OK" {
 		err = errors.New("The Network Cluster status is not OK")
 		return
+	}
+	return
+}
+
+func createFile(name string, size int64) (f *os.File, err error) {
+	f, err = os.Create(name)
+	if err != nil {
+		log.AuctaLogger.Errorf("%v", err)
+		return
+	}
+	if err = f.Truncate(size); err != nil {
+		log.AuctaLogger.Errorf("%v", err)
 	}
 	return
 }
