@@ -20,6 +20,12 @@ import (
 	"time"
 )
 
+const (
+	QuotaExceeded = "QuotaExceeded"
+	TooManyBuckets = "TooManyBuckets"
+	AccessDenied = "Access Denied"
+)
+
 var (
 	id          uint64
 	poolID      uint64
@@ -32,6 +38,25 @@ var (
 	profiles    []s3.S3Profile
 	ctx         = context.Background()
 )
+
+type Permissions struct {
+	ReadPermission bool
+	WritePermission bool
+	DeletePermission bool
+}
+
+type BucketQuotas struct {
+	MaxBuckets uint16
+	MaxBucketSize uint64
+	MaxBucketObject uint64
+}
+
+type UserQuotas struct {
+	MaxUserObjects uint64
+	MaxUserSize uint64
+}
+
+
 
 func testRGW(t *testing.T) {
 	t.Run("createPoolRGW", createPoolRGW)
@@ -49,6 +74,8 @@ func testRGW(t *testing.T) {
 	if t.Failed() {
 		return
 	}
+	t.Run("testBucketQuotas",testBucketQuotas)
+	t.Run("testUserQuotas",testUserQuotas)
 	t.Run("testRemoveRGW", testRemoveRGW)
 }
 
@@ -72,6 +99,7 @@ func createPoolRGW(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, CheckCephClusterRGWExists)
 
 	var (
 		err error
@@ -124,12 +152,12 @@ func verifyPool(t *testing.T) {
 			}
 			switch pool.DeployStatus {
 			case pcc.RGW_DEPLOY_STATUS_PROGRESS:
-				log.AuctaLogger.Info("RGW installation in progress...")
+				log.AuctaLogger.Info("pool installation in progress...")
 			case pcc.RGW_DEPLOY_STATUS_COMPLETED:
-				log.AuctaLogger.Info("RGW installation completed")
+				log.AuctaLogger.Info("pool installation completed")
 				return
 			case pcc.RGW_DEPLOY_STATUS_FAILED:
-				msg := "RGW installation failed"
+				msg := "pool installation failed"
 				checkError(t, res, errors.New(msg))
 			default:
 				msg := fmt.Sprintf("Unexpected status - %v",
@@ -145,6 +173,7 @@ func installRGW(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
+	CheckDependencies(t, res, CheckCephClusterRGWExists)
 
 	var certId uint64
 	certName := Env.RGWConfiguration.CertName
@@ -221,25 +250,30 @@ func createCephProfilesWithPermission(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
+	rwdPermission := Permissions{ReadPermission: true,WritePermission: true, DeletePermission: true}
+	rwPermission := Permissions{ReadPermission: true,WritePermission: true, DeletePermission: false}
+	rPermission := Permissions{ReadPermission: true,WritePermission: false, DeletePermission: false}
+
 	profileRWD := s3.S3Profile{
 		Username:         "blackbox-full",
-		ReadPermission:   true,
-		WritePermission:  true,
-		DeletePermission: true,
+		ReadPermission:   &rwdPermission.ReadPermission,
+		WritePermission:  &rwdPermission.WritePermission,
+		DeletePermission: &rwdPermission.DeletePermission,
 	}
 
+	//default rw profile
 	profileRW := s3.S3Profile{
 		Username:         "blackbox-rw",
-		ReadPermission:   true,
-		WritePermission:  true,
-		DeletePermission: false,
+		ReadPermission: &rwPermission.ReadPermission,
+		WritePermission: &rwPermission.WritePermission,
+		DeletePermission: &rwPermission.DeletePermission,
 	}
 
 	profileR := s3.S3Profile{
 		Username:         "blackbox-r",
-		ReadPermission:   true,
-		WritePermission:  false,
-		DeletePermission: false,
+		ReadPermission:   &rPermission.ReadPermission,
+		WritePermission:  &rPermission.WritePermission,
+		DeletePermission: &rPermission.DeletePermission,
 	}
 
 	profiles = append(profiles, profileRWD, profileRW, profileR)
@@ -252,51 +286,7 @@ func addCephCredential(t *testing.T) {
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	serviceType := "ceph"
-
-	appCredential := authentication.AuthProfile{
-		Name:          fmt.Sprintf("%s-%s", profileRGW.Username, serviceType),
-		Type:          serviceType,
-		ApplicationId: id,
-		Profile:       profileRGW,
-		Active:        true}
-
-	log.AuctaLogger.Infof("creating the ceph profile %v", appCredential)
-
-	var err error
-	_, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
-	checkError(t, res, err)
-
-	timeout := time.After(5 * time.Minute)
-	tick := time.Tick(15 * time.Second)
-	found := false
-
-	for !found {
-		select {
-		case <-timeout:
-			msg := "Timed out waiting for RGW"
-			checkError(t, res, errors.New(msg))
-		case <-tick:
-			acs, err := Pcc.GetAppCredentials("ceph")
-			if err != nil {
-				msg := fmt.Sprintf("Failed to get deploy status "+
-					"%v", err)
-				checkError(t, res, errors.New(msg))
-			}
-
-			for _, ac := range acs {
-				if ac.Name == fmt.Sprintf("%s-%s", profileRGW.Username, "ceph") {
-					jsonString, _ := json.Marshal(ac.Profile)
-					json.Unmarshal(jsonString, &profileRGW)
-					if profileRGW.AccessKey != "" {
-						found = true
-					}
-				}
-			}
-		}
-	}
-
-	log.AuctaLogger.Infof("created the ceph profile", profileRGW)
+	createAppCredentialProfileCeph(t, res, &profileRGW, id)
 }
 
 func initS3Client(host string, accessKey string, secretKey string) (*minio.Client, error) {
@@ -326,17 +316,11 @@ func testCreateBucket(t *testing.T) {
 	minioClient, err = initS3Client(node.Host, profileRGW.AccessKey, profileRGW.SecretKey)
 	checkError(t, res, err)
 
-	bucketName = "test-bucket-bb"
+	bucketName = fmt.Sprintf("bucket-%s",profileRGW.Username)
 
-	if exists, errBucketExists := minioClient.BucketExists(ctx, bucketName); errBucketExists == nil {
-		if !exists {
-			err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
-			checkResultByPermission(t, res, err, profileRGW.WritePermission, "create a bucket")
-		} else {
-			log.AuctaLogger.Warnf("Bucket %s already exists", bucketName)
-		}
-	} else {
-		checkError(t, res, err)
+	alreadyExists, err := createBucket(t, res, ctx, bucketName)
+	if !alreadyExists {
+		checkResultByPermission(t, res, err, *profileRGW.WritePermission, "create a bucket")
 	}
 
 	buckets, err := minioClient.ListBuckets(ctx)
@@ -354,7 +338,7 @@ func testPutObject(t *testing.T) {
 	filePath := "testEnv.json"
 
 	_, err = minioClient.FPutObject(ctx, bucketName, objectName, filePath, minio.PutObjectOptions{})
-	checkResultByPermission(t, res, err, profileRGW.WritePermission, "put an object")
+	checkResultByPermission(t, res, err, *profileRGW.WritePermission, "put an object")
 }
 
 func testRetrieveObject(t *testing.T) {
@@ -364,7 +348,7 @@ func testRetrieveObject(t *testing.T) {
 	defer res.CheckTestAndSave(t, time.Now())
 
 	_, err := minioClient.GetObject(ctx, bucketName, objectName, minio.GetObjectOptions{})
-	checkResultByPermission(t, res, err, profileRGW.ReadPermission, "retrieve an object")
+	checkResultByPermission(t, res, err, *profileRGW.ReadPermission, "retrieve an object")
 }
 
 func testRemoveObject(t *testing.T) {
@@ -375,7 +359,7 @@ func testRemoveObject(t *testing.T) {
 
 	log.AuctaLogger.Infof("Removing object: %s", objectName)
 	err := minioClient.RemoveObject(context.Background(), bucketName, objectName, minio.RemoveObjectOptions{})
-	checkResultByPermission(t, res, err, profileRGW.DeletePermission, "remove an object")
+	checkResultByPermission(t, res, err, *profileRGW.DeletePermission, "remove an object")
 }
 
 func testRemoveBucket(t *testing.T) {
@@ -386,7 +370,167 @@ func testRemoveBucket(t *testing.T) {
 
 	log.AuctaLogger.Infof("Removing bucket: %s", bucketName)
 	err := minioClient.RemoveBucket(context.Background(), bucketName)
-	checkResultByPermission(t, res, err, profileRGW.DeletePermission, "remove a bucket")
+	checkResultByPermission(t, res, err, *profileRGW.DeletePermission, "remove a bucket")
+}
+
+func testBucketQuotas(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	bucketQuotas := BucketQuotas{MaxBuckets: 1, MaxBucketSize: 8, MaxBucketObject: 2}
+	rwdPermission := Permissions{ReadPermission: true,WritePermission: true, DeletePermission: true}
+
+	profileBucketQuotas := s3.S3Profile{
+		Username: "bucket-quota-profile",
+		ReadPermission: &rwdPermission.ReadPermission,
+		WritePermission: &rwdPermission.WritePermission,
+		DeletePermission: &rwdPermission.DeletePermission,
+		MaxBuckets: &bucketQuotas.MaxBuckets,
+		MaxBucketSize: &bucketQuotas.MaxBucketSize,
+		MaxBucketSizeUnit: "KiB",
+		MaxBucketObjects: &bucketQuotas.MaxBucketObject}
+
+	createAppCredentialProfileCeph(t,res, &profileBucketQuotas,id)
+
+	n, err := Pcc.GetNode(targetNode.NodeId)
+	checkError(t,res,err)
+
+	minioClient, err = initS3Client(n.Host, profileBucketQuotas.AccessKey, profileBucketQuotas.SecretKey)
+	checkError(t, res, err)
+
+	log.AuctaLogger.Info("test maximum number of buckets")
+	numBucket := int(bucketQuotas.MaxBuckets) + 1
+	var bucketNames []string
+	for i:=0; i<numBucket; i++ {
+		name := fmt.Sprintf("bucket-%d",i)
+		if _,err = createBucket(t, res, ctx, name); err == nil {
+			log.AuctaLogger.Infof("Bucket: %s correctly created", name)
+			bucketNames = append(bucketNames,name)
+			} else {
+			if strings.Contains(err.Error(),TooManyBuckets) {
+				log.AuctaLogger.Infof(fmt.Sprintf("Negative case pass: %s, exceeded maximum number of buckets",TooManyBuckets))
+			} else {
+				checkError(t,res,err)
+			}
+		}
+	}
+
+	log.AuctaLogger.Info("test maximum bucket size")
+	//put file that exceeds maximum bucket size
+	if info, err := minioClient.FPutObject(ctx, bucketNames[0], "obj", "10kb_file", minio.PutObjectOptions{}); err == nil {
+		err = errors.New(fmt.Sprintf("Error: uploaded a file of size %d that exceeds the maximum bucket size %d %s", info.Size,bucketQuotas.MaxBucketSize,profileBucketQuotas.MaxBucketSizeUnit))
+		checkError(t,res,err)
+	} else {
+		if  strings.Contains(err.Error(),QuotaExceeded) {
+			log.AuctaLogger.Infof(fmt.Sprintf("Negative case pass: error trying to uploade file of size %d that exceeds maximum bucket size of %d %s",info.Size,bucketQuotas.MaxBucketSize,profileBucketQuotas.MaxBucketSizeUnit))
+		} else {
+			checkError(t,res,err)
+		}
+	}
+
+	log.AuctaLogger.Info("test maximum object number on bucket")
+	numObjects := int(bucketQuotas.MaxBucketObject) + 1
+	var objectNames []string
+	for i:=0; i<numObjects; i++ {
+		obj := fmt.Sprintf("object-%d",i)
+		if _, err = minioClient.FPutObject(ctx, bucketNames[0], obj, "1kb_file", minio.PutObjectOptions{}); err == nil {
+			log.AuctaLogger.Infof("Object: %s correctly uploaded", obj)
+			objectNames = append(objectNames, obj)
+		} else {
+			if  strings.Contains(err.Error(),QuotaExceeded) {
+				log.AuctaLogger.Infof(fmt.Sprintf("Negative case pass: error, maximum number of objects inside a bucket [%d] exceeded",bucketQuotas.MaxBucketObject))
+			} else {
+				checkError(t,res,err)
+			}
+		}
+	}
+
+	log.AuctaLogger.Info("removing created objects and buckets")
+	for _, obj := range objectNames {
+		log.AuctaLogger.Infof("Removing object: %s", obj)
+		err = minioClient.RemoveObject(context.Background(), bucketNames[0], obj, minio.RemoveObjectOptions{})
+		checkError(t,res,err)
+	}
+	for _,bucket := range bucketNames {
+		log.AuctaLogger.Infof("Removing bucket: %s", bucket)
+		err = minioClient.RemoveBucket(context.Background(), bucket)
+		checkError(t,res,err)
+	}
+}
+
+func testUserQuotas(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	userQuotas := UserQuotas{MaxUserObjects: 2, MaxUserSize: 8}
+	rwdPermission := Permissions{ReadPermission: true,WritePermission: true, DeletePermission: true}
+
+	profileUserQuotas := s3.S3Profile{
+		Username: "user-quota-profile",
+		ReadPermission: &rwdPermission.ReadPermission,
+		WritePermission: &rwdPermission.WritePermission,
+		DeletePermission: &rwdPermission.DeletePermission,
+		MaxUserSize: &userQuotas.MaxUserSize,
+		MaxUserSizeUnit: "KiB",
+		MaxUserObjects: &userQuotas.MaxUserObjects}
+
+	createAppCredentialProfileCeph(t,res,&profileUserQuotas,id)
+
+	n, err := Pcc.GetNode(targetNode.NodeId)
+	checkError(t,res,err)
+
+	minioClient, err = initS3Client(n.Host, profileUserQuotas.AccessKey, profileUserQuotas.SecretKey)
+	checkError(t, res, err)
+
+	bucket := "user-quota-bucket"
+	_, err = createBucket(t,res,ctx,bucket)
+	checkError(t,res,err)
+
+	log.AuctaLogger.Info("test maximum user size")
+	//put file that exceeds maximum user size
+	obj := "user-quota-obj"
+	if info, err := minioClient.FPutObject(ctx, bucket, obj, "10kb_file", minio.PutObjectOptions{}); err == nil {
+		err = errors.New(fmt.Sprintf("Error: uploaded a file of size %d that exceeds the maximum user size %d %s", info.Size,userQuotas.MaxUserSize,profileUserQuotas.MaxUserSizeUnit))
+		checkError(t,res,err)
+	} else {
+		if  strings.Contains(err.Error(),QuotaExceeded) {
+			log.AuctaLogger.Infof(fmt.Sprintf("Negative case pass: error trying to uploade file of size %d that exceeds maximum user size of %d %s",info.Size,userQuotas.MaxUserSize,profileUserQuotas.MaxUserSizeUnit))
+		} else {
+			checkError(t,res,err)
+		}
+	}
+
+	log.AuctaLogger.Info("test maximum user object")
+	numObjects := int(userQuotas.MaxUserObjects) + 1
+	var objectNames []string
+	for i:=0; i<numObjects; i++ {
+		obj = fmt.Sprintf("object-%d",i)
+		if _, err = minioClient.FPutObject(ctx, bucket, obj, "1kb_file", minio.PutObjectOptions{}); err == nil {
+			log.AuctaLogger.Infof("Object: %s correctly uploaded", obj)
+			objectNames = append(objectNames, obj)
+		} else {
+			if  strings.Contains(err.Error(),QuotaExceeded) {
+				log.AuctaLogger.Infof(fmt.Sprintf("Negative case pass: error, maximum number of user objects [%d] exceeded",userQuotas.MaxUserObjects))
+			} else {
+				checkError(t,res,err)
+			}
+		}
+	}
+
+	log.AuctaLogger.Info("removing created objects and buckets")
+	for _, obj = range objectNames {
+		log.AuctaLogger.Infof("Removing object: %s", obj)
+		err = minioClient.RemoveObject(context.Background(), bucket, obj, minio.RemoveObjectOptions{})
+		checkError(t,res,err)
+	}
+	log.AuctaLogger.Infof("Removing bucket: %s", bucket)
+	err = minioClient.RemoveBucket(context.Background(), bucket)
+	checkError(t,res,err)
+
 }
 
 func testRemoveRGW(t *testing.T) {
@@ -438,18 +582,82 @@ func checkResultByPermission(t *testing.T, res *m.TestResult, err error, permiss
 		if permission {
 			log.AuctaLogger.Infof("Success: %s", operation)
 		} else {
-			msg := fmt.Sprintf("The user is not supposed to be able to %s", operation)
+			msg := fmt.Sprintf("False positive: The user is not supposed to be able to %s", operation)
 			checkError(t, res, errors.New(msg))
 		}
 	} else {
 		if permission {
 			msg := fmt.Sprintf("%v", err)
 			checkError(t, res, errors.New(msg))
-		} else if strings.Contains(err.Error(), "Access Denied") {
-			log.AuctaLogger.Infof("Success: %s, denied", operation)
-		} else if !strings.Contains(err.Error(), "Access Denied") {
+		} else if strings.Contains(err.Error(), AccessDenied) {
+			log.AuctaLogger.Infof("Negative case pass: %s, denied", operation)
+		} else if !strings.Contains(err.Error(), AccessDenied) {
 			msg := fmt.Sprintf("%v", err)
 			checkError(t, res, errors.New(msg))
 		}
 	}
 }
+
+func createAppCredentialProfileCeph(t *testing.T, res *m.TestResult, profile *s3.S3Profile, appId uint64){
+	serviceType := "ceph"
+
+	appCredential := authentication.AuthProfile{
+		Name:          fmt.Sprintf("%s-%s", profile.Username, serviceType),
+		Type:          serviceType,
+		ApplicationId: appId,
+		Profile:       profile,
+		Active:        true}
+
+	log.AuctaLogger.Infof("Creating the ceph profile %v", appCredential)
+
+	var err error
+	_, err = Pcc.CreateAppCredentialProfileCeph(&appCredential)
+	checkError(t, res, err)
+
+	timeout := time.After(5 * time.Minute)
+	tick := time.Tick(15 * time.Second)
+	found := false
+
+	for !found {
+		select {
+		case <-timeout:
+			msg := "Timed out waiting for RGW"
+			checkError(t, res, errors.New(msg))
+		case <-tick:
+			acs, err := Pcc.GetAppCredentials("ceph")
+			if err != nil {
+				msg := fmt.Sprintf("Failed to get deploy status "+
+					"%v", err)
+				checkError(t, res, errors.New(msg))
+			}
+
+			for _, ac := range acs {
+				if ac.Name == fmt.Sprintf("%s-%s", profile.Username, "ceph") {
+					jsonString, _ := json.Marshal(ac.Profile)
+					json.Unmarshal(jsonString, profile)
+					if profile.AccessKey != "" {
+						found = true
+					}
+				}
+			}
+		}
+	}
+
+	log.AuctaLogger.Infof("Created the ceph profile %v", profile)
+}
+
+
+func createBucket(t *testing.T, res *m.TestResult, ctx context.Context, bucketName string) (exists bool, err error){
+
+	if exists, err = minioClient.BucketExists(ctx, bucketName); err == nil {
+		if !exists {
+			err = minioClient.MakeBucket(ctx, bucketName, minio.MakeBucketOptions{})
+		} else {
+			log.AuctaLogger.Warnf("Bucket %s already exists", bucketName)
+		}
+	} else {
+		checkError(t, res, err)
+	}
+	return
+}
+

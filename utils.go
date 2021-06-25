@@ -50,6 +50,16 @@ func getNodeFromEnv(id uint64) *node {
 	return nil
 }
 
+
+func checkError(t *testing.T, res *models.TestResult, err error) {
+	if err != nil {
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
+}
+
 func CheckDependencies(t *testing.T, res *models.TestResult, dep ...func() error) {
 	for _, fn := range dep {
 		if err := fn(); err != nil {
@@ -197,6 +207,26 @@ func CheckNodesNetCluster() (err error) {
 
 func CheckCephClusterExists() (err error) {
 	cephCluster, ok := Pcc.GetCephCluster(Env.CephConfiguration.ClusterName)
+	if ok != nil {
+		err = errors.New("Can't find a CephCluster with the provided ClusterName")
+		return
+	}
+	if cephCluster.CephClusterConfig.ClusterNetwork != Env.CephConfiguration.ClusterNetwork ||
+		cephCluster.CephClusterConfig.PublicNetwork != Env.CephConfiguration.PublicNetwork ||
+		len(cephCluster.Nodes) != Env.CephConfiguration.NumberOfNodes {
+		err = errors.New("The CephCluster does not match the specified parameters")
+		return
+	}
+
+	if status, _ := Pcc.GetCephHealthStatusById(cephCluster.Id); status.Health == "HEALTH_ERR" {
+		err = errors.New("The CephCluster status is not OK")
+		return
+	}
+	return
+}
+
+func CheckCephClusterRGWExists() (err error) {
+	cephCluster, ok := Pcc.GetCephCluster(Env.RGWConfiguration.ClusterName)
 	if ok != nil {
 		err = errors.New("Can't find a CephCluster with the provided ClusterName")
 		return
