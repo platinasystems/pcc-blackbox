@@ -43,6 +43,18 @@ func (pcc *PccClient) Get(endPoint string, out interface{}, options ...interface
 	return
 }
 
+// GETRAWFILE
+func (pcc *PccClient) GetRawFile(endPoint string) (content string, err error) {
+	content, err = (*pcc.getClient()).GetRawFile(endPoint)
+	return
+}
+
+// GETRAW
+func (pcc *PccClient) GetRaw(endPoint string, out interface{}, options ...interface{}) (err error) {
+	err = (*pcc.getClient()).GetRaw(endPoint, out, options...)
+	return
+}
+
 // DELETE
 func (pcc *PccClient) Delete(endPoint string, data interface{}, out interface{}, options ...interface{}) (err error) {
 	err = (*pcc.getClient()).Delete(endPoint, data, out, options...)

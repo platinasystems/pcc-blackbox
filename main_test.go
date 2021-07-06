@@ -251,6 +251,12 @@ func TestRGW(t *testing.T) {
 	})
 }
 
+func TestRGWReplication(t *testing.T) {
+	mayRun(t, "testRGWReplication", func(t *testing.T) {
+		mayRun(t, "testRGWReplicationSecondaryStarted", testRGWReplicationSecondaryStarted)
+	})
+}
+
 func TestK8sApp(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))

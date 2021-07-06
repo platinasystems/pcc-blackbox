@@ -13,22 +13,23 @@ import (
 //       removed from lib.  Please do not add more.
 
 type testEnv struct {
-	Env                   string
-	PccIp                 string
-	Invaders              []invader
-	Servers               []server
-	DockerStats           pcc.DockerStatsConfig
-	AuthenticationProfile pcc.AuthenticationProfile
-	PortusConfiguration   pcc.PortusConfiguration
-	DBConfiguration       *pcc.DBConfiguration
-	SshConfiguration      *pcc.SshConfiguration
-	CephConfiguration     pcc.CephConfiguration
-	K8sAppConfiguration   pcc.K8sAppConfiguration
-	Availability          Availability
-	NetIpam               []netIpam
-	NetCluster            []netCluster
-	RGWConfiguration      RGWConfiguration
-	AuthConfiguration     AuthConfiguration
+	Env                         string
+	PccIp                       string
+	Invaders                    []invader
+	Servers                     []server
+	DockerStats                 pcc.DockerStatsConfig
+	AuthenticationProfile       pcc.AuthenticationProfile
+	PortusConfiguration         pcc.PortusConfiguration
+	DBConfiguration             *pcc.DBConfiguration
+	SshConfiguration            *pcc.SshConfiguration
+	CephConfiguration           pcc.CephConfiguration
+	K8sAppConfiguration         pcc.K8sAppConfiguration
+	Availability                Availability
+	NetIpam                     []netIpam
+	NetCluster                  []netCluster
+	RGWConfiguration            RGWConfiguration
+	AuthConfiguration           AuthConfiguration
+	RGWReplicationConfiguration RGWReplicationConfiguration
 }
 
 type node struct {
@@ -110,6 +111,14 @@ type AuthConfiguration struct {
 	LDAPGroup    string `json"LDAPGroup"`
 	LDAPUsername string `json"LDAPUsername"`
 	LDAPPassword string `json"LDAPPassword"`
+}
+
+type RGWReplicationConfiguration struct {
+	PccPrimaryIP         string `json"pccPrimaryIP"`
+	PccSecondaryIP       string `json"pccSecondaryIP"`
+	PrimaryClusterName   string `json"primaryClusterName"`
+	SecondaryClusterName string `json"secondaryClusterName"`
+	PrimaryRGWName       string `json"primaryRGWName"`
 }
 
 var exampleEnv = testEnv{

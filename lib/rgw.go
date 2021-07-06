@@ -20,6 +20,22 @@ func (pcc *PccClient) GetRadosGWs() (gws []ceph.RadosGateway, err error) {
 	return
 }
 
+//Get a Rados Gateway by its name
+func (pcc *PccClient) GetRadosGWByName(name string) (gw ceph.RadosGateway, err error) {
+	var gws []ceph.RadosGateway
+	err = pcc.Get("pccserver/v2/storage/ceph/rgws", &gws)
+	if err != nil {
+		return
+	}
+	for _, g := range gws {
+		if g.Name == name {
+			gw = g
+			return
+		}
+	}
+	return
+}
+
 // Get a Rados Gateway
 func (pcc *PccClient) GetRadosGW(id uint64) (gw ceph.RadosGateway, err error) {
 	err = pcc.Get(fmt.Sprintf("pccserver/v2/storage/ceph/rgws/%d", id), &gw)
