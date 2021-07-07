@@ -1,6 +1,7 @@
 package pcc
 
 import (
+	"encoding/json"
 	"fmt"
 	log "github.com/platinasystems/go-common/logs"
 	"github.com/platinasystems/pcc-models/security"
@@ -23,6 +24,11 @@ type AvailableNode struct {
 type ErasureCodeProfile struct {
 	DataChunks   uint64 `json:"dataChunks"`
 	CodingChunks uint64 `json:"codingChunks"`
+}
+
+func (pcc *PccClient) GetTrusts() (trusts []security.Trust, err error) {
+	err = pcc.Get("pccserver/trusts", &trusts)
+	return
 }
 
 func (pcc *PccClient) GetTrust(id uint64) (result security.Trust, err error) {
@@ -58,15 +64,42 @@ func (pcc *PccClient) PrimaryEndedRemoteTrustCreation(appType string, masterAppI
 	return
 }
 
-func (pcc *PccClient) SecondaryEndedRemoteTrustCreation(appType string, slaveParams string, filePath string) (trust security.Trust, err error) {
+func (pcc *PccClient) SecondaryEndedRemoteTrustCreation(appType string, slaveParams SlaveParametersRGW, filePath string) (trust security.Trust, err error) {
 	endPoint := "pccserver/trusts"
+	strParams, _ := json.Marshal(slaveParams)
+
 	m := map[string]string{
 		"side":        "slave",
 		"appType":     appType,
-		"slaveParams": slaveParams,
+		"slaveParams": string(strParams),
 	}
 	fileMap := map[string]string{"trustFile": filePath}
 	// this is actually a POST
 	err = pcc.PutFiles("POST", endPoint, fileMap, m, &trust)
+	return
+}
+
+func (pcc *PccClient) DeleteTrust(id uint64) (result security.Trust, err error) {
+	err = pcc.Delete(fmt.Sprintf("pccserver/trusts/%d", id), nil, &result)
+	return
+}
+
+func (pcc *PccClient) DeleteTrusts() (result security.Trust, err error) {
+	err = pcc.Delete("pccserver/trusts/", nil, &result)
+	return
+}
+
+func (pcc *PccClient) TrustExists(id uint64) (found bool, err error) {
+	var trusts []security.Trust
+	trusts, err = pcc.GetTrusts()
+	if err != nil {
+		return
+	}
+	for _, trust := range trusts {
+		if trust.ID == id {
+			found = true
+			return
+		}
+	}
 	return
 }

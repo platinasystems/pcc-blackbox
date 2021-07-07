@@ -119,6 +119,7 @@ type RGWReplicationConfiguration struct {
 	PrimaryClusterName   string `json"primaryClusterName"`
 	SecondaryClusterName string `json"secondaryClusterName"`
 	PrimaryRGWName       string `json"primaryRGWName"`
+	TargetNodeName       string `json"targetNodeName"`
 }
 
 var exampleEnv = testEnv{

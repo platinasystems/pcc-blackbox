@@ -6,6 +6,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/pcc-blackbox/utility"
 	"os"
 	"testing"
 	"time"
@@ -55,7 +56,8 @@ func checkError(t *testing.T, res *models.TestResult, err error) {
 	if err != nil {
 		msg := err.Error()
 		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
+		name, file, line := utility.FuncName(1)
+		log.AuctaLogger.Error(fmt.Sprintf("In file %s, function %s, line %d: %s", file, name, line, msg))
 		t.FailNow()
 	}
 }

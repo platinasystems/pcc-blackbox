@@ -29,7 +29,7 @@ type TestResult struct {
 
 func InitTestResult(runID string) (res *TestResult) {
 	res = &TestResult{RunID: runID, Result: TestUndefined}
-	res.TestID = utility.FuncName()
+	res.TestID, _, _ = utility.FuncName(2)
 	return
 }
 
