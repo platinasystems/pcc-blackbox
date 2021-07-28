@@ -56,7 +56,7 @@ func checkError(t *testing.T, res *models.TestResult, err error) {
 	if err != nil {
 		msg := err.Error()
 		res.SetTestFailure(msg)
-		name, file, line := utility.FuncName(1)
+		name, file, line := utility.FuncName(2)
 		log.AuctaLogger.Error(fmt.Sprintf("In file %s, function %s, line %d: %s", file, name, line, msg))
 		t.FailNow()
 	}

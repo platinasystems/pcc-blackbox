@@ -253,7 +253,8 @@ func TestRGW(t *testing.T) {
 
 func TestRGWReplication(t *testing.T) {
 	mayRun(t, "testRGWReplication", func(t *testing.T) {
-		mayRun(t, "testRGWReplicationSecondaryStarted", testRGWReplicationSecondaryStarted)
+		//mayRun(t, "testRGWReplicationSecondaryStarted", testRGWReplicationSecondaryStarted)
+		mayRun(t, "testRGWReplicationPrimaryStarted", testRGWReplicationPrimaryStarted)
 	})
 }
 

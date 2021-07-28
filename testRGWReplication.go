@@ -28,6 +28,7 @@ func testRGWReplicationSecondaryStarted(t *testing.T) {
 	t.Run("primarySelectTargetNodes", primarySelectTargetNodes)
 	t.Run("checkTrustResult", checkTrustResult)
 	t.Run("deleteTrustSecondary", deleteTrustSecondary)
+	t.Run("deleteTrustPrimary", deleteTrustPrimary)
 }
 
 func testRGWReplicationPrimaryStarted(t *testing.T) {
@@ -35,9 +36,10 @@ func testRGWReplicationPrimaryStarted(t *testing.T) {
 	t.Run("primarySideStartedTrustCreation", primarySideStartedTrustCreation)
 	t.Run("downloadTrustCertificatePrimary", downloadTrustCertificatePrimary)
 	t.Run("secondarySideEndedTrustCreation", secondarySideEndedTrustCreation)
-	t.Run("primarySelectTargetNodes", primarySelectTargetNodes)
+	//t.Run("primarySelectTargetNodes", primarySelectTargetNodes)
 	t.Run("checkTrustResult", checkTrustResult)
 	t.Run("deleteTrustPrimary", deleteTrustPrimary)
+	t.Run("deleteTrustSecondary", deleteTrustSecondary)
 }
 
 func initPccs(t *testing.T) {
@@ -167,7 +169,7 @@ func secondarySideEndedTrustCreation(t *testing.T) {
 	}
 
 	params := pcc.SlaveParametersRGW{ClusterID: secondaryCluster.Id, TargetNodes: []uint64{targetID}}
-	primaryTrust, err = PccPrimary.SecondaryEndedRemoteTrustCreation("rgw", params, "token.txt")
+	secondaryTrust, err = PccSecondary.SecondaryEndedRemoteTrustCreation("rgw", params, "token.txt")
 	checkError(t, res, err)
 }
 
@@ -252,7 +254,7 @@ func deleteTrustPrimary(t *testing.T) {
 	_, err := PccPrimary.DeleteTrust(primaryTrust.ID)
 	checkError(t, res, err)
 
-	var primaryTrustExists, secondaryTrustExists bool
+	var primaryTrustExists bool
 
 	timeout := time.After(15 * time.Minute)
 	tick := time.Tick(30 * time.Second)
@@ -264,15 +266,12 @@ func deleteTrustPrimary(t *testing.T) {
 		case <-tick:
 			primaryTrustExists, err = PccPrimary.TrustExists(primaryTrust.ID)
 			checkError(t, res, err)
-			secondaryTrustExists, err = PccSecondary.TrustExists(secondaryTrust.ID)
-			checkError(t, res, err)
 
-			if !primaryTrustExists && !secondaryTrustExists {
+			if !primaryTrustExists {
 				log.AuctaLogger.Info("Trust has been revoked")
 				return
 			} else {
-				log.AuctaLogger.Infof("Primary trust exists: %s", primaryTrustExists)
-				log.AuctaLogger.Infof("Secondary trust exists: %s", secondaryTrustExists)
+				log.AuctaLogger.Infof("Primary trust exists: %t", primaryTrustExists)
 			}
 		}
 	}
@@ -288,7 +287,7 @@ func deleteTrustSecondary(t *testing.T) {
 	_, err := PccSecondary.DeleteTrust(secondaryTrust.ID)
 	checkError(t, res, err)
 
-	var primaryTrustExists, secondaryTrustExists bool
+	var secondaryTrustExists bool
 
 	timeout := time.After(15 * time.Minute)
 	tick := time.Tick(30 * time.Second)
@@ -298,17 +297,14 @@ func deleteTrustSecondary(t *testing.T) {
 			msg := "Timed out waiting for trust to be established"
 			checkError(t, res, errors.New(msg))
 		case <-tick:
-			primaryTrustExists, err = PccPrimary.TrustExists(primaryTrust.ID)
-			checkError(t, res, err)
 			secondaryTrustExists, err = PccSecondary.TrustExists(secondaryTrust.ID)
 			checkError(t, res, err)
 
-			if !primaryTrustExists && !secondaryTrustExists {
+			if !secondaryTrustExists {
 				log.AuctaLogger.Info("Trust has been revoked")
 				return
 			} else {
-				log.AuctaLogger.Infof("Primary trust exists: %s", primaryTrustExists)
-				log.AuctaLogger.Infof("Secondary trust exists: %s", secondaryTrustExists)
+				log.AuctaLogger.Infof("Secondary trust exists: %t", secondaryTrustExists)
 			}
 		}
 	}
