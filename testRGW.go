@@ -47,13 +47,13 @@ type Permissions struct {
 
 type BucketQuotas struct {
 	MaxBuckets      uint16
-	MaxBucketSize   uint64
-	MaxBucketObject uint64
+	MaxBucketSize   int64
+	MaxBucketObject int64
 }
 
 type UserQuotas struct {
-	MaxUserObjects uint64
-	MaxUserSize    uint64
+	MaxUserObjects int64
+	MaxUserSize    int64
 }
 
 func testRGW(t *testing.T) {

@@ -14,10 +14,10 @@ require (
 	github.com/minio/minio-go/v7 v7.0.5-0.20200811211821-14ed05478889
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/pelletier/go-toml v1.7.0 // indirect
-	github.com/platinasystems/go-common v0.0.0-20210609124353-4dda911fad4a
-	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210609123953-2025655393e7
+	github.com/platinasystems/go-common v0.0.0-20210723091049-9902b4edde9b
+	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20210726085656-c73e1073acb5
 	github.com/platinasystems/test v1.8.6
-	github.com/platinasystems/tiles v1.3.1-rc1.0.20210622083647-5d43abb6c5ff
+	github.com/platinasystems/tiles v1.3.1-rc1.0.20210728072040-f09ac09598cc
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/viper v1.6.3
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
