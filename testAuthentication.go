@@ -2,78 +2,42 @@ package main
 
 import (
 	"errors"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	m "github.com/platinasystems/pcc-blackbox/models"
 	"github.com/platinasystems/pcc-models/security"
 	"github.com/platinasystems/test"
-	"gopkg.in/yaml.v2"
-	"io/ioutil"
-	"os/exec"
 	"testing"
 	"time"
 )
 
 var (
-	ldapReady    bool
-	oktaReady    bool
-	roles        map[string]*pcc.SecurityRole
-	users        map[string]*pcc.User
-	userRequests map[string]*pcc.UserRequest
-	roleNames    []string
-	userNames    []string
-	tenant       *security.Tenant
+	roles                                map[string]*pcc.SecurityRole
+	users                                map[string]*pcc.User
+	userRequests                         map[string]*pcc.UserRequest
+	roleNames, userNames                 []string
+	tenant, tenantOkta, tenantLDAP       *security.Tenant
+	authProfileOktaID, authProfileLDAPID uint64
 )
 
 func testAuthentication(t *testing.T) {
-	t.Run("checkSecurityConfigFile", checkSecurityConfigFile)
-	t.Run("addRolesAndTenants", addRolesAndTenants)
+	t.Run("addRolesAndTenantsPlatina", addRolesAndTenantsPlatina)
+	t.Run("addRolesAndTenantsThirdParty", addRolesAndTenantsThirdParty)
+	t.Run("addThirdPartyBootstrapUsers", addThirdPartyBootstrapUsers)
+	t.Run("addAuthProfiles", addAuthProfiles)
+	t.Run("addGroupMapping", addGroupMapping)
 	t.Run("checkOktaGroupMapping", checkOktaGroupMapping)
 	t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
 	t.Run("addPlatinaUsers", addPlatinaUsers)
 	t.Run("checkTenantsScope", checkTenantsScope)
 	t.Run("checkRolePermissions", checkRolePermissions)
+	t.Run("deleteAuthProfiles", deleteAuthProfiles)
 	t.Run("deleteUsers", deleteUsers)
 	t.Run("deleteRolesAndTenants", deleteRolesAndTenants)
-
-}
-func checkSecurityConfigFile(t *testing.T) {
-	test.SkipIfDryRun(t)
-
-	res := m.InitTestResult(runID)
-	defer res.CheckTestAndSave(t, time.Now())
-
-	var config pcc.SecurityConfig
-
-	ldapReady = true
-	oktaReady = true
-
-	cmd := exec.Command("docker", "cp", "security:/home/conf/application.yml", ".")
-	err := cmd.Run()
-	checkError(t, res, err)
-
-	appYaml, _ := ioutil.ReadFile("application.yml")
-
-	cmd = exec.Command("rm", "application.yml")
-	err = cmd.Run()
-	checkError(t, res, err)
-
-	err = yaml.Unmarshal(appYaml, &config)
-	checkError(t, res, err)
-
-	if config.Auth.Service.Okta.Token == "" || config.Auth.Service.Okta.Domain == "" {
-		oktaReady = false
-		log.AuctaLogger.Warn("The security service is not configured for okta")
-	}
-
-	if config.Auth.Service.LDAP.Url == "" {
-		oktaReady = false
-		log.AuctaLogger.Warn("The security service is not configured for LDAP")
-	}
 }
 
-func addRolesAndTenants(t *testing.T) {
+func addRolesAndTenantsPlatina(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
@@ -81,7 +45,7 @@ func addRolesAndTenants(t *testing.T) {
 
 	var err error
 	roles = make(map[string]*pcc.SecurityRole)
-	roleNames = []string{"role-parent-ro", "role-parent-rw", "role-child-ro", "role-child-rw"}
+	roleNames = []string{"role-parent-ro", "role-parent-rw", "role-child-ro", "role-child-rw", "role-okta", "role-LDAP"}
 
 	name := "test-tenant-bb"
 	tenant = &(security.Tenant{Name: name, Description: "blackbox test tenant"})
@@ -131,43 +95,187 @@ func addRolesAndTenants(t *testing.T) {
 	checkError(t, res, err)
 }
 
+func addRolesAndTenantsThirdParty(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	tenantOkta = &(security.Tenant{Name: "test-tenant-bb-okta", Description: "blackbox test tenant for okta"})
+	tenantLDAP = &(security.Tenant{Name: "test-tenant-bb-LDAP", Description: "blackbox test tenant for LDAP"})
+
+	tenantOkta, err = Pcc.AddTenant(*tenantOkta)
+	checkError(t, res, err)
+
+	tenantLDAP, err = Pcc.AddTenant(*tenantLDAP)
+	checkError(t, res, err)
+
+	rwUserManagementGroupOperation := security.GroupOperation{Id: 8}
+
+	reqRoleChildRWOkta := pcc.UserRole{
+		GenericModel: pcc.GenericModel{Id: 0,
+			Name:  "test-role-okta",
+			Owner: tenantOkta.ID},
+		GroupOperations: []security.GroupOperation{rwUserManagementGroupOperation},
+	}
+
+	roles["role-okta"], err = Pcc.RegisterRole(reqRoleChildRWOkta)
+	checkError(t, res, err)
+
+	reqRoleChildRWLDAP := pcc.UserRole{
+		GenericModel: pcc.GenericModel{Id: 0,
+			Name:  "test-role-LDAP",
+			Owner: tenantLDAP.ID},
+		GroupOperations: []security.GroupOperation{rwUserManagementGroupOperation},
+	}
+
+	roles["role-LDAP"], err = Pcc.RegisterRole(reqRoleChildRWLDAP)
+	checkError(t, res, err)
+}
+
+func addThirdPartyBootstrapUsers(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+	users = make(map[string]*pcc.User)
+	userRequests = make(map[string]*pcc.UserRequest)
+
+	userRequests["user-bootstrap-okta"] = &pcc.UserRequest{
+		UserName:  "user-bootstrap-okta@platinasystems.com",
+		FirstName: "Okta",
+		LastName:  "Okta",
+		Password:  "password-bb",
+		TenantId:  tenantOkta.ID,
+		RoleId:    roles["role-okta"].Id,
+	}
+	userRequests["user-bootstrap-LDAP"] = &pcc.UserRequest{
+		UserName:  "user-bootstrap-LDAP@platinasystems.com",
+		FirstName: "LDAP",
+		LastName:  "LDAP",
+		Password:  "password-bb",
+		TenantId:  tenantLDAP.ID,
+		RoleId:    roles["role-LDAP"].Id,
+	}
+
+	users["user-bootstrap-okta"], err = Pcc.AddUserReq(*userRequests["user-bootstrap-okta"])
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added user %v", users["user-bootstrap-okta"])
+
+	users["user-bootstrap-LDAP"], err = Pcc.AddUserReq(*userRequests["user-bootstrap-LDAP"])
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added user %v", users["user-bootstrap-LDAP"])
+}
+
+func addAuthProfiles(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	authProfileReqOkta := &pcc.AuthProfile{
+		Provider: "okta",
+		Parameters: pcc.OktaConfig{
+			Domain: Env.OktaConfiguration.Domain,
+			ApiKey: Env.OktaConfiguration.ApiKey,
+		},
+	}
+
+	log.AuctaLogger.Infof("Okta auth profile request: %v", authProfileReqOkta)
+
+	authProfileReqLDAP := &pcc.AuthProfile{
+		Provider: "LDAP",
+		Parameters: pcc.LDAPConfig{
+			URL:         Env.LDAPConfiguration.URL,
+			GroupBaseDN: Env.LDAPConfiguration.GroupBaseDN,
+		},
+	}
+
+	log.AuctaLogger.Infof("LDAP auth profile request: %v", authProfileReqLDAP)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-okta"].UserName,
+		Password: "password-bb"})
+	checkError(t, res, err)
+	err = Pcc.AddAuthenticationProfile(authProfileReqOkta)
+	checkError(t, res, err)
+	profiles, _ := Pcc.GetAuthenticationProfiles()
+	authProfileOktaID = profiles[0].ID
+	log.AuctaLogger.Infof("Okta auth profile ID: %v", authProfileOktaID)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
+		Password: "password-bb"})
+	err = Pcc.AddAuthenticationProfile(authProfileReqLDAP)
+	checkError(t, res, err)
+	profiles, _ = Pcc.GetAuthenticationProfiles()
+	authProfileLDAPID = profiles[0].ID
+	log.AuctaLogger.Infof("LDAP auth profile ID: %v", authProfileLDAPID)
+}
+
+func addGroupMapping(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	group := &pcc.ThirdPartyGroup{
+		Group:         Env.OktaConfiguration.Group,
+		RoleID:        roles["role-okta"].Id,
+		TenantID:      tenantOkta.ID,
+		AuthProfileID: authProfileOktaID,
+	}
+
+	log.AuctaLogger.Infof("Okta group mapping: %v", group)
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-okta"].UserName,
+		Password: "password-bb"})
+	checkError(t, res, err)
+
+	group, err = Pcc.AddThirdPartyGroup(group)
+	checkError(t, res, err)
+
+	group = &pcc.ThirdPartyGroup{
+		Group:         Env.LDAPConfiguration.Group,
+		RoleID:        roles["role-LDAP"].Id,
+		TenantID:      tenantLDAP.ID,
+		AuthProfileID: authProfileLDAPID,
+	}
+
+	log.AuctaLogger.Infof("LDAP group mapping: %v", group)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
+		Password: "password-bb"})
+
+	group, err = Pcc.AddThirdPartyGroup(group)
+	checkError(t, res, err)
+}
+
 func checkOktaGroupMapping(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
-	CheckDependencies(t, res, Env.CheckOktaAuthConfiguration)
-
-	if !oktaReady {
-		t.SkipNow()
-	}
 
 	var err error
-	group := &pcc.ThirdPartyGroup{
-		Group:    Env.AuthConfiguration.OktaGroup,
-		RoleID:   roles["role-child-rw"].Id,
-		TenantID: tenant.ID,
-		Provider: "okta",
-		Owner:    tenant.ID,
-	}
 
-	group, err = Pcc.AddThirdPartyGroup(group)
-	checkError(t, res, err)
-
-	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
-
-	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.AuthConfiguration.OktaUsername, Password: Env.AuthConfiguration.OktaPassword, Provider: "okta"})
+	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.OktaConfiguration.Username, Password: Env.OktaConfiguration.Password, Tenant: "test-tenant-bb-okta"})
 	checkError(t, res, err)
 
 	var token *jwt.Token
 	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, nil)
 	claims := token.Claims.(*pcc.TokenClaims)
 
-	if claims.Tenant != tenant.ID {
+	if claims.Tenant != tenantOkta.ID {
 		err = errors.New("Error assigning tenant id to user")
 	}
 
-	if claims.Role != roles["role-child-rw"].Id {
+	if claims.Role != roles["role-okta"].Id {
 		err = errors.New("Error assigning role id to user")
 	}
 }
@@ -177,40 +285,21 @@ func checkLDAPGroupMapping(t *testing.T) {
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
-	CheckDependencies(t, res, Env.CheckLDAPAuthConfiguration)
 
-	if !ldapReady {
-		t.SkipNow()
-	}
+	var err error
 
-	err := Pcc.ChangeUser(adminCredential)
-	checkError(t, res, err)
-
-	group := &pcc.ThirdPartyGroup{
-		Group:    Env.AuthConfiguration.LDAPGroup,
-		RoleID:   roles["role-child-rw"].Id,
-		TenantID: tenant.ID,
-		Provider: "ldap",
-		Owner:    tenant.ID,
-	}
-
-	group, err = Pcc.AddThirdPartyGroup(group)
-	checkError(t, res, err)
-
-	log.AuctaLogger.Infof("Successfully added third party group association %v", *group)
-
-	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.AuthConfiguration.LDAPUsername, Password: Env.AuthConfiguration.LDAPPassword, Provider: "ldap"})
+	err = Pcc.ChangeUser(pcc.Credential{UserName: Env.LDAPConfiguration.Username, Password: Env.LDAPConfiguration.Password, Tenant: "test-tenant-bb-LDAP"})
 	checkError(t, res, err)
 
 	var token *jwt.Token
 	token, err = jwt.ParseWithClaims(Pcc.GetToken(), &pcc.TokenClaims{}, nil)
 	claims := token.Claims.(*pcc.TokenClaims)
 
-	if claims.Tenant != tenant.ID {
+	if claims.Tenant != tenantLDAP.ID {
 		err = errors.New("Error assigning tenant id to user")
 	}
 
-	if claims.Role != roles["role-child-rw"].Id {
+	if claims.Role != roles["role-LDAP"].Id {
 		err = errors.New("Error assigning role id to user")
 	}
 }
@@ -223,10 +312,6 @@ func addPlatinaUsers(t *testing.T) {
 
 	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
-
-	users = make(map[string]*pcc.User)
-	userRequests = make(map[string]*pcc.UserRequest)
-	userNames = []string{"user-parent-ro", "user-parent-rw", "user-child-ro", "user-child-rw"}
 
 	userRequests["user-parent-ro"] = &pcc.UserRequest{
 		UserName:  "user.parent.ro@platinasystems.com",
@@ -261,6 +346,8 @@ func addPlatinaUsers(t *testing.T) {
 		TenantId:  tenant.ID,
 		RoleId:    roles["role-child-rw"].Id,
 	}
+
+	userNames = []string{"user-parent-ro", "user-parent-rw", "user-child-ro", "user-child-rw"}
 
 	for _, username := range userNames {
 		users[username], err = Pcc.AddUserReq(*userRequests[username])
@@ -344,6 +431,26 @@ func checkRolePermissions(t *testing.T) {
 	_, err = Pcc.UpdateRole(reqRoleChildRO)
 	checkError(t, res, err)
 }
+
+func deleteAuthProfiles(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-okta"].UserName,
+		Password: "password-bb"})
+	checkError(t, res, err)
+	err = Pcc.DeleteAuthenticationProfile(authProfileOktaID)
+	checkError(t, res, err)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
+		Password: "password-bb"})
+	checkError(t, res, err)
+	err = Pcc.DeleteAuthenticationProfile(authProfileLDAPID)
+	checkError(t, res, err)
+}
+
 func deleteUsers(t *testing.T) {
 	test.SkipIfDryRun(t)
 
@@ -354,6 +461,11 @@ func deleteUsers(t *testing.T) {
 	checkError(t, res, err)
 
 	for _, username := range userNames {
+		err = Pcc.DelUser(users[username].UserName)
+		checkError(t, res, err)
+	}
+
+	for _, username := range []string{"user-bootstrap-okta", "user-bootstrap-LDAP"} {
 		err = Pcc.DelUser(users[username].UserName)
 		checkError(t, res, err)
 	}
@@ -374,6 +486,13 @@ func deleteRolesAndTenants(t *testing.T) {
 	}
 
 	err = Pcc.DelTenant(tenant.ID)
+	checkError(t, res, err)
+	err = Pcc.DelTenant(tenantOkta.ID)
+	checkError(t, res, err)
+	err = Pcc.DelTenant(tenantLDAP.ID)
+	checkError(t, res, err)
+
+	err = Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 }
 
