@@ -181,7 +181,6 @@ func delAllPortus(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, p := range portusConfigs {
@@ -194,7 +193,6 @@ func delAllPortus(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 		// wait till deleted
 		done := false
@@ -214,7 +212,6 @@ func delAllPortus(t *testing.T) {
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
-					return
 				}
 			case <-timeout:
 				msg := fmt.Sprintf("Timeout deleting Portus")

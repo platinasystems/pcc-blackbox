@@ -22,14 +22,6 @@ const ROLE_BB_TEST = "blackbox-role-test-policy"
 // TEST Policies
 ////
 
-func checkError(t *testing.T, res *models.TestResult, err error) {
-	if err != nil {
-		msg := err.Error()
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
-}
 
 func testPreparePolicies(t *testing.T) {
 	res := models.InitTestResult(runID)

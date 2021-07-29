@@ -27,6 +27,7 @@ type testEnv struct {
 	Availability          Availability
 	NetIpam               []netIpam
 	NetCluster            []netCluster
+	RGWConfiguration      RGWConfiguration
 	AuthConfiguration     AuthConfiguration
 }
 

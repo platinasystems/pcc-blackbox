@@ -51,7 +51,6 @@ func configNetworkInterfaces(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	l2:
 		for j := range node.NetInterfaces { // skip the check of the interfaces are not declared in Env
@@ -166,7 +165,6 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 
 		ifaceRequest = prepIfaceRequest(nodeId, iface,
@@ -182,7 +180,6 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 
@@ -192,7 +189,6 @@ func configNodeInterfaces(t *testing.T, skipManagement bool, nodeId uint64, Host
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 }
@@ -414,7 +410,6 @@ func verifyNetworkConfig(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			if done {
 				delete(serverMap, node.Id)
@@ -430,7 +425,6 @@ func verifyNetworkConfig(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		}
 	}
 
@@ -461,7 +455,6 @@ func verifyNetworkInterfaces(t *testing.T) {
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
-					return
 				}
 				for _, i := range intfs {
 					intf, _ := Pcc.GetIfaceById(id, i)
@@ -481,7 +474,6 @@ func verifyNetworkInterfaces(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		case <-tick:
 			for id, intfs := range nodeIntfMap {
 				if _, found := nodesToCheck[id]; !found {
@@ -514,7 +506,6 @@ func verifyNetworkInterfaces(t *testing.T) {
 						res.SetTestFailure(msg)
 						log.AuctaLogger.Error(msg)
 						assert.FailNow()
-						return
 					}
 				}
 				if intf_count == intf_up {
@@ -570,7 +561,6 @@ func verifyNetworkUp(t *testing.T) {
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
-					return
 				}
 				for _, i := range intfs {
 					intf, err := Pcc.GetIfaceById(id, i)
@@ -595,7 +585,6 @@ func verifyNetworkUp(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		case <-tick:
 			for id, intfs := range nodeIntfMap {
 				if _, found := nodesToCheck[id]; !found {

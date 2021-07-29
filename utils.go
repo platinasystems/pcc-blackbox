@@ -6,6 +6,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
+	"os"
 	"testing"
 	"time"
 )
@@ -48,6 +49,15 @@ func getNodeFromEnv(id uint64) *node {
 	}
 
 	return nil
+}
+
+func checkError(t *testing.T, res *models.TestResult, err error) {
+	if err != nil {
+		msg := err.Error()
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
 }
 
 func CheckDependencies(t *testing.T, res *models.TestResult, dep ...func() error) {
@@ -215,6 +225,26 @@ func CheckCephClusterExists() (err error) {
 	return
 }
 
+func CheckCephClusterRGWExists() (err error) {
+	cephCluster, ok := Pcc.GetCephCluster(Env.RGWConfiguration.ClusterName)
+	if ok != nil {
+		err = errors.New("Can't find a CephCluster with the provided ClusterName")
+		return
+	}
+	if cephCluster.CephClusterConfig.ClusterNetwork != Env.CephConfiguration.ClusterNetwork ||
+		cephCluster.CephClusterConfig.PublicNetwork != Env.CephConfiguration.PublicNetwork ||
+		len(cephCluster.Nodes) != Env.CephConfiguration.NumberOfNodes {
+		err = errors.New("The CephCluster does not match the specified parameters")
+		return
+	}
+
+	if status, _ := Pcc.GetCephHealthStatusById(cephCluster.Id); status.Health == "HEALTH_ERR" {
+		err = errors.New("The CephCluster status is not OK")
+		return
+	}
+	return
+}
+
 func CheckK8sClusterExists() (err error) {
 	k8sCluster, ok := Pcc.GetKubernetesClusterByName(k8sname)
 	if ok != nil {
@@ -283,6 +313,18 @@ func CheckNetClusterExists() (err error) {
 	if networkCluster.Health != "OK" {
 		err = errors.New("The Network Cluster status is not OK")
 		return
+	}
+	return
+}
+
+func createFile(name string, size int64) (f *os.File, err error) {
+	f, err = os.Create(name)
+	if err != nil {
+		log.AuctaLogger.Errorf("%v", err)
+		return
+	}
+	if err = f.Truncate(size); err != nil {
+		log.AuctaLogger.Errorf("%v", err)
 	}
 	return
 }

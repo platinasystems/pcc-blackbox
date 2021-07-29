@@ -33,12 +33,21 @@ func installLLDP(t *testing.T) {
 
 // Install LLDP on all invaders
 func installLLDPOnInvaders(t *testing.T) {
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
 	if nodes, err := Pcc.GetInvaderIds(); err == nil {
 		if err = installLLDPOnNodes(nodes); err != nil {
-			t.Fatal(err)
+			msg := fmt.Sprintf("%v", err)
+			res.SetTestFailure(msg)
+			log.AuctaLogger.Error(msg)
+			t.FailNow()
 		}
 	} else {
-		t.Fatal(err)
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
 	}
 }
 

@@ -5,6 +5,7 @@ import (
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 	"github.com/platinasystems/pcc-blackbox/models"
+	"github.com/platinasystems/test"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -13,7 +14,6 @@ import (
 )
 
 func testKMKeys(t *testing.T) {
-
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
@@ -122,7 +122,6 @@ cont:
 }
 
 func testKMCertificates(t *testing.T) {
-
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
@@ -223,6 +222,38 @@ CONT:
 	if content, err := Pcc.DownloadCertificate(cert.Id); err == nil { // compare the content
 		readFileAndCompare(t, content, fileName)
 	} else {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
+}
+
+func addPrivatePublicCert(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := models.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	alias := "test-cert-bb"
+	description := "private/public blackbox certificate"
+
+	fileName := "cert-bb.pem"
+	keyName := "key-bb.pem"
+
+	if exists, _, err := Pcc.FindCertificate(alias); err == nil {
+		if exists {
+			log.AuctaLogger.Warnf("A certificate with name %s already exists and will be used", alias)
+			return
+		}
+	} else {
+		msg := fmt.Sprintf("%v", err)
+		res.SetTestFailure(msg)
+		log.AuctaLogger.Error(msg)
+		t.FailNow()
+	}
+
+	if _, err := Pcc.UploadCertPrivatePublic(fileName, keyName, alias, description); err != nil {
 		msg := fmt.Sprintf("%v", err)
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)

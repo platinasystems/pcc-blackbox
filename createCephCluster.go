@@ -144,7 +144,6 @@ func testCreateCephCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -216,7 +215,6 @@ func testCreateCephPool(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -277,7 +275,6 @@ func testCreateCephFS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -344,7 +341,6 @@ func testDeleteCephFS(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -390,7 +386,6 @@ func testDeleteCephPool(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -439,7 +434,6 @@ func testDeleteCephCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -474,7 +468,6 @@ func testVerifyCephFSCreation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -504,7 +497,6 @@ func testVerifyCephFSDeletion(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -536,7 +528,6 @@ func testVerifyCephPoolCreation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -583,7 +574,6 @@ func testVerifyCephPoolDeletion(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -623,7 +613,6 @@ func testVerifyCephInstallation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 	_, status, err := Pcc.GetCephClusterStatus(cephConfig.ClusterId)
 	if err != nil {
@@ -681,7 +670,6 @@ func testVerifyCephUninstallation(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 

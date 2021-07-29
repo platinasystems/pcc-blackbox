@@ -81,7 +81,6 @@ func createK8s_3nodes(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	k8sRequest = pcc.K8sClusterRequest{
@@ -98,7 +97,6 @@ func createK8s_3nodes(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -120,7 +118,6 @@ func validateK8sCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	timeout := time.After(45 * time.Minute)
@@ -134,7 +131,6 @@ func validateK8sCluster(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		case <-tick:
 			status, percent, err := Pcc.GetKubernetesDeployStatus(id)
 			if err != nil {
@@ -143,7 +139,6 @@ func validateK8sCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 
 			switch status {
@@ -177,7 +172,6 @@ func validateK8sCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		}
 	}
@@ -192,7 +186,6 @@ func validateK8sCluster(t *testing.T) {
 			res.SetTestFailure(msg)
 			log.AuctaLogger.Error(msg)
 			assert.FailNow()
-			return
 		case <-tick:
 			health, err := Pcc.GetKubernetesHealth(id)
 			if err != nil {
@@ -200,7 +193,6 @@ func validateK8sCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 			log.AuctaLogger.Infof("Kubernetes health = %v", health)
 			if health == "good" {
@@ -234,14 +226,12 @@ func addNodeK8sCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	if len(k8sAddDelNodes) == 0 {
 		msg := fmt.Sprintf("No spare nodes to add to Kubernetes cluster %v", id)
 		res.SetTestSkipped(msg)
 		t.SkipNow()
-		return
 	}
 
 	updateReq = pcc.KClusterUpdateRequest{
@@ -255,7 +245,6 @@ func addNodeK8sCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 }
 
@@ -276,7 +265,6 @@ func deleteAllK8sCluster(t *testing.T) {
 		res.SetTestFailure(msg)
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
-		return
 	}
 
 	for _, c := range clusters {
@@ -290,7 +278,6 @@ func deleteAllK8sCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			}
 		}
 
@@ -304,7 +291,6 @@ func deleteAllK8sCluster(t *testing.T) {
 				res.SetTestFailure(msg)
 				log.AuctaLogger.Error(msg)
 				assert.FailNow()
-				return
 			case <-tick:
 				var cluster pcc.K8sCluster
 				allClusters, err := Pcc.GetKubernetes()
@@ -313,7 +299,6 @@ func deleteAllK8sCluster(t *testing.T) {
 					res.SetTestFailure(msg)
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
-					return
 				}
 				found := false
 				for _, cluster = range allClusters {

@@ -80,6 +80,8 @@ func GetNameToTestFunc() (nameToTestFunc map[string]func(*testing.T)) {
 		"testDashboardGetAdvSearchedObjects":        testDashboardGetAdvSearchedObjects,
 		"testDashboardGetAggrHealthCountByType":     testDashboardGetAggrHealthCountByType,
 		"testDashboardGetMetadataEnumStrings":       testDashboardGetMetadataEnumStrings,
+		"addPrivatePublicCert":                      addPrivatePublicCert,
+		"testRGW":                                   testRGW,
 		"testAuthentication":                        testAuthentication,
 	}
 	return
@@ -113,7 +115,6 @@ func GetDefaultTestMap() (defaultTests map[string][]string) {
 		"TestKeyManager":              {"testKMKeys", "testKMCertificates"},
 		"TestAppCredentials":          {"testCreateCredendialMetadataProfile", "testUpdateCredendialMetadataProfile", "testDeleteCredendialMetadataProfile"},
 		"TestDashboard":               {"testDashboardGetAllPCCObjects", "testDashboardGetPCCObjectByRandomId", "testDashboardGetPCCObjectById", "testDashboardGetChildrenObjectsByRandomId", "testDashboardGetParentObjectsByRandomId", "testDashboardGetFilteredObjects", "testDashboardGetAdvSearchedObjects", "testDashboardGetAggrHealthCountByType", "testDashboardGetMetadataEnumStrings"},
-		"TestAuthentication":          {"testAuthentication"},
 	}
 	return
 }
