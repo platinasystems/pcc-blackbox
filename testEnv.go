@@ -84,6 +84,13 @@ type netNode struct {
 	BgpNeighbors []bgpPeer
 }
 
+type RGWConfiguration struct {
+	ClusterName string `json:"clusterName"`
+	PoolName    string `json:"poolName"`
+	CertName    string `json:"certName"`
+	RGWName     string `json:"rgwName"`
+}
+
 type bgpPeer struct {
 	NeighborIp string
 	RemoteAs   string
