@@ -5,9 +5,9 @@ go 1.13
 require (
 	github.com/KyleBanks/dockerstats v0.0.0-20180213183355-b5fec062e953
 	github.com/astaxie/beego v1.12.1 // indirect
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/docker/docker v20.10.5+incompatible
 	github.com/go-test/deep v1.0.2-0.20181118220953-042da051cf31
+	github.com/golang-jwt/jwt v3.2.1+incompatible
 	github.com/google/uuid v1.2.0
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/lib/pq v1.9.0
@@ -23,5 +23,4 @@ require (
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	gopkg.in/go-playground/validator.v9 v9.31.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
-	gotest.tools v2.2.0+incompatible // indirect
 )

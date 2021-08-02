@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -28,7 +27,8 @@ type testEnv struct {
 	NetIpam               []netIpam
 	NetCluster            []netCluster
 	RGWConfiguration      RGWConfiguration
-	AuthConfiguration     AuthConfiguration
+	OktaConfiguration     OktaAuthConfiguration
+	LDAPConfiguration     LDAPAuthConfiguration
 }
 
 type node struct {
@@ -103,13 +103,20 @@ type netIpam struct {
 	Routed    bool
 }
 
-type AuthConfiguration struct {
-	OktaGroup    string `json"oktaGroup"`
-	OktaUsername string `json"oktaUsername"`
-	OktaPassword string `json"oktaPassword"`
-	LDAPGroup    string `json"LDAPGroup"`
-	LDAPUsername string `json"LDAPUsername"`
-	LDAPPassword string `json"LDAPPassword"`
+type OktaAuthConfiguration struct {
+	Domain   string `json:"domain"`
+	ApiKey   string `json:"apiKey"`
+	Group    string `json:"group"`
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
+
+type LDAPAuthConfiguration struct {
+	URL         string `json:"url"`
+	GroupBaseDN string `json:"groupBaseDN"`
+	Group       string `json:"group"`
+	Username    string `json:"username"`
+	Password    string `json:"password"`
 }
 
 var exampleEnv = testEnv{
@@ -376,9 +383,11 @@ func (te *testEnv) CheckPortusConfiguration() (err error) {
 }
 
 func (te *testEnv) CheckOktaAuthConfiguration() (err error) {
-	if te.AuthConfiguration.OktaGroup == "" ||
-		te.AuthConfiguration.OktaUsername == "" ||
-		te.AuthConfiguration.OktaPassword == "" {
+	if te.OktaConfiguration.Group == "" ||
+		te.OktaConfiguration.Username == "" ||
+		te.OktaConfiguration.Password == "" ||
+		te.OktaConfiguration.ApiKey == "" ||
+		te.OktaConfiguration.Domain == "" {
 		err = errors.New("Okta configuration parameters missing")
 		return
 	}
@@ -386,9 +395,11 @@ func (te *testEnv) CheckOktaAuthConfiguration() (err error) {
 }
 
 func (te *testEnv) CheckLDAPAuthConfiguration() (err error) {
-	if te.AuthConfiguration.LDAPGroup == "" ||
-		te.AuthConfiguration.LDAPUsername == "" ||
-		te.AuthConfiguration.LDAPPassword == "" {
+	if te.LDAPConfiguration.Group == "" ||
+		te.LDAPConfiguration.Username == "" ||
+		te.LDAPConfiguration.Password == "" ||
+		te.LDAPConfiguration.URL == "" ||
+		te.LDAPConfiguration.GroupBaseDN == "" {
 		err = errors.New("LDAP configuration parameters missing")
 		return
 	}

@@ -6,7 +6,7 @@ package pcc
 
 import (
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt"
 	"github.com/platinasystems/pcc-models/security"
 )
 
@@ -99,14 +99,29 @@ type User struct {
 }
 
 type ThirdPartyGroup struct {
-	Id       uint64 `json:"id"`
-	Owner    uint64 `json:"owner"`
-	Provider string `json:"provider"`
-	Group    string `json:"groupId"`
-	RoleID   uint64 `json:"roleId"`
-	TenantID uint64 `json:"tenantId"`
+	ID            uint64 `json:"id,omitempty"`
+	Group         string `json:"groupId"`
+	RoleID        uint64 `json:"roleId"`
+	TenantID      uint64 `json:"tenantId"`
+	AuthProfileID uint64 `json:"authProfileId"`
+	Owner         uint64 `json:"owner,omitempty"`
 }
 
+type AuthProfile struct {
+	ID         uint64      `json:"id,omitempty"`
+	Provider   string      `json:"provider"`
+	Parameters interface{} `json:"parameters"`
+}
+
+type OktaConfig struct {
+	Domain string `json:"domain"`
+	ApiKey string `json:"apiKey"`
+}
+
+type LDAPConfig struct {
+	URL         string `json:"url"`
+	GroupBaseDN string `json:"groupBaseDN"`
+}
 type TokenClaims struct {
 	Provider string `json:"provider"`
 	Role     uint64 `json:"role"`
@@ -347,5 +362,29 @@ func (pcc *PccClient) AddThirdPartyGroup(groupReq *ThirdPartyGroup) (group *Thir
 	endpoint := fmt.Sprintf("user-management/third-party/groups")
 	err = pcc.Post(endpoint, groupReq, &g)
 	group = &g
+	return
+}
+
+func (pcc *PccClient) AddAuthenticationProfile(authProfileReq *AuthProfile) (err error) {
+	endpoint := fmt.Sprintf("user-management/tenant/auth-profiles")
+	err = pcc.Post(endpoint, authProfileReq, nil)
+	return
+}
+
+func (pcc *PccClient) GetAuthenticationProfiles() (profiles []AuthProfile, err error) {
+	endpoint := fmt.Sprintf("user-management/tenant/auth-profiles")
+	err = pcc.Get(endpoint, &profiles)
+	return
+}
+
+func (pcc *PccClient) DeleteThirdPartyGroup(id uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/third-party/groups/%d", id)
+	err = pcc.Delete(endpoint, nil, nil)
+	return
+}
+
+func (pcc *PccClient) DeleteAuthenticationProfile(id uint64) (err error) {
+	endpoint := fmt.Sprintf("user-management/tenant/auth-profiles/%d", id)
+	err = pcc.Delete(endpoint, nil, nil)
 	return
 }

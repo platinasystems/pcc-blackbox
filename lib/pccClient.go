@@ -13,7 +13,7 @@ import (
 type Credential struct {
 	UserName string `json:"username"`
 	Password string `json:"password"`
-	Provider string `json:"provider,omitempty"`
+	Tenant   string `json:"tenant,omitempty"`
 }
 
 type PccClient struct {

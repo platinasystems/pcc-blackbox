@@ -307,12 +307,18 @@
         "rgwName": "test-rgw-bb"
      }
     ],
-    "AuthConfiguration":{
-        "oktaGroup":"",
-        "oktaUsername": "",
-        "oktaPassword": "",
-        "LDAPGroup": "",
-        "LDAPUsername": "",
-        "LDAPPassword": "",
-      }
+    "OktaConfiguration":{
+        "username": "",
+        "password": "",
+        "group": "",
+        "domain":"",
+        "apiKey":""
+      },
+    "LDAPConfiguration":{
+      "username": "",
+      "password": "",
+      "group": "",
+      "url": "",
+      "groupBaseDN": ""
+
 }
