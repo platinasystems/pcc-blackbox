@@ -75,41 +75,52 @@ func reimageAllBrown(t *testing.T) {
 
 	assert := test.Assert{t}
 
-	var nodeIdsAdded []uint64
+	var (
+		nodesToReimage = make(map[uint64]string)
+		request        pcc.MaasRequest
+		nodesReimaged  []uint64
+	)
 
 	fails := 0
 	if key, err := getFirstKey(); err == nil {
 		keys := []string{key.Alias}
 
-		nodesList := make([]uint64, len(Env.Servers))
-		for i, s := range Env.Servers {
+		for _, s := range Env.Servers {
 			id := NodebyHostIP[s.HostIp]
-			nodesList[i] = id
-			nodeIdsAdded = append(nodeIdsAdded, id)
+			imageName := "ubuntu-bionic"
+			if len(Env.Maas.Reimage.Nodes) > 0 { // check if the nodes to reimage have been defined
+				if n, ok := Env.Maas.Reimage.Nodes[s.HostIp]; ok {
+					imageName = n.Image
+				} else {
+					continue // skip the node
+				}
+			}
+			nodesToReimage[id] = imageName
 		}
 
-		var request pcc.MaasRequest
-		request.Nodes = nodesList
-		request.Image = "centos78"
-		request.Image = "ubuntu-bionic"
 		request.Locale = "en-US"
 		request.Timezone = "PDT"
 		request.AdminUser = "admin"
 		request.SSHKeys = keys
 
-		fmt.Println(request)
-		if err = Pcc.MaasDeploy(request); err != nil {
-			msg := fmt.Sprintf("MaasDeploy failed: %v", err)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			assert.FailNow()
+		log.AuctaLogger.Infof("Reimaging nodes %+v", nodesToReimage)
+
+		for nodeID, _ := range nodesToReimage {
+			request.Nodes = []uint64{nodeID}
+			request.Image = nodesToReimage[nodeID]
+			if err = Pcc.MaasDeploy(request); err != nil {
+				msg := fmt.Sprintf("MaasDeploy failed: %v", err)
+				res.SetTestFailure(msg)
+				log.AuctaLogger.Error(msg)
+				assert.FailNow()
+			}
 		}
 
 		log.AuctaLogger.Infof("Sleep for 8 minutes")
 		time.Sleep(8 * time.Minute)
 
 		for {
-			for i, id := range nodesList {
+			for id, _ := range nodesToReimage {
 				status, err := Pcc.GetProvisionStatus(id)
 				if err != nil {
 					log.AuctaLogger.Errorf("Node %v error: %v", id, err)
@@ -118,17 +129,17 @@ func reimageAllBrown(t *testing.T) {
 				}
 				if strings.Contains(status, "Ready") {
 					log.AuctaLogger.Infof("Node %v has gone Ready", id)
-					nodesList = removeIndex(i, nodesList)
+					nodesReimaged = append(nodesReimaged, id)
 					continue
 				} else if strings.Contains(status, "reimage failed") {
 					log.AuctaLogger.Errorf("Node %v has failed reimage", id)
-					nodesList = removeIndex(i, nodesList)
+					nodesReimaged = append(nodesReimaged, id)
 					fails++
 					continue
 				}
 				log.AuctaLogger.Infof("Node %v: %v", id, status)
 			}
-			if len(nodesList) == 0 {
+			if len(nodesReimaged) == len(nodesToReimage) { // all re-image completed
 				if fails == 0 {
 					log.AuctaLogger.Infof("Brownfield re-image done")
 				} else {
@@ -137,7 +148,7 @@ func reimageAllBrown(t *testing.T) {
 					log.AuctaLogger.Error(msg)
 					assert.FailNow()
 				}
-				checkAddNodesStatus(t, nodeIdsAdded)
+				checkAddNodesStatus(t, nodesReimaged)
 				return
 			}
 			time.Sleep(60 * time.Second)
@@ -148,12 +159,4 @@ func reimageAllBrown(t *testing.T) {
 		log.AuctaLogger.Error(msg)
 		assert.FailNow()
 	}
-}
-
-func removeIndex(i int, n []uint64) []uint64 {
-	if len(n) > 1 {
-		n = append(n[:i], n[i+1:]...)
-		return n
-	}
-	return nil
 }

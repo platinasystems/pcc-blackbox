@@ -1,12 +1,12 @@
 {
    "PccIp":"172.17.2.238",
-     "Availability":{
-      "Inaccessible": "172.17.2.1"   // some address that can not ssh into
-    },
-    "NetCluster": {
-	"IgwPolicy": "upstream",
-	"ControlCIDR": "1.0.0.0/24"
-    },  
+   "Availability":{
+      "Inaccessible":"172.17.2.1"
+   },
+   "NetCluster":{
+      "IgwPolicy":"upstream",
+      "ControlCIDR":"1.0.0.0/24"
+   },
    "DBConfiguration":{
       "address":"127.0.0.1",
       "port":5432,
@@ -204,121 +204,129 @@
          "deleteCluster":true
       }
    },
-   "K8sAppConfiguration": {
-       "k8sClusterName": "",
-       "cephStorageRequired": true,
-       "apps": [
-           {
-                "appName": "nginxapp",
-                "appNamespace": "nginx",
-                "gitUrl": "https://github.com/platinasystems/devops",
-                "gitRepoPath": "helm-charts",
-                "gitBranch": "master",
-                "label": "nginx"
-           },
-           {
-                "appName": "wordpress-mysql-stateful",
-                "appNamespace": "wordpress-cephfs",
-                "gitUrl": "https://github.com/platinasystems/devops",
-                "gitRepoPath": "helm-charts",
-                "gitBranch": "master",
-                "label": "wordpress-cephfs",
-                "storageClassHelmConfig": [
-                    {
-                        "type": "cephfs",
-                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
-                    }
-                ],
-                "helmFilePath": "wordpressHelmValuesCephFS.txt"
-           },
-           {
-                "appName": "wordpress-mysql-stateful",
-                "appNamespace": "wordpress-cephrbd",
-                "gitUrl": "https://github.com/platinasystems/devops",
-                "gitRepoPath": "helm-charts",
-                "gitBranch": "master",
-                "label": "wordpress-cephrbd",
-                "storageClassHelmConfig": [
-                    {
-                        "type": "rbd",
-                        "storageClassHelmVariableName": "STORAGE_CLASS_NAME"
-                    }
-                ],
-                "helmFilePath": "wordpressHelmValuesCephRBD.txt"
-            }
-        ],
-        "tests": {
-               "createK8sCluster": true,
-               "createK8sStorageClass": true,
-               "deployApp": true,
-               "undeployApp": true,
-               "deleteK8sStorageClass": true,
-               "deleteK8sCluster": false
-        }
+   "K8sAppConfiguration":{
+      "k8sClusterName":"",
+      "cephStorageRequired":true,
+      "apps":[
+         {
+            "appName":"nginxapp",
+            "appNamespace":"nginx",
+            "gitUrl":"https://github.com/platinasystems/devops",
+            "gitRepoPath":"helm-charts",
+            "gitBranch":"master",
+            "label":"nginx"
+         },
+         {
+            "appName":"wordpress-mysql-stateful",
+            "appNamespace":"wordpress-cephfs",
+            "gitUrl":"https://github.com/platinasystems/devops",
+            "gitRepoPath":"helm-charts",
+            "gitBranch":"master",
+            "label":"wordpress-cephfs",
+            "storageClassHelmConfig":[
+               {
+                  "type":"cephfs",
+                  "storageClassHelmVariableName":"STORAGE_CLASS_NAME"
+               }
+            ],
+            "helmFilePath":"wordpressHelmValuesCephFS.txt"
+         },
+         {
+            "appName":"wordpress-mysql-stateful",
+            "appNamespace":"wordpress-cephrbd",
+            "gitUrl":"https://github.com/platinasystems/devops",
+            "gitRepoPath":"helm-charts",
+            "gitBranch":"master",
+            "label":"wordpress-cephrbd",
+            "storageClassHelmConfig":[
+               {
+                  "type":"rbd",
+                  "storageClassHelmVariableName":"STORAGE_CLASS_NAME"
+               }
+            ],
+            "helmFilePath":"wordpressHelmValuesCephRBD.txt"
+         }
+      ],
+      "tests":{
+         "createK8sCluster":true,
+         "createK8sStorageClass":true,
+         "deployApp":true,
+         "undeployApp":true,
+         "deleteK8sStorageClass":true,
+         "deleteK8sCluster":false
+      }
    },
-       "NetIpam": [
-        {
-            "Name": "control-cidr",
-            "Subnet": "10.0.201.192/26",
-            "PubAccess": true,
-            "Routed": true
-        },
-        {
-            "Name": "data-cidr",
-            "Subnet": "7.0.0.0/24",
-            "PubAccess": false,
-            "Routed": false
-        }
-    ],
-    "NetCluster": [
-        {
-            "Name": "my-net",
-            "ControlCIDR": "control-cidr",
-            "DataCIDR": "data-cidr",
-            "IgwPolicy": "upstream",
-            "Nodes": [
-                {
-                    "IpAddr": "172.17.2.72",
-                    "LocalAs": "64733",
-                    "BgpNeighbors": [
-                        {
-                            "NeighborIp": "10.0.6.6",
-                            "RemoteAs": "64608"
-                        }
-                    ]
-                },
-                {
-                    "IpAddr": "172.17.2.71",
-                    "LocalAs": "64733",
-                    "BgpNeighbors": [
-                        {
-                            "NeighborIp": "10.0.6.36",
-                            "RemoteAs": "64608"
-                        }
-                    ]
-                }
-            ]
-        }
-    ],
-    "RGWConfiguration":{
-        "clusterName": "test-ceph",
-        "poolName": "bb-rgw-pool",
-        "certName": "test-cert-bb",
-        "rgwName": "test-rgw-bb"
-     }
-    ],
-    "OktaConfiguration":{
-        "username": "",
-        "password": "",
-        "group": "",
-        "domain":"",
-        "apiKey":""
+   "NetIpam":[
+      {
+         "Name":"control-cidr",
+         "Subnet":"10.0.201.192/26",
+         "PubAccess":true,
+         "Routed":true
       },
-    "LDAPConfiguration":{
-      "username": "",
-      "password": "",
-      "group": "",
-      "url": "",
-      "groupBaseDN": ""
-
+      {
+         "Name":"data-cidr",
+         "Subnet":"7.0.0.0/24",
+         "PubAccess":false,
+         "Routed":false
+      }
+   ],
+   "NetCluster":[
+      {
+         "Name":"my-net",
+         "ControlCIDR":"control-cidr",
+         "DataCIDR":"data-cidr",
+         "IgwPolicy":"upstream",
+         "Nodes":[
+            {
+               "IpAddr":"172.17.2.72",
+               "LocalAs":"64733",
+               "BgpNeighbors":[
+                  {
+                     "NeighborIp":"10.0.6.6",
+                     "RemoteAs":"64608"
+                  }
+               ]
+            },
+            {
+               "IpAddr":"172.17.2.71",
+               "LocalAs":"64733",
+               "BgpNeighbors":[
+                  {
+                     "NeighborIp":"10.0.6.36",
+                     "RemoteAs":"64608"
+                  }
+               ]
+            }
+         ]
+      }
+   ],
+   "RGWConfiguration":{
+      "clusterName":"test-ceph",
+      "poolName":"bb-rgw-pool",
+      "certName":"test-cert-bb",
+      "rgwName":"test-rgw-bb"
+   },
+   "OktaConfiguration":{
+      "username":"",
+      "password":"",
+      "group":"",
+      "domain":"",
+      "apiKey":""
+   },
+   "LDAPConfiguration":{
+      "username":"",
+      "password":"",
+      "group":"",
+      "url":"",
+      "groupBaseDN":""
+   },
+   "Maas":{
+      "Reimage":{
+         "Nodes":{
+            "172.17.2.164":{
+               "Image":"centos78"
+            }
+         }
+      }
+   }
 }

@@ -29,6 +29,7 @@ type testEnv struct {
 	RGWConfiguration      RGWConfiguration
 	OktaConfiguration     OktaAuthConfiguration
 	LDAPConfiguration     LDAPAuthConfiguration
+	Maas                  Maas
 }
 
 type node struct {
@@ -117,6 +118,14 @@ type LDAPAuthConfiguration struct {
 	Group       string `json:"group"`
 	Username    string `json:"username"`
 	Password    string `json:"password"`
+}
+
+type Maas struct {
+	Reimage struct {
+		Nodes map[string]struct {
+			Image string
+		}
+	}
 }
 
 var exampleEnv = testEnv{
