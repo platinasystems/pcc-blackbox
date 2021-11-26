@@ -14,6 +14,7 @@ import (
 type testEnv struct {
 	Env                   string
 	PccIp                 string
+	PrometheusIp          string
 	Invaders              []invader
 	Servers               []server
 	DockerStats           pcc.DockerStatsConfig

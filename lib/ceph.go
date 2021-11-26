@@ -249,9 +249,8 @@ func (p *PccClient) GetCephPool(name string, cephClusterId uint64) (cephPool *mo
 				}
 				return
 			}
-		} else {
-			err = fmt.Errorf("No ceph pool found")
 		}
+		err = fmt.Errorf("No ceph pool found")
 	}
 	return
 }
