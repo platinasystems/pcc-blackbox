@@ -231,12 +231,6 @@ func CheckCephClusterRGWExists() (err error) {
 		err = errors.New("Can't find a CephCluster with the provided ClusterName")
 		return
 	}
-	if cephCluster.CephClusterConfig.ClusterNetwork != Env.CephConfiguration.ClusterNetwork ||
-		cephCluster.CephClusterConfig.PublicNetwork != Env.CephConfiguration.PublicNetwork ||
-		len(cephCluster.Nodes) != Env.CephConfiguration.NumberOfNodes {
-		err = errors.New("The CephCluster does not match the specified parameters")
-		return
-	}
 
 	if status, _ := Pcc.GetCephHealthStatusById(cephCluster.Id); status.Health == "HEALTH_ERR" {
 		err = errors.New("The CephCluster status is not OK")

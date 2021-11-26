@@ -109,8 +109,8 @@ func createPoolRGW(t *testing.T) {
 	poolRequest := pcc.CreateCephPoolRequest{
 		CephClusterId: cluster.Id,
 		Name:          Env.RGWConfiguration.PoolName,
-		QuotaUnit:     "GiB",
-		Quota:         "1",
+		QuotaUnit:     "MiB",
+		Quota:         "100",
 		PoolType:      models.CEPH_POOL_PROFILE_TYPE_REPLICATED.String(),
 		Size:          3,
 	}
@@ -118,7 +118,7 @@ func createPoolRGW(t *testing.T) {
 	var poolRes *models.CephPool
 	poolRes, err = Pcc.GetCephPool(Env.RGWConfiguration.PoolName, cluster.Id)
 
-	if poolRes != nil {
+	if err == nil {
 		log.AuctaLogger.Warn("Pool already exists, skipping creation")
 		poolID = poolRes.Id
 		return
@@ -142,7 +142,7 @@ func verifyPool(t *testing.T) {
 			msg := "Timed out waiting for pool response"
 			checkError(t, res, errors.New(msg))
 		case <-tick:
-			pool, err := Pcc.GetCephPool("bb-rgw-pool", cluster.Id)
+			pool, err := Pcc.GetCephPool(Env.RGWConfiguration.PoolName, cluster.Id)
 			if err != nil {
 				msg := fmt.Sprintf("Failed to get deploy status "+
 					"%v", err)
@@ -621,12 +621,11 @@ func createAppCredentialProfileCeph(t *testing.T, res *m.TestResult, profile *s3
 
 	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(15 * time.Second)
-	found := false
 
-	for !found {
+	for {
 		select {
 		case <-timeout:
-			msg := "Timed out waiting for RGW"
+			msg := "Timed out waiting for App Credential"
 			checkError(t, res, errors.New(msg))
 		case <-tick:
 			acs, err := Pcc.GetAppCredentials("ceph")
@@ -637,18 +636,15 @@ func createAppCredentialProfileCeph(t *testing.T, res *m.TestResult, profile *s3
 			}
 
 			for _, ac := range acs {
-				if ac.Name == fmt.Sprintf("%s-%s", profile.Username, "ceph") {
+				if ac.Name == fmt.Sprintf("%s-%s", profile.Username, serviceType) && ac.DeployStatus == "completed" {
 					jsonString, _ := json.Marshal(ac.Profile)
 					json.Unmarshal(jsonString, profile)
-					if profile.AccessKey != "" {
-						found = true
-					}
+					log.AuctaLogger.Infof("Created the ceph profile %v", profile)
+					return
 				}
 			}
 		}
 	}
-
-	log.AuctaLogger.Infof("Created the ceph profile %v", profile)
 }
 
 func createBucket(t *testing.T, res *m.TestResult, ctx context.Context, bucketName string) (exists bool, err error) {

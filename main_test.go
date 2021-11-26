@@ -452,6 +452,14 @@ func TestAppCredentials(t *testing.T) {
 }
 
 // Test functions for New Dashboard
+func TestAlerts(t *testing.T) {
+	count++
+	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
+	mayRun(t, "Test Alerts", func(t *testing.T) {
+		mayRun(t, "testPoolUsageAlert", testPoolUsageAlert)
+	})
+}
+
 func TestDashboard(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
