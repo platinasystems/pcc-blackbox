@@ -14,6 +14,17 @@ type Notification struct {
 	models.Notification
 }
 
+type AlertMetadata struct {
+	Description string `json:"Description"`
+	EndTime     string `json:"EndTime"`
+	Node        string `json:"Node"`
+	Rule        string `json:"Rule"`
+	Severity    string `json:"Severity"`
+	StartTime   string `json:"StartTime"`
+	Status      string `json:"Status"`
+	Summary     string `json:"Summary"`
+}
+
 func (p *PccClient) GetNotifications() (notifications []Notification, err error) {
 	page := 0
 	limit := 50

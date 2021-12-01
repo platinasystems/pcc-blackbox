@@ -31,6 +31,7 @@ type testEnv struct {
 	OktaConfiguration     OktaAuthConfiguration
 	LDAPConfiguration     LDAPAuthConfiguration
 	Maas                  Maas
+	AlertsConfiguration   AlertsConfiguration
 }
 
 type node struct {
@@ -121,6 +122,10 @@ type LDAPAuthConfiguration struct {
 	Password    string `json:"password"`
 }
 
+type AlertsConfiguration struct {
+	PrometheusIp string `json:"prometheusIp"`
+	ClusterName  string `json:"clusterName"`
+}
 type Maas struct {
 	Reimage struct {
 		Nodes map[string]struct {

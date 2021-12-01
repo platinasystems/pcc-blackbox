@@ -58,7 +58,7 @@ type UserQuotas struct {
 
 func testRGW(t *testing.T) {
 	t.Run("createPoolRGW", createPoolRGW)
-	t.Run("verifyPool", verifyPool)
+	t.Run("verifyPoolRGW", verifyPoolRGW)
 	if t.Failed() {
 		return
 	}
@@ -128,7 +128,7 @@ func createPoolRGW(t *testing.T) {
 	checkError(t, res, err)
 }
 
-func verifyPool(t *testing.T) {
+func verifyPoolRGW(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
