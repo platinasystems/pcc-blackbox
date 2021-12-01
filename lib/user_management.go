@@ -5,6 +5,7 @@
 package pcc
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang-jwt/jwt"
 	"github.com/platinasystems/pcc-models/security"
@@ -280,6 +281,20 @@ func (pcc *PccClient) FindTenant(tenantName string) (tenant security.Tenant, err
 		}
 		err = fmt.Errorf("Couldn't find tenant %v", tenantName)
 	}
+	return
+}
+
+func (pcc *PccClient) GetUser(id uint64) (user User, err error) {
+	endpoint := fmt.Sprintf("user-management/user/list")
+	var users []User
+	err = pcc.Get(endpoint, &users)
+	for _, u := range users {
+		if u.Id == id {
+			user = u
+			return
+		}
+	}
+	err = errors.New("Could not find user")
 	return
 }
 
