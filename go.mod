@@ -15,7 +15,7 @@ require (
 	github.com/mitchellh/mapstructure v1.2.2
 	github.com/pelletier/go-toml v1.7.0 // indirect
 	github.com/platinasystems/go-common v0.0.0-20211124104514-10ad48cd9f0d
-	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211122083915-595f8c520887
+	github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211202095420-43bba4846651
 	github.com/platinasystems/platina-monitor v1.6.1-0.20211129104342-4c60b966b120
 	github.com/platinasystems/test v1.8.6
 	github.com/platinasystems/tiles v1.3.1-rc1.0.20211129023709-d55df26c25bf
