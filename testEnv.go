@@ -125,6 +125,9 @@ type LDAPAuthConfiguration struct {
 type AlertsConfiguration struct {
 	PrometheusIp string `json:"prometheusIp"`
 	ClusterName  string `json:"clusterName"`
+	MailUsername string `json:"mailUsername"`
+	MailPassword string `json:"mailPassword"`
+	MailIMAP     string `json:"mailIMAP"`
 }
 type Maas struct {
 	Reimage struct {
