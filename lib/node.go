@@ -136,6 +136,21 @@ func (pcc *PccClient) GetNode(id uint64) (node *NodeDetailed, err error) {
 	return
 }
 
+func (p *PccClient) GetNodeByName(name string) (node *NodeDetailed, err error) {
+	var nodes *[]NodeDetailed
+
+	if nodes, err = p.GetNodes(); err == nil {
+		for _, n := range *nodes {
+			if n.Name == name {
+				node = &n
+				return
+			}
+		}
+	}
+	err = fmt.Errorf("node [%v] not found", name)
+	return
+}
+
 // List of all invaders
 func (pcc *PccClient) GetInvaders() (nodes *[]NodeDetailed, err error) {
 	return pcc.filterNodes(true)

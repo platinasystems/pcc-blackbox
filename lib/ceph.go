@@ -500,3 +500,9 @@ func (p *PccClient) GetCephHealthStatusById(id uint64) (cephStatus models.CephHe
 	err = p.Get(fmt.Sprintf("pccserver/storage/ceph/cluster/%d/state/health", id), &cephStatus)
 	return
 }
+
+func (p *PccClient) GetOSDsStateByClusterID(clusterID uint64) ([]*models.CephOsdState, error) {
+	r := make([]*models.CephOsdState, 0)
+	err := p.Get(fmt.Sprintf("pccserver/storage/ceph/cluster/%d/state/osds", clusterID), &r)
+	return r, err
+}

@@ -562,8 +562,16 @@ github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211122083915-595f8c520887 h1
 github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211122083915-595f8c520887/go.mod h1:1DhsuLG4YgqQZGKVgjLDdpdY8WpCxaZ1wpykjMB5+Kw=
 github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211202095420-43bba4846651 h1:LiZ+UXKFtFN2dpBNZihFw8J8qM5k4wtx/epLeiPaTZM=
 github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211202095420-43bba4846651/go.mod h1:1DhsuLG4YgqQZGKVgjLDdpdY8WpCxaZ1wpykjMB5+Kw=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211202113451-3af69b104484/go.mod h1:1DhsuLG4YgqQZGKVgjLDdpdY8WpCxaZ1wpykjMB5+Kw=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211202180001-906f3fb6a694/go.mod h1:1DhsuLG4YgqQZGKVgjLDdpdY8WpCxaZ1wpykjMB5+Kw=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211203101245-fb06cce7bb07 h1:qKVgIrPWDlHW5ra+gVp0NmF2aiFeP9RfDM9UOsYC4n4=
+github.com/platinasystems/pcc-models v1.6.2-rc3.0.20211203101245-fb06cce7bb07/go.mod h1:1DhsuLG4YgqQZGKVgjLDdpdY8WpCxaZ1wpykjMB5+Kw=
 github.com/platinasystems/platina-monitor v1.6.1-0.20211129104342-4c60b966b120 h1:dtsOumtYu24iQ/wsmRhqSypDxB+8hJZhyyDohWgiZnQ=
 github.com/platinasystems/platina-monitor v1.6.1-0.20211129104342-4c60b966b120/go.mod h1:dxDHrRMep59tmFkLR5RJr9jGzK5d9BrUF+diVbYLBAA=
+github.com/platinasystems/platina-monitor v1.6.1-0.20211202133303-772c98442189 h1:sAzo596LLhJ/7j6Vp+QXzaG7Mpe5XAJZf9oX5fTYxr0=
+github.com/platinasystems/platina-monitor v1.6.1-0.20211202133303-772c98442189/go.mod h1:+8UthuRaqmsdp3q9v1fmddDxFIfFkjD824tsEcupotY=
+github.com/platinasystems/platina-monitor v1.6.1-0.20211203101842-9ea67572f9e9 h1:8TRbRCwu/jkcVtxtHatieme7HEs2UvjYxpaWo+6IDi4=
+github.com/platinasystems/platina-monitor v1.6.1-0.20211203101842-9ea67572f9e9/go.mod h1:XiM4xqQI9T0tvCott4U8Eal8g+DSpn/6KtZ52UKHl7M=
 github.com/platinasystems/test v1.8.6 h1:HdjebjrTVJfa6+EGdwxKqEoOXD/KOtumqEtEkB2uIXM=
 github.com/platinasystems/test v1.8.6/go.mod h1:Ar6YoXSUooZXkC4VEyzQAMtJgbYfGONg+OSBgo/DCj0=
 github.com/platinasystems/tiles v1.3.1-rc1.0.20211129023709-d55df26c25bf h1:iHIgAoTB7aa4LDmFYCuIhQ/UxtlV1KAuI0tzGm53q1Y=

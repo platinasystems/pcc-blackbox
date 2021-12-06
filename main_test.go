@@ -456,7 +456,8 @@ func TestAlerts(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
 	mayRun(t, "Test Alerts", func(t *testing.T) {
-		mayRun(t, "testPoolUsageAlert", testPoolUsageAlert)
+		mayRun(t, "test2PoolUsageAlert", test2PoolUsageAlert)
+		mayRun(t, "testOSDDownAlert", testOSDDownAlert)
 	})
 }
 
