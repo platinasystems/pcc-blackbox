@@ -156,7 +156,7 @@ func testChangeMailAlerts(t *testing.T) {
 				Inputs: []notification.NotificationInput{
 					{
 						Name:  "to",
-						Value: "aucta.tenant@gmail.com",
+						Value: Env.AlertsConfiguration.MailUsername,
 					},
 				},
 			},
@@ -214,7 +214,7 @@ func changeRootMail(t *testing.T) {
 	checkError(t, res, err)
 
 	oldMail = user.Profile.Email
-	user.Email = "aucta.tenant@gmail.com"
+	user.Email = Env.AlertsConfiguration.MailUsername
 	user.Role = nil
 
 	err = Pcc.UpdateUser(user)
@@ -682,11 +682,11 @@ func testNotificationRuleResolvedOSD(t *testing.T) {
 }
 
 func testMailKeywords(t *testing.T, res *m.TestResult, keywords ...string) {
-	c, err := client.DialTLS("imap.gmail.com:993", nil)
+	c, err := client.DialTLS(Env.AlertsConfiguration.MailIMAP, nil)
 	checkError(t, res, err)
 	defer c.Logout()
 
-	err = c.Login("aucta.tenant@gmail.com", "plat1n@!")
+	err = c.Login(Env.AlertsConfiguration.MailUsername, Env.AlertsConfiguration.MailPassword)
 	checkError(t, res, err)
 
 	// Select INBOX
