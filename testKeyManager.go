@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	log "github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
@@ -9,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 	"time"
 )
@@ -30,94 +32,56 @@ func testKMKeys(t *testing.T) {
 	fileName := fmt.Sprintf("%s.pem", alias)
 	log.AuctaLogger.Info(fmt.Sprintf("generating the key %s %s", alias, fileName))
 	cmd := exec.Command("/usr/bin/openssl", "genrsa", "-out", fileName, "2048")
-	if err = cmd.Run(); err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	err = cmd.Run()
+	checkError(t, res, err)
 
 	log.AuctaLogger.Infof("uploading the key", alias)
-	if _, err = Pcc.UploadKey(fileName, alias, pcc.PRIVATE_KEY, description); err == nil { // TODO check if the key already exist
-		log.AuctaLogger.Infof("Added the key", alias)
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	_, err = Pcc.UploadKey(fileName, alias, pcc.PRIVATE_KEY, description)
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added the key", alias)
 
 	defer func() {
 		log.AuctaLogger.Infof("deleting the key", alias)
 		err = Pcc.DeleteKey(alias) // delete at the end
-		if err != nil {
-			log.AuctaLogger.Infof("Delete key [%v] failed: %v", alias, err)
-			msg := fmt.Sprintf("%v", err)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
-		}
+		checkError(t, res, err)
 	}()
 
 	log.AuctaLogger.Infof("comparing the content for the key", alias)
-	if content, err := Pcc.DownloadKey(alias, pcc.PRIVATE_KEY); err == nil { // compare the content
-		readFileAndCompare(t, content, fileName)
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	content, err := Pcc.DownloadKey(alias, pcc.PRIVATE_KEY)
+	checkError(t, res, err)
+	readFileAndCompare(t, content, fileName)
 
 	log.AuctaLogger.Info(fmt.Sprintf("looking for the key %s", alias))
-	if items, err := Pcc.GetSecurityKeys(); err == nil {
-		for _, c := range items {
-			if c.Alias == alias {
-				goto cont
-			}
+	items, err := Pcc.GetSecurityKeys()
+	checkError(t, res, err)
+	for _, c := range items {
+		if c.Alias == alias {
+			goto cont
 		}
-		msg := fmt.Sprintf("not able to found the key %s", alias)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
 	}
+
+	err = errors.New(fmt.Sprintf("not able to found the key %s", alias))
+	checkError(t, res, err)
 
 cont:
 	log.AuctaLogger.Infof("getting the key", alias)
-	if key, err = Pcc.GetSecurityKey(alias); err == nil {
-		if alias != key.Alias || description != key.Description || key.Protect {
-			msg := fmt.Sprintf("the describe returned some different values %v", key)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
-		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+	key, err = Pcc.GetSecurityKey(alias)
+	checkError(t, res, err)
+
+	if alias != key.Alias || description != key.Description || key.Protect {
+		err = errors.New(fmt.Sprintf("the describe returned some different values %v", key))
+		checkError(t, res, err)
 	}
 
 	log.AuctaLogger.Infof("updating the key", key.Alias)
 	previous := key.Description
 	key.Description = key.Description + "new"
-	if err := Pcc.UpdateSecurityKey(key); err == nil {
-		if previous == key.Description {
-			msg := fmt.Sprintf("the description does not change for the key %s", key.Alias)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
-		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+	err = Pcc.UpdateSecurityKey(key)
+	checkError(t, res, err)
+
+	if previous == key.Description {
+		err = errors.New(fmt.Sprintf("the description does not change for the key %s", key.Alias))
+		checkError(t, res, err)
 	}
 }
 
@@ -134,99 +98,63 @@ func testKMCertificates(t *testing.T) {
 	alias := "certificate-bb-test"
 	description := "blackbox certificate"
 	log.AuctaLogger.Info(fmt.Sprintf("looking for the certificate %s and deleting if exists", alias))
-	if items, err := Pcc.GetCertificates(); err == nil {
-		for _, c := range items {
-			if c.Alias == alias {
-				err = Pcc.DeleteCertificate(c.Id)
-				if err != nil {
-					log.AuctaLogger.Infof("Delete cert failed: %v",
-						err)
-				}
-				break
-			}
+	items, err := Pcc.GetCertificates()
+	checkError(t, res, err)
+
+	for _, c := range items {
+		if c.Alias == alias {
+			err = Pcc.DeleteCertificate(c.Id)
+			checkError(t, res, err)
+			log.AuctaLogger.Infof("Delete cert failed: %v", err)
+			break
 		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
 	}
 
 	fileName := fmt.Sprintf("%s.crt", alias)
 	keyName := fmt.Sprintf("%s.pem", alias)
 	log.AuctaLogger.Info(fmt.Sprintf("generating the certificate %s %s", alias, fileName))
 	cmd := exec.Command("/usr/bin/openssl", "req", "-nodes", "-new", "-x509", "-keyout", keyName, "-out", fileName, "--subj", "/C=US/ST=SanFrancisco/L=SanFrancisco/O=Global Security/OU=IT Department/CN=platinasystems.net")
-	if err = cmd.Run(); err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	err = cmd.Run()
+	checkError(t, res, err)
 
 	log.AuctaLogger.Infof("uploading the certificate ", fileName)
-	if _, err = Pcc.UploadCert(fileName, alias, description, 0); err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	_, err = Pcc.UploadCert(fileName, alias, description, 0)
+	checkError(t, res, err)
 
 	log.AuctaLogger.Infof("uploaded the certificate", alias)
-	if certs, err := Pcc.GetCertificates(); err == nil { // Look for the certificate
-		for i := range certs {
-			if certs[i].Alias == alias {
-				cert = &certs[i]
-				goto CONT
-			}
+	certs, err := Pcc.GetCertificates()
+	checkError(t, res, err)
+	// Look for the certificate
+	for i := range certs {
+		if certs[i].Alias == alias {
+			cert = &certs[i]
+			goto CONT
 		}
-		msg := "unable to find the certificate"
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
 	}
+	err = errors.New("unable to find the certificate")
+	checkError(t, res, err)
 
 CONT:
 	defer func() {
 		if cert != nil {
 			log.AuctaLogger.Infof("deleting the certificate", cert.Id, cert.Alias)
 			err = Pcc.DeleteCertificate(cert.Id) // delete at the end
-			if err != nil {
-				msg := fmt.Sprintf("Delete cert failed: %v", err)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
-			}
+			checkError(t, res, err)
 		}
 	}()
 
-	if c, err := Pcc.GetCertificate(cert.Id); err == nil {
-		if c.Alias != alias || c.Protect || c.Description != description {
-			msg := fmt.Sprintf("the describe returned some different values %v , %v", c, cert)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
-		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+	c, err := Pcc.GetCertificate(cert.Id)
+	checkError(t, res, err)
+	if c.Alias != alias || c.Protect || c.Description != description {
+		err = errors.New(fmt.Sprintf("the describe returned some different values %v , %v", c, cert))
+		checkError(t, res, err)
 	}
 
 	log.AuctaLogger.Infof("comparing the content for the certificate", *cert)
-	if content, err := Pcc.DownloadCertificate(cert.Id); err == nil { // compare the content
-		readFileAndCompare(t, content, fileName)
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	content, err := Pcc.DownloadCertificate(cert.Id)
+	checkError(t, res, err)
+	// compare the content
+	readFileAndCompare(t, content, fileName)
 }
 
 func addPrivatePublicCert(t *testing.T) {
@@ -241,24 +169,15 @@ func addPrivatePublicCert(t *testing.T) {
 	fileName := "cert-bb.pem"
 	keyName := "key-bb.pem"
 
-	if exists, _, err := Pcc.FindCertificate(alias); err == nil {
-		if exists {
-			log.AuctaLogger.Warnf("A certificate with name %s already exists and will be used", alias)
-			return
-		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+	exists, _, err := Pcc.FindCertificate(alias)
+	checkError(t, res, err)
+	if exists {
+		log.AuctaLogger.Warnf("A certificate with name %s already exists and will be used", alias)
+		return
 	}
 
-	if _, err := Pcc.UploadCertPrivatePublic(fileName, keyName, alias, description); err != nil {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
-	}
+	_, err = Pcc.UploadCertPrivatePublic(fileName, keyName, alias, description)
+	checkError(t, res, err)
 }
 
 // read from file and compare the content
@@ -267,25 +186,15 @@ func readFileAndCompare(t *testing.T, content string, fileName string) {
 	res := models.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
-	if file, err := os.Open(fileName); err == nil {
-		defer file.Close()
-		if b, err := ioutil.ReadAll(file); err == nil {
-			if string(b) != content {
-				msg := fmt.Sprintf("the downloaded file is different from %s", fileName)
-				res.SetTestFailure(msg)
-				log.AuctaLogger.Error(msg)
-				t.FailNow()
-			}
-		} else {
-			msg := fmt.Sprintf("%v", err)
-			res.SetTestFailure(msg)
-			log.AuctaLogger.Error(msg)
-			t.FailNow()
-		}
-	} else {
-		msg := fmt.Sprintf("%v", err)
-		res.SetTestFailure(msg)
-		log.AuctaLogger.Error(msg)
-		t.FailNow()
+	file, err := os.Open(fileName)
+	checkError(t, res, err)
+	defer file.Close()
+	b, err := ioutil.ReadAll(file)
+	checkError(t, res, err)
+
+	trimmedB, trimmedContent := strings.TrimSuffix(string(b), "\n"), strings.TrimSuffix(content, "\n")
+	if trimmedB != trimmedContent {
+		err = errors.New(fmt.Sprintf("the downloaded file is different from %s", fileName))
+		checkError(t, res, err)
 	}
 }
