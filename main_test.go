@@ -470,6 +470,18 @@ func TestDashboard(t *testing.T) {
 	})
 }
 
+func TestDBRestart(t *testing.T) {
+	count++
+	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
+	mayRun(t, "Test Postgres DB restart", func(t *testing.T) {
+		mayRun(t, "testDBRestartPCCServer", testDBRestartPCCServer)
+		mayRun(t, "testDBRestartUserManagement", testDBRestartUserManagement)
+		mayRun(t, "testDBRestartPlatinaMonitor", testDBRestartPlatinaMonitor)
+		mayRun(t, "testDBRestartSecurity", testDBRestartSecurity)
+		mayRun(t, "testDBRestartKeyManager", testDBRestartKeyManager)
+	})
+}
+
 func TestCustom(t *testing.T) {
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
 
