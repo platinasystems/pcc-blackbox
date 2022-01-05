@@ -33,8 +33,8 @@ type SecurityKey struct {
 	Type        string `json:"type"`
 	Tenant      uint64 `json:"tenant"`
 	Protect     bool   `json:"protect"`
-	PrivatePath string `json:"privatePath"`
-	PublicPath  string `json:"PublicPath"`
+	HasPrivate  bool   `json:"hasPrivate"`
+	HasPublic   bool   `json:"hasPublic"`
 }
 
 func (p *PccClient) checkKeyType(fileType string) (err error) {

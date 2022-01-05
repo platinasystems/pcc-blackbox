@@ -50,9 +50,16 @@ func getFirstKey() (sKey pcc.SecurityKey, err error) {
 		if len(secKeys) == 0 {
 			err = fmt.Errorf("key not found")
 		} else {
-			sKey = secKeys[0]
+			for _, key := range secKeys {
+				if key.HasPublic {
+					sKey = key
+					break
+				}
+			}
+			if sKey.Id == 0 {
+				err = fmt.Errorf("key not found")
+			}
 		}
-
 	}
 
 	return
