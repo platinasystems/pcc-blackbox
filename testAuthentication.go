@@ -23,18 +23,33 @@ var (
 
 func testAuthentication(t *testing.T) {
 	t.Run("addRolesAndTenantsPlatina", addRolesAndTenantsPlatina)
-	t.Run("addRolesAndTenantsThirdParty", addRolesAndTenantsThirdParty)
-	t.Run("addThirdPartyBootstrapUsers", addThirdPartyBootstrapUsers)
-	t.Run("addAuthProfiles", addAuthProfiles)
-	t.Run("addGroupMapping", addGroupMapping)
-	t.Run("checkOktaGroupMapping", checkOktaGroupMapping)
-	t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
 	t.Run("addPlatinaUsers", addPlatinaUsers)
 	t.Run("checkTenantsScope", checkTenantsScope)
 	t.Run("checkRolePermissions", checkRolePermissions)
-	t.Run("deleteAuthProfiles", deleteAuthProfiles)
 	t.Run("deleteUsers", deleteUsers)
 	t.Run("deleteRolesAndTenants", deleteRolesAndTenants)
+
+	if Env.OktaConfiguration.ApiKey != "" {
+		t.Run("addRolesAndTenantsOkta", addRolesAndTenantsOkta)
+		t.Run("addOktaBootstrapUser", addOktaBootstrapUser)
+		t.Run("addOktaAuthProfiles", addOktaAuthProfiles)
+		t.Run("addOktaGroupMapping", addOktaGroupMapping)
+		t.Run("checkOktaGroupMapping", checkOktaGroupMapping)
+		t.Run("deleteOktaAuthProfile", deleteOktaAuthProfile)
+		t.Run("deleteOktaUser", deleteOktaUser)
+		t.Run("deleteRolesAndTenantsOkta", deleteRolesAndTenantsOkta)
+	}
+
+	if Env.LDAPConfiguration.URL != "" {
+		t.Run("addRolesAndTenantsLDAP", addRolesAndTenantsLDAP)
+		t.Run("addLDAPBootstrapUser", addLDAPBootstrapUser)
+		t.Run("addLDAPAuthProfiles", addLDAPAuthProfiles)
+		t.Run("addLDAPGroupMapping", addLDAPGroupMapping)
+		t.Run("checkLDAPGroupMapping", checkLDAPGroupMapping)
+		t.Run("deleteLDAPAuthProfile", deleteLDAPAuthProfile)
+		t.Run("deleteLDAPUser", deleteLDAPUser)
+		t.Run("deleteRolesAndTenantsLDAP", deleteRolesAndTenantsLDAP)
+	}
 }
 
 func addRolesAndTenantsPlatina(t *testing.T) {
@@ -45,7 +60,7 @@ func addRolesAndTenantsPlatina(t *testing.T) {
 
 	var err error
 	roles = make(map[string]*pcc.SecurityRole)
-	roleNames = []string{"role-parent-ro", "role-parent-rw", "role-child-ro", "role-child-rw", "role-okta", "role-LDAP"}
+	roleNames = []string{"role-parent-ro", "role-parent-rw", "role-child-ro", "role-child-rw"}
 
 	name := "test-tenant-bb"
 	tenant = &(security.Tenant{Name: name, Description: "blackbox test tenant"})
@@ -95,7 +110,7 @@ func addRolesAndTenantsPlatina(t *testing.T) {
 	checkError(t, res, err)
 }
 
-func addRolesAndTenantsThirdParty(t *testing.T) {
+func addRolesAndTenantsOkta(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
@@ -104,12 +119,7 @@ func addRolesAndTenantsThirdParty(t *testing.T) {
 	var err error
 
 	tenantOkta = &(security.Tenant{Name: "test-tenant-bb-okta", Description: "blackbox test tenant for okta"})
-	tenantLDAP = &(security.Tenant{Name: "test-tenant-bb-LDAP", Description: "blackbox test tenant for LDAP"})
-
 	tenantOkta, err = Pcc.AddTenant(*tenantOkta)
-	checkError(t, res, err)
-
-	tenantLDAP, err = Pcc.AddTenant(*tenantLDAP)
 	checkError(t, res, err)
 
 	rwUserManagementGroupOperation := security.GroupOperation{Id: 8}
@@ -123,6 +133,22 @@ func addRolesAndTenantsThirdParty(t *testing.T) {
 
 	roles["role-okta"], err = Pcc.RegisterRole(reqRoleChildRWOkta)
 	checkError(t, res, err)
+}
+
+func addRolesAndTenantsLDAP(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	tenantLDAP = &(security.Tenant{Name: "test-tenant-bb-LDAP", Description: "blackbox test tenant for LDAP"})
+
+	tenantLDAP, err = Pcc.AddTenant(*tenantLDAP)
+	checkError(t, res, err)
+
+	rwUserManagementGroupOperation := security.GroupOperation{Id: 8}
 
 	reqRoleChildRWLDAP := pcc.UserRole{
 		GenericModel: pcc.GenericModel{Id: 0,
@@ -135,15 +161,13 @@ func addRolesAndTenantsThirdParty(t *testing.T) {
 	checkError(t, res, err)
 }
 
-func addThirdPartyBootstrapUsers(t *testing.T) {
+func addOktaBootstrapUser(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
 	defer res.CheckTestAndSave(t, time.Now())
 
 	var err error
-	users = make(map[string]*pcc.User)
-	userRequests = make(map[string]*pcc.UserRequest)
 
 	userRequests["user-bootstrap-okta"] = &pcc.UserRequest{
 		UserName:  "user-bootstrap-okta@platinasystems.com",
@@ -153,6 +177,21 @@ func addThirdPartyBootstrapUsers(t *testing.T) {
 		TenantId:  tenantOkta.ID,
 		RoleId:    roles["role-okta"].Id,
 	}
+
+	users["user-bootstrap-okta"], err = Pcc.AddUserReq(*userRequests["user-bootstrap-okta"])
+	checkError(t, res, err)
+	log.AuctaLogger.Infof("Added user %v", users["user-bootstrap-okta"])
+}
+
+func addLDAPBootstrapUser(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+	users = make(map[string]*pcc.User)
+
 	userRequests["user-bootstrap-LDAP"] = &pcc.UserRequest{
 		UserName:  "user-bootstrap-LDAP@platinasystems.com",
 		FirstName: "LDAP",
@@ -162,16 +201,39 @@ func addThirdPartyBootstrapUsers(t *testing.T) {
 		RoleId:    roles["role-LDAP"].Id,
 	}
 
-	users["user-bootstrap-okta"], err = Pcc.AddUserReq(*userRequests["user-bootstrap-okta"])
-	checkError(t, res, err)
-	log.AuctaLogger.Infof("Added user %v", users["user-bootstrap-okta"])
-
 	users["user-bootstrap-LDAP"], err = Pcc.AddUserReq(*userRequests["user-bootstrap-LDAP"])
 	checkError(t, res, err)
 	log.AuctaLogger.Infof("Added user %v", users["user-bootstrap-LDAP"])
 }
 
-func addAuthProfiles(t *testing.T) {
+func addLDAPAuthProfiles(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	authProfileReqLDAP := &pcc.AuthProfile{
+		Provider: "LDAP",
+		Parameters: pcc.LDAPConfig{
+			URL:         Env.LDAPConfiguration.URL,
+			GroupBaseDN: Env.LDAPConfiguration.GroupBaseDN,
+		},
+	}
+
+	log.AuctaLogger.Infof("LDAP auth profile request: %v", authProfileReqLDAP)
+
+	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
+		Password: "password-bb"})
+	err = Pcc.AddAuthenticationProfile(authProfileReqLDAP)
+	checkError(t, res, err)
+	profiles, _ := Pcc.GetAuthenticationProfiles()
+	authProfileLDAPID = profiles[0].ID
+	log.AuctaLogger.Infof("LDAP auth profile ID: %v", authProfileLDAPID)
+}
+
+func addOktaAuthProfiles(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
@@ -189,16 +251,6 @@ func addAuthProfiles(t *testing.T) {
 
 	log.AuctaLogger.Infof("Okta auth profile request: %v", authProfileReqOkta)
 
-	authProfileReqLDAP := &pcc.AuthProfile{
-		Provider: "LDAP",
-		Parameters: pcc.LDAPConfig{
-			URL:         Env.LDAPConfiguration.URL,
-			GroupBaseDN: Env.LDAPConfiguration.GroupBaseDN,
-		},
-	}
-
-	log.AuctaLogger.Infof("LDAP auth profile request: %v", authProfileReqLDAP)
-
 	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-okta"].UserName,
 		Password: "password-bb"})
 	checkError(t, res, err)
@@ -207,17 +259,8 @@ func addAuthProfiles(t *testing.T) {
 	profiles, _ := Pcc.GetAuthenticationProfiles()
 	authProfileOktaID = profiles[0].ID
 	log.AuctaLogger.Infof("Okta auth profile ID: %v", authProfileOktaID)
-
-	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
-		Password: "password-bb"})
-	err = Pcc.AddAuthenticationProfile(authProfileReqLDAP)
-	checkError(t, res, err)
-	profiles, _ = Pcc.GetAuthenticationProfiles()
-	authProfileLDAPID = profiles[0].ID
-	log.AuctaLogger.Infof("LDAP auth profile ID: %v", authProfileLDAPID)
 }
-
-func addGroupMapping(t *testing.T) {
+func addOktaGroupMapping(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
@@ -239,8 +282,17 @@ func addGroupMapping(t *testing.T) {
 
 	group, err = Pcc.AddThirdPartyGroup(group)
 	checkError(t, res, err)
+}
 
-	group = &pcc.ThirdPartyGroup{
+func addLDAPGroupMapping(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	var err error
+
+	group := &pcc.ThirdPartyGroup{
 		Group:         Env.LDAPConfiguration.Group,
 		RoleID:        roles["role-LDAP"].Id,
 		TenantID:      tenantLDAP.ID,
@@ -312,6 +364,9 @@ func addPlatinaUsers(t *testing.T) {
 
 	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
+
+	users = make(map[string]*pcc.User)
+	userRequests = make(map[string]*pcc.UserRequest)
 
 	userRequests["user-parent-ro"] = &pcc.UserRequest{
 		UserName:  "user.parent.ro@platinasystems.com",
@@ -432,7 +487,7 @@ func checkRolePermissions(t *testing.T) {
 	checkError(t, res, err)
 }
 
-func deleteAuthProfiles(t *testing.T) {
+func deleteOktaAuthProfile(t *testing.T) {
 	test.SkipIfDryRun(t)
 
 	res := m.InitTestResult(runID)
@@ -444,7 +499,15 @@ func deleteAuthProfiles(t *testing.T) {
 	err = Pcc.DeleteAuthenticationProfile(authProfileOktaID)
 	checkError(t, res, err)
 
-	err = Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
+}
+
+func deleteLDAPAuthProfile(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(pcc.Credential{UserName: users["user-bootstrap-LDAP"].UserName,
 		Password: "password-bb"})
 	checkError(t, res, err)
 	err = Pcc.DeleteAuthenticationProfile(authProfileLDAPID)
@@ -464,11 +527,32 @@ func deleteUsers(t *testing.T) {
 		err = Pcc.DelUser(users[username].UserName)
 		checkError(t, res, err)
 	}
+}
 
-	for _, username := range []string{"user-bootstrap-okta", "user-bootstrap-LDAP"} {
-		err = Pcc.DelUser(users[username].UserName)
-		checkError(t, res, err)
-	}
+func deleteOktaUser(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(adminCredential)
+	checkError(t, res, err)
+
+	err = Pcc.DelUser(users["user-bootstrap-okta"].UserName)
+	checkError(t, res, err)
+}
+
+func deleteLDAPUser(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(adminCredential)
+	checkError(t, res, err)
+
+	err = Pcc.DelUser(users["user-bootstrap-LDAP"].UserName)
+	checkError(t, res, err)
 }
 
 func deleteRolesAndTenants(t *testing.T) {
@@ -487,15 +571,37 @@ func deleteRolesAndTenants(t *testing.T) {
 
 	err = Pcc.DelTenant(tenant.ID)
 	checkError(t, res, err)
-	err = Pcc.DelTenant(tenantOkta.ID)
-	checkError(t, res, err)
-	err = Pcc.DelTenant(tenantLDAP.ID)
+}
+
+func deleteRolesAndTenantsOkta(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(adminCredential)
 	checkError(t, res, err)
 
-	err = Pcc.ChangeUser(adminCredential)
+	err = Pcc.DeleteRole(roles["role-okta"].Id)
+	checkError(t, res, err)
+	err = Pcc.DelTenant(tenantOkta.ID)
 	checkError(t, res, err)
 }
 
+func deleteRolesAndTenantsLDAP(t *testing.T) {
+	test.SkipIfDryRun(t)
+
+	res := m.InitTestResult(runID)
+	defer res.CheckTestAndSave(t, time.Now())
+
+	err := Pcc.ChangeUser(adminCredential)
+	checkError(t, res, err)
+
+	err = Pcc.DeleteRole(roles["role-LDAP"].Id)
+	checkError(t, res, err)
+	err = Pcc.DelTenant(tenantLDAP.ID)
+	checkError(t, res, err)
+}
 func isVisible(visibleRoles []*pcc.SecurityRole, roleName string) bool {
 	for _, role := range visibleRoles {
 		if role.Name == roleName {
