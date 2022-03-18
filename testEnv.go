@@ -32,6 +32,7 @@ type testEnv struct {
 	LDAPConfiguration     LDAPAuthConfiguration
 	Maas                  Maas
 	AlertsConfiguration   AlertsConfiguration
+	Monitor               Monitor
 }
 
 type node struct {
@@ -129,6 +130,11 @@ type AlertsConfiguration struct {
 	MailPassword string `json:"mailPassword"`
 	MailIMAP     string `json:"mailIMAP"`
 }
+
+type Monitor struct {
+	FakeNodesNumber int `json:"fakeNodesNumber"`
+}
+
 type Maas struct {
 	Reimage struct {
 		Nodes map[string]struct {

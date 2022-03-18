@@ -24,6 +24,7 @@ type Node struct {
 
 type NodeDetailed struct {
 	models.NodeDetailed
+	ScopeId *uint64 `gorm:"scope_id;" json:"scopeId"`
 }
 
 // fixme

@@ -298,6 +298,12 @@ func TestHardwareInventory(t *testing.T) {
 	})
 }
 
+func TestStressKafka(t *testing.T) {
+	count++
+	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
+	mayRun(t, "stressTestKafka", testStressKafka)
+}
+
 func TestFull(t *testing.T) {
 	count++
 	log.AuctaLogger.Infof("Iteration %v, %v", count, time.Now().Format(timeFormat))
