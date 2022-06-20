@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	log "github.com/platinasystems/go-common/logs"
+	"io/ioutil"
 	"strconv"
 	"strings"
 
@@ -11,6 +12,7 @@ import (
 )
 
 var outEnv testEnv
+var dump nodesDump
 
 func addTestTestNode(testNode *pcc.NodeDetailed) {
 	var n node
@@ -70,6 +72,59 @@ func addTestTestNode(testNode *pcc.NodeDetailed) {
 		outEnv.Servers = append(outEnv.Servers, s)
 	}
 
+}
+
+func addTestTestNodeDump(testNode *pcc.NodeDetailed) {
+	var n nodeOnlyInterfaces
+
+	n.HostIp = testNode.Host
+
+	ifaces, err := Pcc.GetIfacesByNodeId(testNode.Id)
+	if err != nil {
+		log.AuctaLogger.Errorf("error node %v: %v", testNode.Id, err)
+		return
+	}
+
+	for _, intf := range ifaces {
+		var net netInterfaceExtended
+
+		if intf.Interface.Name == "control0" {
+			continue
+		}
+		net.Name = intf.Interface.Name
+		net.Gateway = intf.Interface.Gateway
+		switch intf.Interface.Autoneg {
+		case true:
+			net.Autoneg = "true"
+		case false:
+			net.Autoneg = "false"
+			net.Speed = intf.Interface.Speed
+		}
+		net.AdminStatus = intf.Interface.AdminStatus
+		net.MacAddr = intf.Interface.MacAddress
+		net.IsManagement = intf.Interface.IsManagement
+		net.ManagedByPcc = intf.Interface.ManagedByPcc
+		for _, addr := range intf.Interface.Ipv4Addresses {
+			if strings.HasPrefix(addr, "203.0.113.") {
+				// skip MaaS addresses
+				continue
+			}
+			net.Cidrs = append(net.Cidrs, addr)
+		}
+		net.Mtu = strconv.Itoa(int(intf.Interface.Mtu))
+		net.Fec = intf.Interface.FecType
+		net.Media = intf.Interface.MediaType
+		net.RemoteLinksDetails = intf.RemoteLinksDetails
+		net.RemoteNodesName = intf.RemoteNodeNames
+		n.NetInterfaces = append(n.NetInterfaces, net)
+
+	}
+
+	if strings.HasPrefix(testNode.Model, "PS-3001") {
+		dump.Invaders = append(dump.Invaders, n)
+	} else {
+		dump.Servers = append(dump.Servers, n)
+	}
 }
 
 func addTestIpam() {
@@ -161,6 +216,25 @@ func genEnv() {
 
 	data, err := json.MarshalIndent(outEnv, "", "    ")
 	if err == nil {
+		log.AuctaLogger.Infof("%v", string(data))
+	} else {
+		log.AuctaLogger.Errorf("Error marshal to json: %v", err)
+	}
+}
+
+func dumpNodes() {
+	dump.PccIp = Env.PccIp
+	nodes, err := Pcc.GetNodesDetail()
+	if err != nil {
+		log.AuctaLogger.Errorf("Failed to GetNodes: %v", err)
+		return
+	}
+	for _, testNode := range nodes {
+		addTestTestNodeDump(testNode)
+	}
+	data, err := json.MarshalIndent(dump, "", "    ")
+	if err == nil {
+		err = ioutil.WriteFile(fmt.Sprintf("envConf_%s.json", Env.PccIp), data, 0644)
 		log.AuctaLogger.Infof("%v", string(data))
 	} else {
 		log.AuctaLogger.Errorf("Error marshal to json: %v", err)

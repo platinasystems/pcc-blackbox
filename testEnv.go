@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
+	avro "github.com/platinasystems/tiles/pccagent/models"
 )
 
 // Note: The lib directory is intended to be the start of an SDK, so
@@ -35,6 +36,33 @@ type testEnv struct {
 	Monitor               Monitor
 }
 
+type nodesDump struct {
+	PccIp    string
+	Invaders []nodeOnlyInterfaces
+	Servers  []nodeOnlyInterfaces
+}
+
+type nodeOnlyInterfaces struct {
+	HostIp        string
+	NetInterfaces []netInterfaceExtended
+}
+
+type netInterfaceExtended struct {
+	Name               string
+	Cidrs              []string
+	Gateway            string
+	MacAddr            string
+	IsManagement       bool
+	ManagedByPcc       bool
+	AdminStatus        string
+	Speed              string
+	Autoneg            string
+	Fec                string
+	Media              string
+	Mtu                string
+	RemoteNodesName    []string
+	RemoteLinksDetails []*avro.Interface
+}
 type node struct {
 	Id            uint64
 	HostIp        string

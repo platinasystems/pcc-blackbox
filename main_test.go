@@ -536,6 +536,14 @@ func TestGen(t *testing.T) {
 	os.Exit(0)
 }
 
+func TestDumpNodes(t *testing.T) {
+	// Not a real testcase, but can be used to generate a
+	// testEnv.json file from existing PCC setup.
+	test.SkipIfDryRun(t)
+	dumpNodes()
+	os.Exit(0)
+}
+
 func mayRun(t *testing.T, name string, f func(*testing.T)) bool {
 	dockerStats.ChangePhase(name)
 	var ret bool
