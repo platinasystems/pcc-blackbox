@@ -37,6 +37,12 @@ type TimeSeriesElem struct {
 	Metrics   []map[string]interface{} `json:"metrics,omitempty"`
 }
 
+type MinNode struct {
+	Id   uint64
+	Name string
+	Host string
+}
+
 func pPrint(out interface{}) {
 	switch t := out.(type) {
 	case []interface{}:
@@ -150,6 +156,7 @@ func main() {
 		err           error
 		hasData       bool
 		dataStr       string
+		dataSlice     []string
 		datafp        string
 		data          interface{}
 	)
@@ -159,15 +166,19 @@ func main() {
 	}
 	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data | -df filename]"
 	usage2 := "[ip addr|domain name] history [topic] [t1] [t2] [-n nodes] [-f fields]"
+	usage3 := "[ip addr|domain name] batch [add|del|get] [-d data | -df filename]"
 	example1 := "172.17.2.34 pccserver/node GET"
 	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
 	example3 := "172.17.2.34 pccserver/cluster/add POST -d '{\"id\":0,\"name\":\"lab\",\"description\":\"test node group\",\"owner\":1}'"
+	example4 := "172.17.2.20 batch add -d 172.17.2.75 172.17.2.76"
 	if len(os.Args) < 4 {
 		fmt.Println("usage1", os.Args[0], usage)
 		fmt.Println("usage2", os.Args[0], usage2)
+		fmt.Println("usage3", os.Args[0], usage3)
 		fmt.Println("example1", os.Args[0], example1)
 		fmt.Println("example2", os.Args[0], example2)
 		fmt.Println("example3", os.Args[0], example3)
+		fmt.Println("example4", os.Args[0], example4)
 		return
 	}
 	if strings.EqualFold(os.Args[2], "history") && len(os.Args) < 6 {
@@ -175,7 +186,15 @@ func main() {
 		fmt.Println("example2", os.Args[0], example2)
 		return
 	}
+	if strings.EqualFold(os.Args[2], "batch") && len(os.Args) < 4 {
+		fmt.Println("usage3", os.Args[0], usage3)
+		fmt.Println("example4", os.Args[0], example4)
+		return
+	}
 
+	addr := os.Args[1]
+	endpoint := os.Args[2]
+	cmd := os.Args[3]
 	for i, arg := range os.Args {
 		if arg == "--raw" {
 			raw = true
@@ -192,6 +211,9 @@ func main() {
 		case "-d":
 			hasData = true
 			dataStr = p
+			if strings.EqualFold(endpoint, "batch") {
+				dataSlice = os.Args[i+1:]
+			}
 		case "-df":
 			hasData = true
 			datafp = p
@@ -203,9 +225,6 @@ func main() {
 	}
 
 	log.InitWithDefault(nil)
-	addr := os.Args[1]
-	endpoint := os.Args[2]
-	cmd := os.Args[3]
 	if hasData {
 		var b []byte
 		if datafp != "" {
@@ -216,10 +235,12 @@ func main() {
 				return
 			}
 		}
-		if err = json.Unmarshal([]byte(dataStr), &data); err != nil {
-			fmt.Println("expect data to be in json format")
-			fmt.Println(err)
-			return
+		if !strings.EqualFold(endpoint, "batch") && datafp == "" {
+			if err = json.Unmarshal([]byte(dataStr), &data); err != nil {
+				fmt.Println("expect data to be in json format")
+				fmt.Println(err)
+				return
+			}
 		}
 	}
 
@@ -265,6 +286,66 @@ func main() {
 			out2.Print(strings.Fields(nodes), strings.Fields(fields))
 			return
 		}
+	case strings.EqualFold(endpoint, "batch"):
+		var nodes []MinNode
+		if cmd != "get" {
+			if len(dataSlice) == 0 {
+				e := json.Unmarshal([]byte(dataStr), &nodes)
+				if e != nil {
+					fmt.Println(e)
+					fmt.Println(dataStr)
+				}
+			} else {
+				for _, addr := range dataSlice {
+					minNode := MinNode{
+						Host: addr,
+					}
+					nodes = append(nodes, minNode)
+				}
+			}
+		}
+		switch cmd {
+		case "add":
+			for _, node := range nodes {
+				err = Pcc.Post("pccserver/node/add", &node, &out)
+				if err == nil {
+					fmt.Printf("added %+v\n", node)
+				} else {
+					fmt.Printf("pccserver/node/add POST %+v\n", node)
+					fmt.Println(err)
+				}
+			}
+		case "delete":
+			fallthrough
+		case "del":
+			for _, node := range nodes {
+				if node.Id == 0 {
+					continue
+				}
+				ep := fmt.Sprintf("pccserver/node/%v", node.Id)
+				err = Pcc.Delete(ep, &out, nil)
+				if err == nil {
+					fmt.Printf("deleted %+v\n", node)
+				} else {
+					fmt.Println(ep, "DELETE")
+					fmt.Println(err)
+				}
+			}
+		case "get":
+			err = Pcc.Get("pccserver/node", &out, nil)
+			switch t := out.(type) {
+			default:
+				j, _ := json.Marshal(t)
+				if e := json.Unmarshal(j, &nodes); e != nil {
+					fmt.Println(e)
+					pPrint(out)
+				} else {
+					j, _ = json.MarshalIndent(nodes, "", " ")
+					fmt.Println(string(j))
+				}
+			}
+		}
+		return
 	case strings.EqualFold(cmd, "get"):
 		err = Pcc.Get(endpoint, &out, nil)
 	case strings.EqualFold(cmd, "getf"):
