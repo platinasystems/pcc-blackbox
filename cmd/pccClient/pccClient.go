@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -150,13 +149,14 @@ func main() {
 		err           error
 		hasData       bool
 		dataStr       string
+		datafp        string
 		data          interface{}
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
 		Password: "admin",
 	}
-	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data]"
+	usage := "[ip addr|domain name] [endpoint] [GET|POST|PUT|DELETE] [-d data | -df filename]"
 	usage2 := "[ip addr|domain name] history [topic] [t1] [t2] [-n nodes] [-f fields]"
 	example1 := "172.17.2.34 pccserver/node GET"
 	example2 := "172.17.2.238 history summary 0 30m -n \"i60\" -f \"cpuLoad realUsedMem inodeUsage networkThrought\""
@@ -191,6 +191,9 @@ func main() {
 		case "-d":
 			hasData = true
 			dataStr = p
+		case "-df":
+			hasData = true
+			datafp = p
 		case "-u":
 			cred.UserName = p
 		case "-p":
@@ -198,17 +201,24 @@ func main() {
 		}
 	}
 
-	log.InitWithDefault(nil)
 	addr := os.Args[1]
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
 	if hasData {
+		var b []byte
+		if datafp != "" {
+			if b, err = os.ReadFile(datafp); err == nil {
+				dataStr = string(b)
+			} else {
+				fmt.Println("Unable to read data from", datafp)
+				return
+			}
+		}
 		if err = json.Unmarshal([]byte(dataStr), &data); err != nil {
 			fmt.Println("expect data to be in json format")
 			fmt.Println(err)
 			return
 		}
-
 	}
 
 	Pcc, err = pcc.Authenticate(addr, cred)
