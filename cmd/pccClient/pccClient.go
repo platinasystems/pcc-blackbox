@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/platinasystems/go-common/logs"
 	pcc "github.com/platinasystems/pcc-blackbox/lib"
 )
 
@@ -201,6 +202,7 @@ func main() {
 		}
 	}
 
+	log.InitWithDefault(nil)
 	addr := os.Args[1]
 	endpoint := os.Args[2]
 	cmd := os.Args[3]
