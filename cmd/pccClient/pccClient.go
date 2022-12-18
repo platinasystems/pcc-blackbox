@@ -7,6 +7,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"sort"
 	"strings"
@@ -159,6 +160,7 @@ func main() {
 		dataSlice     []string
 		datafp        string
 		data          interface{}
+		u             *url.URL
 	)
 	cred := pcc.Credential{
 		UserName: "admin",
@@ -346,16 +348,32 @@ func main() {
 			}
 		}
 		return
-	case strings.EqualFold(cmd, "get"):
-		err = Pcc.Get(endpoint, &out, nil)
-	case strings.EqualFold(cmd, "getf"):
-		out, err = Pcc.GetFile(endpoint)
-	case strings.EqualFold(cmd, "delete"):
-		err = Pcc.Delete(endpoint, &out, nil)
-	case strings.EqualFold(cmd, "post"):
-		err = Pcc.Post(endpoint, &data, &out)
-	case strings.EqualFold(cmd, "put"):
-		err = Pcc.Put(endpoint, &data, &out)
+	default:
+		// Normal url
+		if u, err = url.Parse(endpoint); err != nil {
+			fmt.Println(err)
+			return
+		}
+		// Encode the query if needed
+		if params, e := url.ParseQuery(u.RawQuery); e != nil {
+			fmt.Println(e)
+			return
+		} else {
+			u.RawQuery = params.Encode()
+		}
+		endpoint = u.String()
+		switch {
+		case strings.EqualFold(cmd, "get"):
+			err = Pcc.Get(endpoint, &out, nil)
+		case strings.EqualFold(cmd, "getf"):
+			out, err = Pcc.GetFile(endpoint)
+		case strings.EqualFold(cmd, "delete"):
+			err = Pcc.Delete(endpoint, &out, nil)
+		case strings.EqualFold(cmd, "post"):
+			err = Pcc.Post(endpoint, &data, &out)
+		case strings.EqualFold(cmd, "put"):
+			err = Pcc.Put(endpoint, &data, &out)
+		}
 	}
 
 	if err != nil {
